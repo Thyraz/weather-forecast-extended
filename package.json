@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "source": "src/index.ts",
+  "module": "dist/weatherforecastextended.js",
+  "targets": {
+    "module": {
+      "includeNodeModules": true
+    }
+  },
+  "scripts": {
+    "watch": "parcel watch",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "@parcel/transformer-inline-string": "^2.8.3",
+    "parcel": "^2.8.3"
+  },
+  "dependencies": {
+    "@lit-labs/observers": "^2.0.5",
+    "custom-card-helpers": "^1.9.0",
+    "home-assistant-js-websocket": "^8.0.1",
+    "lit": "^2.7.4",
+    "memoize-one": "^6.0.0"
+  }
+}

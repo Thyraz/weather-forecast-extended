@@ -1,0 +1,106 @@
+ha-card {
+  --width: 100%;
+  height: 100%;
+  overflow-x: auto !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 12px 0;
+}
+
+.forecast {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  padding: 0 16px;
+}
+
+.forecast > div {
+  text-align: center;
+}
+
+.forecast .new-day {
+  font-weight: bold;
+  margin-left: 2px;
+  margin-right: 2px;
+  background-color: rgba(122, 122, 122, 0.1);
+  border-radius: 5px;
+}
+
+.forecast .day-of-month {
+  margin-top: -4px;
+  opacity: 0.5;
+}
+
+.forecast .ampm,
+.forecast .ampm-hidden {
+  min-height: 5px;
+  margin-top: -5px;
+  font-size: 11;
+  opacity: 0.3;
+}
+
+.forecast .ampm-hidden {
+  opacity: 0.0 !important;
+}
+
+.forecast-image-icon {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  display: flex;
+  justify-content: center;
+}
+
+.forecast .temp {
+  font-size: var(--ha-font-size-l);
+}
+
+.forecast .templow {
+  opacity: 0.5;
+}
+
+.forecast .precipitation {
+  opacity: 0.4;
+  color: var(--state-climate-cool-color);
+}
+
+.forecast .precipitationprobability {
+  opacity: 0.4;
+  color: var(--state-climate-cool-color);
+}
+
+.forecast .precipitation.active,
+.forecast .precipitationprobability.active {
+  opacity: 0.9;
+}
+
+.forecast-image-icon > * {
+  width: 40px;
+  height: 40px;
+  --mdc-icon-size: 40px;
+}
+
+/* Styles from weather.ts */
+
+.rain {
+  fill: var(--weather-icon-rain-color, #30b3ff);
+}
+.sun {
+  fill: var(--weather-icon-sun-color, #fdd93c);
+}
+.moon {
+  fill: var(--weather-icon-moon-color, #fcf497);
+}
+.cloud-back {
+  fill: var(--weather-icon-cloud-back-color, #d4d4d4);
+}
+.cloud-front {
+  fill: var(--weather-icon-cloud-front-color, #f9f9f9);
+}
+.snow {
+  fill: var(--weather-icon-snow-color, #f9f9f9);
+  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);
+  stroke-width: 1;
+  paint-order: stroke;
+}

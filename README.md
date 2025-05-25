@@ -1,1 +1,1 @@
-# weather-forecast-extended
+# Extended Weather Card for Home Assistant
