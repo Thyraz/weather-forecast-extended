@@ -1,47 +1,20 @@
-import { ResizeController } from "@lit-labs/observers/resize-controller";
 import type { PropertyValues } from "lit";
 import { LitElement, html, nothing } from "lit";
 import { state } from "lit/decorators";
-import { formatTime, formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
+import { formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import {
   getForecast,
-  getSecondaryWeatherAttribute,
   getWeatherStateIcon,
-  getWeatherUnit,
-  getWind,
   subscribeForecast
 } from "./weather";
-import { HomeAssistant, LovelaceCardConfig, ActionConfig } from "custom-card-helpers";
+import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { LovelaceGridOptions } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 
-// HA config object
-interface Config extends LovelaceCardConfig {
-  showSeconds: boolean;
-  twentyFourHourFormat: boolean;
-  hideBackground: boolean;
-  styles: Styles;
-  entity: string
-  tap_action: ActionConfig;
-}
-
-interface HassEvent extends Event {
-  detail
-}
-
-// Available CSS options for the card
-type Styles = {
-  width: string;
-  height: string;
-  font: string;
-  fontSize: string;
-  textColor: string;
-}
-
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
-  @state() private _config: Config;
+  @state() private _config: LovelaceCardConfig;
   @state() private _header: string | typeof nothing;
   @state() private _entity: string;
   @state() private _name: string;
@@ -52,10 +25,12 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _subscribed?: Promise<() => void>;
 
   // private property
+  private _resizeObserver;
   private _hass;
+  private _oldContainerWidth;
 
-  // lifecycle interface
-  setConfig(config: Config) {
+  // Called by HA
+  setConfig(config: LovelaceCardConfig) {
     this._config = config;
     this._header = config.header === "" ? nothing : config.header;
     this._entity = config.entity;
@@ -77,33 +52,21 @@ export class WeatherForecastExtended extends LitElement {
     }
   }
 
+  public getGridOptions(): LovelaceGridOptions {
+    var rows = this._config.forecast_type === "daily" ? 4 : 3;
+    var min_rows = 1;
+    return {
+      columns: 12,
+      rows: rows,
+      min_columns: 6,
+      min_rows: min_rows,
+    };
+  }
+
   // Load styles using LitElement
   static styles = styles;
 
-  // Lit callback
-  connectedCallback() {
-    super.connectedCallback();
-    if (this.hasUpdated && this._config && this._hass) {
-      this._subscribeForecastEvents();
-    }
-  }
-
-  // Lit callback
-  disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
-  protected updated(changedProps: PropertyValues): void {
-    super.updated(changedProps);
-    if (!this._config || !this._hass) {
-      return;
-    }
-
-    if (changedProps.has("_config") || !this._subscribed) {
-      this._subscribeForecastEvents();
-    }
-  }
-
+  // Forecast
   private _needForecastSubscription() {
     return (
       this._config.forecast_type
@@ -147,7 +110,40 @@ export class WeatherForecastExtended extends LitElement {
     });
   }
 
-  // Lit callback
+   // Lit callbacks
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.hasUpdated && this._config && this._hass) {
+      this._subscribeForecastEvents();
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unsubscribeForecastEvents();
+    this._resizeObserver.disconnect();
+  }
+
+  updated(changedProps: PropertyValues): void {
+     super.updated(changedProps);
+    if (!this._config || !this._hass) {
+      return;
+    }
+
+    if (changedProps.has("_config") || !this._subscribed) {
+      this._subscribeForecastEvents();
+    }
+
+    if (!this._resizeObserver) {
+      const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
+      this._resizeObserver = new ResizeObserver((entries) => this._updateGap() );
+      this._resizeObserver.observe(card);
+
+      // Call once for the initial size
+      this._updateGap()
+    }
+  }
+
   render() {
     if (!this._config || !this._hass) {
       return nothing;
@@ -175,15 +171,7 @@ export class WeatherForecastExtended extends LitElement {
       this._config?.forecast_type
     );
 
-    console.log("FORECASTDATA");
-    console.log(forecastData);
-
-    const weatherStateIcon = getWeatherStateIcon(this._status, this);
-
-    // Needs to be set bassed on if user wants to see weather summary later
-    const weather = false;
     const forecast = this._config.show_forecast !== false && forecastData?.forecast?.length ? forecastData.forecast : undefined;
-
     const hourly = forecastData?.type === "hourly";
 
     return html`
@@ -191,81 +179,53 @@ export class WeatherForecastExtended extends LitElement {
         ${forecast
           ? html`
             <div class="forecast">
-              ${forecast.map((item) =>
-                this._showValue(item.temperature)
+              ${forecast.map((item) => {
+                const date = new Date(item.datetime);
+                const newDay = isNewDay(date, this._hass);
+                return this._hasValidValue(item.temperature)
                   ? html`
-                      <div>
-                        <div class=${hourly && isNewDay(new Date(item.datetime), this._hass) ? 'new-day' : ''}>
+                      <div class="card-content">
+                        <div class=${hourly && newDay ? 'new-day' : ''}>
                           ${hourly
                             ? html`
-                                ${isNewDay(new Date(item.datetime), this._hass)
-                                  ? formatDateWeekdayShort(
-                                      new Date(item.datetime),
-                                      this._hass!.locale,
-                                      this._hass!.config
-                                    )
-                                  : formatHour(
-                                      new Date(item.datetime),
-                                      this._hass!.locale,
-                                      this._hass!.config
-                                    )
+                                ${newDay
+                                  ? formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
+                                  : formatHour(date, this._hass!.locale, this._hass!.config)
                                 }
                               `
-                            : html`
-                                ${formatDateWeekdayShort(
-                                  new Date(item.datetime),
-                                  this._hass!.locale,
-                                  this._hass!.config
-                                )}
-                              `
+                            : html`${formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)}`
                           }
                         </div>
                         <div class="day-of-month">
                           ${!hourly
-                            ? html`
-                                ${formatDateDayTwoDigit(
-                                  new Date(item.datetime),
-                                  this._hass!.locale,
-                                  this._hass!.config
-                                )}
-                              `
+                            ? html`${formatDateDayTwoDigit(date, this._hass!.locale, this._hass!.config)}`
                             : ""
                           }
                         </div>
-                         <div class="${isNewDay(new Date(item.datetime), this._hass) ? 'ampm-hidden' : 'ampm'}">
+                        <div class="${newDay ? 'ampm-hidden' : 'ampm'}">
                           ${hourly && useAmPm(this._hass!.locale)
-                            ? html`
-                                ${formatDayPeriod(
-                                  new Date(item.datetime),
-                                  this._hass!.locale,
-                                  this._hass!.config
-                                )}
-                              `
+                            ? html`${formatDayPeriod(date, this._hass!.locale, this._hass!.config)}`
                             : ""
                           }
                         </div>
-                          ${this._showValue(item.condition)
-                            ? html`
-                                <div class="forecast-image-icon">
-                                  ${getWeatherStateIcon(
-                                    item.condition!,
-                                    this,
-                                    !(
-                                      item.is_daytime ||
-                                      item.is_daytime === undefined
-                                    )
-                                  )}
-                                </div>
-                              `
-                            : ""
-                          }
+
+                        ${this._hasValidValue(item.condition)
+                          ? html`
+                              <div class="forecast-image-icon">
+                                ${getWeatherStateIcon(item.condition!, this, !(item.is_daytime || item.is_daytime === undefined))}
+                              </div>
+                            `
+                          : ""
+                        }
+
                         <div class="temp">
-                          ${this._showValue(item.temperature)
+                          ${this._hasValidValue(item.temperature)
                             ? html`${Math.round(item.temperature)}°`
-                            : "—"}
+                            : "—"
+                          }
                         </div>
                         <div class="templow">
-                          ${this._showValue(item.templow)
+                          ${this._hasValidValue(item.templow)
                             ? html`${Math.round(item.templow)}°`
                             : hourly
                               ? ""
@@ -273,39 +233,56 @@ export class WeatherForecastExtended extends LitElement {
                           }
                         </div>
                         <div class="precipitation ${item.precipitation > 0.3 ? 'active' : ''}">
-                          ${this._showValue(item.precipitation)
+                          ${this._hasValidValue(item.precipitation)
                             ? html`${item.precipitation}`
-                            : "—"}
+                            : "—"
+                          }
                         </div>
                         <div class="precipitationprobability ${item.precipitation_probability > 30 ? 'active' : ''}">
-                          ${this._showValue(item.precipitation_probability)
+                          ${this._hasValidValue(item.precipitation_probability)
                             ? html`${item.precipitation_probability}%`
                             : "—"
                           }
                         </div>
                       </div>
                     `
-                  : ""
-                )}
-              </div>
-            `: "" }
+                  : nothing;
+              })}
+            </div>
+          `: ""
+        }
       </ha-card>
     `;
   }
 
-  private _showValue(item?: any): boolean {
+  // Private methods
+
+  private _hasValidValue(item?: any): boolean {
     return typeof item !== "undefined" && item !== null;
   }
 
-  // Called by HA for card sizing
-  public getGridOptions(): LovelaceGridOptions {
-    var rows = this._config.forecast_type === "daily" ? 4 : 3;
-    var min_rows = 1;
-    return {
-      columns: 12,
-      rows: rows,
-      min_columns: 6,
-      min_rows: min_rows,
-    };
+  private _updateGap() {
+    const container = this.shadowRoot.querySelector('ha-card') as HTMLElement | null;
+    if (!container) {
+      return;
+    }
+
+    const containerWidth = container.clientWidth;
+    if (containerWidth === this._oldContainerWidth) {
+      return;
+    }
+
+    const itemWidth = 40;
+    const minGap = 30;
+    const padding = 16;
+    const maxItems = Math.floor((containerWidth + minGap - 2*padding) / (itemWidth + minGap));
+
+    if (maxItems < 2) return; // Avoid divide by zero
+
+    const totalItemWidth = maxItems * itemWidth;
+    const gap = Math.round((containerWidth - 2*padding - totalItemWidth) / (maxItems - 1));
+
+    container.style.setProperty("--dynamic-gap", `${gap}px`);
+    this._oldContainerWidth = containerWidth;
   }
 }

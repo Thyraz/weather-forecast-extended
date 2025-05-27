@@ -1,7 +1,5 @@
 ha-card {
-  --width: 100%;
   height: 100%;
-  overflow-x: auto !important;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -10,13 +8,29 @@ ha-card {
 }
 
 .forecast {
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  scroll-padding-right: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
   display: flex;
   justify-content: space-around;
-  gap: 20px;
+  /* gap: 20px; */
+  gap: var(--dynamic-gap, 20px); /* fallback */
   padding: 0 16px;
 }
 
+.forecast::-webkit-scrollbar {
+  height: 6px;
+}
+
+/* .forecast::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.3);
+  border-radius: 3px;
+} */
+
 .forecast > div {
+  scroll-snap-align: start;
   text-align: center;
 }
 
@@ -37,7 +51,7 @@ ha-card {
 .forecast .ampm-hidden {
   min-height: 5px;
   margin-top: -5px;
-  font-size: 11;
+  font-size: 11px;
   opacity: 0.3;
 }
 
@@ -54,17 +68,15 @@ ha-card {
 
 .forecast .temp {
   font-size: var(--ha-font-size-l);
+  font-weight: bolder;
 }
 
 .forecast .templow {
   opacity: 0.5;
+  font-weight: bolder;
 }
 
-.forecast .precipitation {
-  opacity: 0.4;
-  color: var(--state-climate-cool-color);
-}
-
+.forecast .precipitation,
 .forecast .precipitationprobability {
   opacity: 0.4;
   color: var(--state-climate-cool-color);

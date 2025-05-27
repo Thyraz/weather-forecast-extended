@@ -456,6 +456,7 @@ var $24c52f343453d62d$export$2e2bcd8739ae039 = {
 };
 
 
+
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -1376,12 +1377,10 @@ const $2e3b0c24d7649e32$var$formatDateDayTwoDigitMem = (0, $c106d6426411ff6f$exp
     }));
 const $2e3b0c24d7649e32$export$86a5557e1d677e29 = (dateObj, locale, config)=>{
     const parts = $2e3b0c24d7649e32$var$formatHourMem(locale, config.time_zone).formatToParts(dateObj);
-    console.log(parts);
     return parts.find((part)=>part.type === "hour").value;
 };
 const $2e3b0c24d7649e32$export$f57482e5e4ce715a = (dateObj, locale, config)=>{
     const parts = $2e3b0c24d7649e32$var$formatHourMem(locale, config.time_zone).formatToParts(dateObj);
-    console.log(parts);
     return parts.find((part)=>part.type === "dayPeriod")?.value;
 };
 const $2e3b0c24d7649e32$var$formatHourMem = (0, $c106d6426411ff6f$export$2e2bcd8739ae039)((locale, serverTimeZone)=>new Intl.DateTimeFormat(locale.language, {
@@ -1856,17 +1855,17 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
 
 
 
-var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  --width: 100%;\n  height: 100%;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  padding: 12px 0;\n  display: flex;\n  overflow-x: auto !important;\n}\n\n.forecast {\n  justify-content: space-around;\n  gap: 20px;\n  padding: 0 16px;\n  display: flex;\n}\n\n.forecast > div {\n  text-align: center;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .5;\n  margin-top: -4px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -5px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  padding-top: 4px;\n  padding-bottom: 4px;\n  display: flex;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n}\n\n.forecast .templow {\n  opacity: .5;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .4;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: .9;\n}\n\n.forecast-image-icon > * {\n  width: 40px;\n  height: 40px;\n  --mdc-icon-size: 40px;\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+var $1219addb6e1f45e4$exports = {};
+$1219addb6e1f45e4$exports = "ha-card {\n  height: 100%;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  padding: 12px 0;\n  display: flex;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  gap: var(--dynamic-gap, 20px);\n  padding: 0 16px;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow-x: auto;\n  overflow-y: hidden;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 6px;\n}\n\n.forecast > div {\n  scroll-snap-align: start;\n  text-align: center;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .5;\n  margin-top: -4px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -5px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  padding-top: 4px;\n  padding-bottom: 4px;\n  display: flex;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .4;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: .9;\n}\n\n.forecast-image-icon > * {\n  width: 40px;\n  height: 40px;\n  --mdc-icon-size: 40px;\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-  ${(0, $def2de46b9306e8a$export$8d80f9cac07cdb3)((0, (/*@__PURE__*/$parcel$interopDefault($1b50081e774bdf57$exports))))}
+  ${(0, $def2de46b9306e8a$export$8d80f9cac07cdb3)((0, (/*@__PURE__*/$parcel$interopDefault($1219addb6e1f45e4$exports))))}
 `;
 
 
 class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
-    // lifecycle interface
+    // Called by HA
     setConfig(config) {
         this._config = config;
         this._header = config.header === "" ? (0, $f58f44579a4747ac$export$45b790e32b2810ee) : config.header;
@@ -1884,24 +1883,21 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
             this._name = fn ? fn : this._entity;
         }
     }
+    getGridOptions() {
+        var rows = this._config.forecast_type === "daily" ? 4 : 3;
+        var min_rows = 1;
+        return {
+            columns: 12,
+            rows: rows,
+            min_columns: 6,
+            min_rows: min_rows
+        };
+    }
     static #_ = (()=>{
         // Load styles using LitElement
         this.styles = (0, $b377d607dfc671f6$export$9dd6ff9ea0189349);
     })();
-    // Lit callback
-    connectedCallback() {
-        super.connectedCallback();
-        if (this.hasUpdated && this._config && this._hass) this._subscribeForecastEvents();
-    }
-    // Lit callback
-    disconnectedCallback() {
-        super.disconnectedCallback();
-    }
-    updated(changedProps) {
-        super.updated(changedProps);
-        if (!this._config || !this._hass) return;
-        if (changedProps.has("_config") || !this._subscribed) this._subscribeForecastEvents();
-    }
+    // Forecast
     _needForecastSubscription() {
         return this._config.forecast_type;
     }
@@ -1923,7 +1919,28 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
             throw e;
         });
     }
-    // Lit callback
+    // Lit callbacks
+    connectedCallback() {
+        super.connectedCallback();
+        if (this.hasUpdated && this._config && this._hass) this._subscribeForecastEvents();
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this._unsubscribeForecastEvents();
+        this._resizeObserver.disconnect();
+    }
+    updated(changedProps) {
+        super.updated(changedProps);
+        if (!this._config || !this._hass) return;
+        if (changedProps.has("_config") || !this._subscribed) this._subscribeForecastEvents();
+        if (!this._resizeObserver) {
+            const card = this.shadowRoot.querySelector("ha-card");
+            this._resizeObserver = new ResizeObserver((entries)=>this._updateGap());
+            this._resizeObserver.observe(card);
+            // Call once for the initial size
+            this._updateGap();
+        }
+    }
     render() {
         if (!this._config || !this._hass) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
         if (!this._state) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -1937,73 +1954,73 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
         </ha-card>
       `;
         const forecastData = (0, $a670ed82a1e76f75$export$c1e906046b5de973)(this._state.attributes, this._forecastEvent, this._config?.forecast_type);
-        console.log("FORECASTDATA");
-        console.log(forecastData);
-        const weatherStateIcon = (0, $a670ed82a1e76f75$export$e0801f527146069)(this._status, this);
-        // Needs to be set bassed on if user wants to see weather summary later
-        const weather = false;
         const forecast = this._config.show_forecast !== false && forecastData?.forecast?.length ? forecastData.forecast : undefined;
         const hourly = forecastData?.type === "hourly";
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
       <ha-card header="${this._header}">
         ${forecast ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
             <div class="forecast">
-              ${forecast.map((item)=>this._showValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                      <div>
-                        <div class=${hourly && (0, $2e3b0c24d7649e32$export$824eefb57336d873)(new Date(item.datetime), this._hass) ? "new-day" : ""}>
+              ${forecast.map((item)=>{
+            const date = new Date(item.datetime);
+            const newDay = (0, $2e3b0c24d7649e32$export$824eefb57336d873)(date, this._hass);
+            return this._hasValidValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                      <div class="card-content">
+                        <div class=${hourly && newDay ? "new-day" : ""}>
                           ${hourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                ${(0, $2e3b0c24d7649e32$export$824eefb57336d873)(new Date(item.datetime), this._hass) ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(new Date(item.datetime), this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(new Date(item.datetime), this._hass.locale, this._hass.config)}
-                              ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                ${(0, $2e3b0c24d7649e32$export$e86782e02be44113)(new Date(item.datetime), this._hass.locale, this._hass.config)}
-                              `}
+                                ${newDay ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this._hass.locale, this._hass.config)}
+                              ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config)}`}
                         </div>
                         <div class="day-of-month">
-                          ${!hourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                ${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(new Date(item.datetime), this._hass.locale, this._hass.config)}
-                              ` : ""}
+                          ${!hourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(date, this._hass.locale, this._hass.config)}` : ""}
                         </div>
-                         <div class="${(0, $2e3b0c24d7649e32$export$824eefb57336d873)(new Date(item.datetime), this._hass) ? "ampm-hidden" : "ampm"}">
-                          ${hourly && (0, $2e3b0c24d7649e32$export$98b044737b007ca6)(this._hass.locale) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                ${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(new Date(item.datetime), this._hass.locale, this._hass.config)}
-                              ` : ""}
+                        <div class="${newDay ? "ampm-hidden" : "ampm"}">
+                          ${hourly && (0, $2e3b0c24d7649e32$export$98b044737b007ca6)(this._hass.locale) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(date, this._hass.locale, this._hass.config)}` : ""}
                         </div>
-                          ${this._showValue(item.condition) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                <div class="forecast-image-icon">
-                                  ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
-                                </div>
-                              ` : ""}
+
+                        ${this._hasValidValue(item.condition) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                              <div class="forecast-image-icon">
+                                ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
+                              </div>
+                            ` : ""}
+
                         <div class="temp">
-                          ${this._showValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.temperature)}°` : "—"}
+                          ${this._hasValidValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.temperature)}°` : "—"}
                         </div>
                         <div class="templow">
-                          ${this._showValue(item.templow) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.templow)}°` : hourly ? "" : "—"}
+                          ${this._hasValidValue(item.templow) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.templow)}°` : hourly ? "" : "—"}
                         </div>
                         <div class="precipitation ${item.precipitation > 0.3 ? "active" : ""}">
-                          ${this._showValue(item.precipitation) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation}` : "—"}
+                          ${this._hasValidValue(item.precipitation) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation}` : "—"}
                         </div>
                         <div class="precipitationprobability ${item.precipitation_probability > 30 ? "active" : ""}">
-                          ${this._showValue(item.precipitation_probability) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation_probability}%` : "—"}
+                          ${this._hasValidValue(item.precipitation_probability) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation_probability}%` : "—"}
                         </div>
                       </div>
-                    ` : "")}
-              </div>
-            ` : ""}
+                    ` : (0, $f58f44579a4747ac$export$45b790e32b2810ee);
+        })}
+            </div>
+          ` : ""}
       </ha-card>
     `;
     }
-    _showValue(item) {
+    // Private methods
+    _hasValidValue(item) {
         return typeof item !== "undefined" && item !== null;
     }
-    // Called by HA for card sizing
-    getGridOptions() {
-        var rows = this._config.forecast_type === "daily" ? 4 : 3;
-        var min_rows = 1;
-        return {
-            columns: 12,
-            rows: rows,
-            min_columns: 6,
-            min_rows: min_rows
-        };
+    _updateGap() {
+        const container = this.shadowRoot.querySelector("ha-card");
+        if (!container) return;
+        const containerWidth = container.clientWidth;
+        if (containerWidth === this._oldContainerWidth) return;
+        const itemWidth = 40;
+        const minGap = 30;
+        const padding = 16;
+        const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
+        if (maxItems < 2) return; // Avoid divide by zero
+        const totalItemWidth = maxItems * itemWidth;
+        const gap = Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
+        container.style.setProperty("--dynamic-gap", `${gap}px`);
+        this._oldContainerWidth = containerWidth;
     }
 }
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([

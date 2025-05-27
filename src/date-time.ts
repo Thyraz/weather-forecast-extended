@@ -86,7 +86,6 @@ export const formatHour = (
   config: HassConfig
 ) => {
   const parts = formatHourMem(locale, config.time_zone).formatToParts(dateObj);
-  console.log(parts);
   return parts.find(part => part.type === 'hour').value;
 }
 
@@ -97,7 +96,6 @@ export const formatDayPeriod = (
   config: HassConfig
 ) => {
   const parts = formatHourMem(locale, config.time_zone).formatToParts(dateObj);
-  console.log(parts);
   return parts.find(part => part.type === 'dayPeriod')?.value;
 }
 
