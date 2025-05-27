@@ -1,6 +1,6 @@
 {
   "name": "Weather Card Extended",
   "render_readme": true,
-  "filename": "card.js",
+  "filename": "weatherforecastextended.js",
   "content_in_root": false
 }
