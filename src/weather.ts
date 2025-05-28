@@ -568,12 +568,7 @@ export const getForecast = (
   weather_attributes?: WeatherEntityAttributes | undefined,
   forecast_event?: ForecastEvent,
   forecast_type?: ForecastType | undefined
-):
-  | {
-      forecast: ForecastAttribute[];
-      type: "daily" | "hourly" | "twice_daily";
-    }
-  | undefined => {
+): { forecast: ForecastAttribute[]; type: "daily" | "hourly" | "twice_daily"; } | undefined => {
   if (forecast_type === undefined) {
     if (
       forecast_event?.type !== undefined &&
