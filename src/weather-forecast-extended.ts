@@ -12,17 +12,6 @@ import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { LovelaceGridOptions } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 
-// Internal types
-type ForecastSubscription = {
-  event: ForecastEvent;
-  promise: Promise<() => void>;
-};
-
-type ForecastSubscriptionsDict = {
-  daily: ForecastSubscription,
-  hourly: ForecastSubscription
-}
-
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
   @state() private _config: LovelaceCardConfig;
@@ -31,11 +20,10 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _name: string;
   @state() private _state: WeatherEntity;
   @state() private _status: string;
-
-  @state() private _forecastEvent?: ForecastEvent;
-
-  @state() private _subscribed?: Promise<() => void>;
-  @state() private _subscriptions: ForecastSubscriptionsDict;
+  @state() private _forecastDailyEvent?: ForecastEvent;
+  @state() private _forecastHourlyEvent?: ForecastEvent;
+  @state() private _subscribedDaily?: Promise<() => void>;
+  @state() private _subscribedHourly?: Promise<() => void>;
 
   // private property
   private _resizeObserver;
@@ -66,81 +54,42 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   public getGridOptions(): LovelaceGridOptions {
-    var rows = this._config.forecast_type === "daily" ? 4 : 3;
-    var min_rows = 1;
+    const rows = this._config.daily_forecast === true ? 4 : 3;
+    const minRows = 1;
     return {
       columns: 12,
       rows: rows,
       min_columns: 6,
-      min_rows: min_rows,
+      min_rows: minRows,
     };
   }
 
   // Load styles using LitElement
   static styles = styles;
 
-  // Forecast
   private _needForecastSubscription() {
-    return (
-      this._config.forecast_type
-    );
-  }
-
-  private _needForecastSubscription2() {
     return (
       this._config.daily_forecast || this._config.hourly_forecast
     );
   }
 
   private _unsubscribeForecastEvents() {
-    if (this._subscribed) {
-      this._subscribed.then((unsub) => unsub());
-      this._subscribed = undefined;
-    }
-  }
-
-  private _unsubscribeForecastEvents2() {
-    if (!this._subscriptions)
+    if (!this._subscribedHourly && !this._subscribedDaily)
       return;
 
-    for (var type of Object.keys(this._subscriptions)) {
-      this._subscriptions[type].promise?.then((unsub) => unsub());
-      this._subscriptions[type].promise = undefined;
+    if (this._subscribedHourly) {
+      this._subscribedHourly.then((unsub) => unsub());
+      this._subscribedHourly = undefined;
+    }
+
+    if (this._subscribedDaily) {
+      this._subscribedDaily.then((unsub) => unsub());
+      this._subscribedDaily = undefined;
     }
   }
 
   private async _subscribeForecastEvents() {
     this._unsubscribeForecastEvents();
-    if (
-      !this.isConnected ||
-      !this._hass ||
-      !this._config ||
-      !this._needForecastSubscription() ||
-      !this._hass.config.components.includes("weather") ||
-      !this._state
-    ) {
-      return;
-    }
-
-    this._subscribed = subscribeForecast(
-      this._hass!,
-      this._entity,
-      this._config.forecast_type as "daily" | "hourly" | "twice_daily",
-      (event) => {
-        this._forecastEvent = event;
-      }
-    ).catch((e) => {
-      if (e.code === "invalid_entity_id") {
-        setTimeout(() => {
-          this._subscribed = undefined;
-        }, 2000);
-      }
-      throw e;
-    });
-  }
-
-  private async _subscribeForecastEvents2() {
-    this._unsubscribeForecastEvents2();
 
     const shouldSubscribe =
       this.isConnected &&
@@ -152,27 +101,44 @@ export class WeatherForecastExtended extends LitElement {
 
     if (!shouldSubscribe) return;
 
-    const subscribe = (type: ModernForecastType) => {
+    const subscribeHourly = () => {
       const subscription = subscribeForecast(
         this._hass,
         this._entity,
-        type as ModernForecastType,
+        "hourly",
         (event) => {
-          this._subscriptions[type].event = event;
+          this._forecastHourlyEvent = event;
         }
       ).catch((e) => {
         if (e.code === "invalid_entity_id") {
-          setTimeout(() => this._subscriptions[type].promise = undefined, 2000);
+          setTimeout(() => this._subscribedHourly = undefined, 2000);
         }
         throw e;
       });
-      this._subscriptions[type].promise = subscription;
+      this._subscribedHourly = subscription;
     }
 
-    if (this._config.daily_forecast == true)
-      subscribe("daily");
+    const subscribeDaily = () => {
+      const subscription = subscribeForecast(
+        this._hass,
+        this._entity,
+        "daily",
+        (event) => {
+          this._forecastDailyEvent = event;
+        }
+      ).catch((e) => {
+        if (e.code === "invalid_entity_id") {
+          setTimeout(() => this._subscribedDaily = undefined, 2000);
+        }
+        throw e;
+      });
+      this._subscribedDaily = subscription;
+    }
+
     if (this._config.hourly_forecast == true)
-      subscribe("hourly");
+      subscribeHourly();
+    if (this._config.daily_forecast == true)
+      subscribeDaily();
   }
 
    // Lit callbacks
@@ -180,14 +146,12 @@ export class WeatherForecastExtended extends LitElement {
     super.connectedCallback();
     if (this.hasUpdated && this._config && this._hass) {
       this._subscribeForecastEvents();
-      this._subscribeForecastEvents2();
     }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unsubscribeForecastEvents();
-    this._unsubscribeForecastEvents2();
     this._resizeObserver.disconnect();
   }
 
@@ -197,9 +161,8 @@ export class WeatherForecastExtended extends LitElement {
       return;
     }
 
-    if (changedProps.has("_config") || !this._subscribed) {
+    if (changedProps.has("_config") || (!this._subscribedHourly && !this._subscribedDaily)) {
       this._subscribeForecastEvents();
-      this._subscribeForecastEvents2();
     }
 
     if (!this._resizeObserver) {
@@ -233,7 +196,7 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
-    const forecastData = this._forecastEvent;
+    const forecastData = this._forecastHourlyEvent;
 
     const forecast = this._config.show_forecast !== false && forecastData?.forecast?.length ? forecastData.forecast : undefined;
     const hourly = forecastData?.type === "hourly";

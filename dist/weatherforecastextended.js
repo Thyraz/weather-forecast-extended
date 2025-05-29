@@ -1884,88 +1884,72 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
         }
     }
     getGridOptions() {
-        var rows = this._config.forecast_type === "daily" ? 4 : 3;
-        var min_rows = 1;
+        const rows = this._config.daily_forecast === true ? 4 : 3;
+        const minRows = 1;
         return {
             columns: 12,
             rows: rows,
             min_columns: 6,
-            min_rows: min_rows
+            min_rows: minRows
         };
     }
     static #_ = (()=>{
         // Load styles using LitElement
         this.styles = (0, $b377d607dfc671f6$export$9dd6ff9ea0189349);
     })();
-    // Forecast
     _needForecastSubscription() {
-        return this._config.forecast_type;
-    }
-    _needForecastSubscription2() {
         return this._config.daily_forecast || this._config.hourly_forecast;
     }
     _unsubscribeForecastEvents() {
-        if (this._subscribed) {
-            this._subscribed.then((unsub)=>unsub());
-            this._subscribed = undefined;
+        if (!this._subscribedHourly && !this._subscribedDaily) return;
+        if (this._subscribedHourly) {
+            this._subscribedHourly.then((unsub)=>unsub());
+            this._subscribedHourly = undefined;
         }
-    }
-    _unsubscribeForecastEvents2() {
-        if (!this._subscriptions) return;
-        for (var type of Object.keys(this._subscriptions)){
-            this._subscriptions[type].promise?.then((unsub)=>unsub());
-            this._subscriptions[type].promise = undefined;
+        if (this._subscribedDaily) {
+            this._subscribedDaily.then((unsub)=>unsub());
+            this._subscribedDaily = undefined;
         }
     }
     async _subscribeForecastEvents() {
         this._unsubscribeForecastEvents();
-        if (!this.isConnected || !this._hass || !this._config || !this._needForecastSubscription() || !this._hass.config.components.includes("weather") || !this._state) return;
-        this._subscribed = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, this._config.forecast_type, (event)=>{
-            this._forecastEvent = event;
-        }).catch((e)=>{
-            if (e.code === "invalid_entity_id") setTimeout(()=>{
-                this._subscribed = undefined;
-            }, 2000);
-            throw e;
-        });
-    }
-    async _subscribeForecastEvents2() {
-        this._unsubscribeForecastEvents2();
         const shouldSubscribe = this.isConnected && this._hass && this._config && this._needForecastSubscription() && this._hass.config.components.includes("weather") && this._state;
         if (!shouldSubscribe) return;
-        const subscribe = (type)=>{
-            const subscription = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, type, (event)=>{
-                this._subscriptions[type].event = event;
+        const subscribeHourly = ()=>{
+            const subscription = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, "hourly", (event)=>{
+                this._forecastHourlyEvent = event;
             }).catch((e)=>{
-                if (e.code === "invalid_entity_id") setTimeout(()=>this._subscriptions[type].promise = undefined, 2000);
+                if (e.code === "invalid_entity_id") setTimeout(()=>this._subscribedHourly = undefined, 2000);
                 throw e;
             });
-            this._subscriptions[type].promise = subscription;
+            this._subscribedHourly = subscription;
         };
-        if (this._config.daily_forecast == true) subscribe("daily");
-        if (this._config.hourly_forecast == true) subscribe("hourly");
+        const subscribeDaily = ()=>{
+            const subscription = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, "daily", (event)=>{
+                this._forecastDailyEvent = event;
+            }).catch((e)=>{
+                if (e.code === "invalid_entity_id") setTimeout(()=>this._subscribedDaily = undefined, 2000);
+                throw e;
+            });
+            this._subscribedDaily = subscription;
+        };
+        if (this._config.hourly_forecast == true) subscribeHourly();
+        if (this._config.daily_forecast == true) subscribeDaily();
     }
     // Lit callbacks
     connectedCallback() {
         super.connectedCallback();
-        if (this.hasUpdated && this._config && this._hass) {
-            this._subscribeForecastEvents();
-            this._subscribeForecastEvents2();
-        }
+        if (this.hasUpdated && this._config && this._hass) this._subscribeForecastEvents();
     }
     disconnectedCallback() {
         super.disconnectedCallback();
         this._unsubscribeForecastEvents();
-        this._unsubscribeForecastEvents2();
         this._resizeObserver.disconnect();
     }
     updated(changedProps) {
         super.updated(changedProps);
         if (!this._config || !this._hass) return;
-        if (changedProps.has("_config") || !this._subscribed) {
-            this._subscribeForecastEvents();
-            this._subscribeForecastEvents2();
-        }
+        if (changedProps.has("_config") || !this._subscribedHourly && !this._subscribedDaily) this._subscribeForecastEvents();
         if (!this._resizeObserver) {
             const card = this.shadowRoot.querySelector("ha-card");
             this._resizeObserver = new ResizeObserver((entries)=>this._updateGap());
@@ -1986,7 +1970,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
           <p>${this._name} is unavailable.</p>
         </ha-card>
       `;
-        const forecastData = this._forecastEvent;
+        const forecastData = this._forecastHourlyEvent;
         const forecast = this._config.show_forecast !== false && forecastData?.forecast?.length ? forecastData.forecast : undefined;
         const hourly = forecastData?.type === "hourly";
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2076,13 +2060,16 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_status", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastEvent", void 0);
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastDailyEvent", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_subscribed", void 0);
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastHourlyEvent", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_subscriptions", void 0);
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_subscribedDaily", void 0);
+(0, $24c52f343453d62d$export$29e00dfd3077644b)([
+    (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_subscribedHourly", void 0);
 
 
 customElements.define("weather-forecast-extended-card", (0, $e6159c9afb48cae5$export$53427b5d95bebd88));
