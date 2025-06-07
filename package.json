@@ -2,14 +2,23 @@
   "type": "module",
   "source": "src/index.ts",
   "module": "dist/weatherforecastextended.js",
+  "debug": "dist/weatherforecastextended.js",
   "targets": {
     "module": {
+      "distDir": "./dist",
+      "publicUrl": "/hacsfiles/weather-forecast-extended/",
+      "includeNodeModules": true
+    },
+    "debug": {
+      "distDir": "../../community/weather-forecast-extended",
+      "publicUrl": "/hacsfiles/weather-forecast-extended/",
       "includeNodeModules": true
     }
   },
   "scripts": {
-    "watch": "parcel watch",
-    "build": "parcel build"
+    "build": "parcel build",
+    "debug": "parcel build --target debug",
+    "watch": "parcel watch --target debug"
   },
   "devDependencies": {
     "@parcel/transformer-inline-string": "^2.8.3",
