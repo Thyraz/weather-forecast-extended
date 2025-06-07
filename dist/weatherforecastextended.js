@@ -456,7 +456,6 @@ var $24c52f343453d62d$export$2e2bcd8739ae039 = {
 };
 
 
-
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -1855,12 +1854,12 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
 
 
 
-var $1219addb6e1f45e4$exports = {};
-$1219addb6e1f45e4$exports = "ha-card {\n  height: 100%;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  padding: 12px 0;\n  display: flex;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  gap: var(--dynamic-gap, 20px);\n  padding: 0 16px;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow-x: auto;\n  overflow-y: hidden;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 6px;\n}\n\n.forecast > div {\n  scroll-snap-align: start;\n  text-align: center;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .5;\n  margin-top: -4px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -5px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  padding-top: 4px;\n  padding-bottom: 4px;\n  display: flex;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .4;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: .9;\n}\n\n.forecast-image-icon > * {\n  width: 40px;\n  height: 40px;\n  --mdc-icon-size: 40px;\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+var $1b50081e774bdf57$exports = {};
+$1b50081e774bdf57$exports = "ha-card {\n  height: 100%;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: space-evenly;\n  display: flex;\n}\n\n.forecast-header {\n  width: 100%;\n  height: 150px;\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  background-image: url(\"pouring.8b4e549f.jpg\");\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  gap: var(--dynamic-gap, 20px);\n  padding: 0 16px;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow-x: auto;\n  overflow-y: hidden;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --icon-container-height: auto;\n}\n\n.forecast.hourly {\n  --min-gap: 10px;\n  --icon-size: 20px;\n  --icon-container-width: 30px;\n  --icon-container-height: 70px;\n  --translate-content-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  height: var(--icon-container-height);\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--icon-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-  ${(0, $def2de46b9306e8a$export$8d80f9cac07cdb3)((0, (/*@__PURE__*/$parcel$interopDefault($1219addb6e1f45e4$exports))))}
+  ${(0, $def2de46b9306e8a$export$8d80f9cac07cdb3)((0, (/*@__PURE__*/$parcel$interopDefault($1b50081e774bdf57$exports))))}
 `;
 
 
@@ -1884,39 +1883,54 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
         }
     }
     getGridOptions() {
-        var rows = this._config.forecast_type === "daily" ? 4 : 3;
-        var min_rows = 1;
+        const minRows = 1;
+        var rows = 0;
+        rows += this._config.daily_forecast !== false ? 3 : 0;
+        rows += this._config.hourly_forecast !== false ? 3 : 0;
         return {
             columns: 12,
             rows: rows,
             min_columns: 6,
-            min_rows: min_rows
+            min_rows: minRows
         };
     }
     static #_ = (()=>{
         // Load styles using LitElement
         this.styles = (0, $b377d607dfc671f6$export$9dd6ff9ea0189349);
     })();
-    // Forecast
+    // Forecast subscriptions
     _needForecastSubscription() {
-        return this._config.forecast_type;
+        return this._config.daily_forecast || this._config.hourly_forecast;
     }
     _unsubscribeForecastEvents() {
-        if (this._subscribed) {
-            this._subscribed.then((unsub)=>unsub());
-            this._subscribed = undefined;
-        }
+        Object.values(this._subscriptions).forEach((sub)=>{
+            sub?.then((unsub)=>unsub());
+        });
+        this._subscriptions = {
+            hourly: undefined,
+            daily: undefined
+        };
+    }
+    async _subscribeForecast(type) {
+        if (this._subscriptions[type]) return;
+        this._subscriptions[type] = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, type, (event)=>{
+            if (type === "hourly") this._forecastHourlyEvent = event;
+            if (type === "daily") this._forecastDailyEvent = event;
+        }).catch((e)=>{
+            this._subscriptions[type] = undefined;
+            throw e;
+        });
     }
     async _subscribeForecastEvents() {
         this._unsubscribeForecastEvents();
-        if (!this.isConnected || !this._hass || !this._config || !this._needForecastSubscription() || !this._hass.config.components.includes("weather") || !this._state) return;
-        this._subscribed = (0, $a670ed82a1e76f75$export$ace10bd47409a000)(this._hass, this._entity, this._config.forecast_type, (event)=>{
-            this._forecastEvent = event;
-        }).catch((e)=>{
-            if (e.code === "invalid_entity_id") setTimeout(()=>{
-                this._subscribed = undefined;
-            }, 2000);
-            throw e;
+        const shouldSubscribe = this.isConnected && this._hass && this._config && this._needForecastSubscription() && this._hass.config.components.includes("weather") && this._state;
+        if (!shouldSubscribe) return;
+        [
+            "hourly",
+            "daily"
+        ].forEach((type)=>{
+            const configKey = `${type}_forecast`;
+            if (this._config[configKey]) this._subscribeForecast(type);
         });
     }
     // Lit callbacks
@@ -1932,15 +1946,25 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
     updated(changedProps) {
         super.updated(changedProps);
         if (!this._config || !this._hass) return;
-        if (changedProps.has("_config") || !this._subscribed) this._subscribeForecastEvents();
+        if (changedProps.has("_config") || !this._subscriptions.hourly && !this._subscriptions.daily) this._subscribeForecastEvents();
         if (!this._resizeObserver) {
             const card = this.shadowRoot.querySelector("ha-card");
-            this._resizeObserver = new ResizeObserver((entries)=>this._updateGap());
+            const daily = this.shadowRoot.querySelector(".forecast.daily");
+            const hourly = this.shadowRoot.querySelector(".forecast.daily");
+            if (!card || !daily && !hourly) return;
+            this._resizeObserver = new ResizeObserver(()=>this._updateGap());
             this._resizeObserver.observe(card);
             // Call once for the initial size
             this._updateGap();
+            // Set translation content height for hourly forecast
+            this._setTranslationContentHeight();
+            console.log("FORECAST");
+            console.log(this._forecastDailyEvent.forecast);
+            console.log("State");
+            console.log(this._state);
         }
     }
+    // Render methods
     render() {
         if (!this._config || !this._hass) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
         if (!this._state) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -1948,59 +1972,80 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
           ${this._name} not found.
         </hui-warning>
       `;
+        // Calculate min/max temperatures for hourly forecast vertical icon translation
+        if (this._forecastHourlyEvent?.forecast?.length) {
+            const temps = this._forecastHourlyEvent.forecast.map((item)=>item.temperature).filter((temp)=>typeof temp === "number");
+            this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
+            this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
+        }
         if (this._status === "unavailable") return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
         <ha-card class="unavailable">
           <p>${this._name} is unavailable.</p>
         </ha-card>
       `;
-        const forecastData = (0, $a670ed82a1e76f75$export$c1e906046b5de973)(this._state.attributes, this._forecastEvent, this._config?.forecast_type);
-        const forecast = this._config.show_forecast !== false && forecastData?.forecast?.length ? forecastData.forecast : undefined;
-        const hourly = forecastData?.type === "hourly";
+        const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
+        const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
       <ha-card header="${this._header}">
-        ${forecast ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-            <div class="forecast">
-              ${forecast.map((item)=>{
-            const date = new Date(item.datetime);
-            const newDay = (0, $2e3b0c24d7649e32$export$824eefb57336d873)(date, this._hass);
-            return this._hasValidValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                      <div class="card-content">
-                        <div class=${hourly && newDay ? "new-day" : ""}>
-                          ${hourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                ${newDay ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this._hass.locale, this._hass.config)}
-                              ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config)}`}
-                        </div>
-                        <div class="day-of-month">
-                          ${!hourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(date, this._hass.locale, this._hass.config)}` : ""}
-                        </div>
-                        <div class="${newDay ? "ampm-hidden" : "ampm"}">
-                          ${hourly && (0, $2e3b0c24d7649e32$export$98b044737b007ca6)(this._hass.locale) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(date, this._hass.locale, this._hass.config)}` : ""}
-                        </div>
-
-                        ${this._hasValidValue(item.condition) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                              <div class="forecast-image-icon">
-                                ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
-                              </div>
-                            ` : ""}
-
-                        <div class="temp">
-                          ${this._hasValidValue(item.temperature) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.temperature)}°` : "—"}
-                        </div>
-                        <div class="templow">
-                          ${this._hasValidValue(item.templow) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.templow)}°` : hourly ? "" : "—"}
-                        </div>
-                        <div class="precipitation ${item.precipitation > 0.3 ? "active" : ""}">
-                          ${this._hasValidValue(item.precipitation) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation}` : "—"}
-                        </div>
-                        <div class="precipitationprobability ${item.precipitation_probability > 30 ? "active" : ""}">
-                          ${this._hasValidValue(item.precipitation_probability) ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation_probability}%` : "—"}
-                        </div>
-                      </div>
-                    ` : (0, $f58f44579a4747ac$export$45b790e32b2810ee);
-        })}
+        <div class="forecast-header"></div>
+        ${showDaily ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <div class="forecast daily">
+              ${this._forecastDailyEvent.forecast.map((item)=>this.renderForecastItem(item, "daily"))}
+            </div>
+          ` : ""}
+        ${showHourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
+              ${this._forecastHourlyEvent.forecast.map((item)=>this.renderForecastItem(item, "hourly"))}
             </div>
           ` : ""}
       </ha-card>
+    `;
+    }
+    renderForecastItem(item, type) {
+        if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+        const date = new Date(item.datetime);
+        const newDay = (0, $2e3b0c24d7649e32$export$824eefb57336d873)(date, this._hass);
+        const hourly = type === "hourly";
+        const shouldShow = {
+            dayOfMonth: !hourly,
+            amPm: hourly && (0, $2e3b0c24d7649e32$export$98b044737b007ca6)(this._hass.locale),
+            tempLow: this._hasValidValue(item.templow) && !hourly,
+            precipitation: this._hasValidValue(item.precipitation),
+            precipitationProbability: this._hasValidValue(item.precipitation_probability)
+        };
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div class="forecast-item">
+      <div class=${hourly && newDay ? "new-day" : ""}>
+        ${hourly ? newDay ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config)}
+      </div>
+      <div class="day-of-month">
+        ${shouldShow.dayOfMonth ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(date, this._hass.locale, this._hass.config)}` : ""}
+      </div>
+      <div class="${newDay ? "ampm-hidden" : "ampm"}">
+        ${shouldShow.amPm ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(date, this._hass.locale, this._hass.config)}` : ""}
+      </div>
+      <div class="translate-container">
+        <div class="icon-container" style=${hourly ? `--item-temp: ${item.temperature}` : ""}>
+            ${item.condition ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+              <div class="forecast-image-icon">
+              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
+              </div>
+              ` : ""}
+          <div class="temp">
+            ${Math.round(item.temperature)}°
+          </div>
+          <div class="templow">
+            ${shouldShow.tempLow ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.templow)}°` : hourly ? "" : "—"}
+          </div>
+        </div>
+      </div>
+      <div class="precipitation ${item.precipitation > 0.3 ? "active" : ""}">
+        ${shouldShow.precipitation ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation.toFixed(1)}` : "—"}
+      </div>
+      <div class="precipitationprobability ${item.precipitation_probability > 30 ? "active" : ""}">
+        ${shouldShow.precipitationProbability ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${item.precipitation_probability}%` : "—"}
+      </div>
+    </div>
     `;
     }
     // Private methods
@@ -2009,18 +2054,46 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
     }
     _updateGap() {
         const container = this.shadowRoot.querySelector("ha-card");
-        if (!container) return;
+        const daily = this.shadowRoot.querySelector(".forecast.daily");
+        const hourly = this.shadowRoot.querySelector(".forecast.hourly");
+        if (!container || !daily && !hourly) return;
         const containerWidth = container.clientWidth;
         if (containerWidth === this._oldContainerWidth) return;
-        const itemWidth = 40;
-        const minGap = 30;
-        const padding = 16;
-        const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
-        if (maxItems < 2) return; // Avoid divide by zero
-        const totalItemWidth = maxItems * itemWidth;
-        const gap = Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
-        container.style.setProperty("--dynamic-gap", `${gap}px`);
+        [
+            daily,
+            hourly
+        ].forEach((elem)=>{
+            if (elem) {
+                const itemWidth = parseInt(getComputedStyle(elem).getPropertyValue("--icon-container-width"));
+                const minGap = parseInt(getComputedStyle(elem).getPropertyValue("--min-gap"));
+                const padding = 16;
+                const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
+                if (maxItems < 2) return; // Avoid divide by zero
+                const totalItemWidth = maxItems * itemWidth;
+                const gap = Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
+                elem.style.setProperty("--dynamic-gap", `${gap}px`);
+            }
+        });
         this._oldContainerWidth = containerWidth;
+    }
+    // Queries the height of the temperature text element and saves it as a CSS variable
+    // So it can be used for the CSS calculation of the vertical icon translation in the hourly forecast
+    // (based on the temperature)
+    _setTranslationContentHeight() {
+        const hourly = this.shadowRoot.querySelector(".forecast.hourly");
+        if (!hourly) return;
+        const container = hourly.querySelector(".icon-container");
+        if (!container) return;
+        const contentHeight = container.offsetHeight;
+        hourly.style.setProperty("--translate-content-height", `${contentHeight}px`);
+    }
+    constructor(...args){
+        super(...args);
+        // private property
+        this._subscriptions = {
+            hourly: undefined,
+            daily: undefined
+        };
     }
 }
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
@@ -2043,10 +2116,10 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_status", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastEvent", void 0);
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastDailyEvent", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_subscribed", void 0);
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastHourlyEvent", void 0);
 
 
 customElements.define("weather-forecast-extended-card", (0, $e6159c9afb48cae5$export$53427b5d95bebd88));
