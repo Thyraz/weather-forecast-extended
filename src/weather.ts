@@ -29,7 +29,7 @@ export interface HomeAssistantExended extends HomeAssistant {
   ): string;
 }
 
-interface ForecastAttribute {
+export interface ForecastAttribute {
   temperature: number;
   datetime: string;
   templow?: number;

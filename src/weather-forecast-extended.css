@@ -2,12 +2,108 @@ ha-card {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 6px;;
+}
+
+.weather {
+  width: 100%;
+  height: calc(2.5 * var(--row-height));
+  /* Background image will be set via JS */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-top-left-radius: var(--ha-card-border-radius, 12px);
+  border-top-right-radius: var(--ha-card-border-radius, 12px);
+  flex-shrink: 0;
+}
+
+.weather .condition {
+    font-size: var(--ha-font-size-xl);
+    line-height: normal;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: fit-content;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: 15px;
+    padding: 4px 15px;
+    border-radius: 100px;
+}
+
+.weather .temp {
+    font-size: var(--ha-font-size-5xl);
+    line-height: normal;
+    font-weight: bolder;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: fit-content;
+    margin-top: 15px;
+    margin-left: auto;
+    margin-right: 15px;
+    padding: 2px 17px;
+    border-radius: 100px;
+}
+
+.forecast-container {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.divider {
+  height: 4px;
+  background-color: var(--primary-background-color);
+}
+
+.forecast-container .divider {
+  margin: 0px 16px;
+  border-radius: 2px;
+}
+
+.forecast-daily-container,
+.forecast-hourly-container {
+  position: relative; /* Fading overlays should be relative positioned */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  box-sizing: border-box;
-  padding: 12px 0;
+}
+
+/* Forecasts can increase the height based on a user setting, in this case flex: 1 needs to be set to the hourly or daily container */
+.forecast-hourly-container {
+  flex: 1
+}
+
+.fade-left,
+.fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.fade-left {
+  left: 0;
+  background: linear-gradient(to right,
+    var(--card-background-color) 0%,
+    var(--card-background-color) 2px,
+    transparent 100%
+  );
+}
+
+.fade-right {
+  right: 0;
+  background: linear-gradient(to left,
+    var(--card-background-color) 0%,
+    var(--card-background-color) 2px,
+    transparent 100%
+  );
 }
 
 .forecast {
+  height: 100%;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 16px;
   scroll-padding-right: 16px;
@@ -15,23 +111,60 @@ ha-card {
   overflow-y: hidden;
   display: flex;
   justify-content: space-around;
-  /* gap: 20px; */
   gap: var(--dynamic-gap, 20px); /* fallback */
-  padding: 0 16px;
+  padding: 14px 16px;
+}
+
+.forecast.daily {
+  --min-gap: 30px;
+  --icon-size: 40px;
+  --icon-container-width: 40px;
+  --icon-container-height: auto;
+    /* Variables for the temperature bars in the daily forecast */
+  --temp-bar-width: 8px;
+  --temp-bar-min: -20;
+  --temp-bar-max: 50;
+}
+
+.forecast.daily .temperature-bar {
+  width: var(--temp-bar-width);
+  height: 50px;
+  margin: 4px auto;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+}
+
+.forecast.daily .temperature-bar-inner {
+  position: absolute;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+}
+
+.forecast.hourly {
+  --min-gap: 16px;
+  --icon-size: 25px;
+  --icon-container-width: 25px;
+  /* --icon-container-height: 70px; */
+
+  /* Variables used for calculations in CSS rules of "forecast-item .icon-container" */
+  --translate-content-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
+  --translate-container-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
+  --min-temp: -20; /* Default value, will be set in render() */
+  --max-temp: 50; /* Default value, will be set in render() */
 }
 
 .forecast::-webkit-scrollbar {
-  height: 6px;
+  height: 0px;
 }
 
-/* .forecast::-webkit-scrollbar-thumb {
-  background: rgba(100, 100, 100, 0.3);
-  border-radius: 3px;
-} */
-
-.forecast > div {
+.forecast-item {
   scroll-snap-align: start;
   text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .forecast .new-day {
@@ -44,26 +177,20 @@ ha-card {
 
 .forecast .day-of-month {
   margin-top: -4px;
-  opacity: 0.5;
+  font-size: 13px;
+  opacity: 0.3;
 }
 
 .forecast .ampm,
 .forecast .ampm-hidden {
   min-height: 5px;
-  margin-top: -5px;
+  margin-top: -4px;
   font-size: 11px;
   opacity: 0.3;
 }
 
 .forecast .ampm-hidden {
   opacity: 0.0 !important;
-}
-
-.forecast-image-icon {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  display: flex;
-  justify-content: center;
 }
 
 .forecast .temp {
@@ -78,23 +205,48 @@ ha-card {
 
 .forecast .precipitation,
 .forecast .precipitationprobability {
-  opacity: 0.4;
+  opacity: 0.3;
   color: var(--state-climate-cool-color);
 }
 
 .forecast .precipitation.active,
 .forecast .precipitationprobability.active {
-  opacity: 0.9;
+  opacity: 1.0;
+}
+
+.forecast.daily .precipitationprobability {
+  display: none;
+}
+
+.forecast-item .translate-container {
+  width: var(--icon-container-width);
+  /* height: var(--icon-container-height); */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.forecast-item .icon-container {
+  /* Vertically icon translation based on temperature for hourly forecast */
+  --item-temp: 0; /* Correct value will be set in renderForecastItem() */
+  --max-translation: calc((var(--translate-container-height) - var(--translate-content-height)) / 2);
+  --percentual-translation: calc((var(--item-temp) - var(--min-temp)) / (var(--max-temp) - var(--min-temp)));
+  transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
+}
+
+.forecast-image-icon {
+  display: flex;
+  justify-content: center;
 }
 
 .forecast-image-icon > * {
-  width: 40px;
-  height: 40px;
-  --mdc-icon-size: 40px;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 
 /* Styles from weather.ts */
-
 .rain {
   fill: var(--weather-icon-rain-color, #30b3ff);
 }
