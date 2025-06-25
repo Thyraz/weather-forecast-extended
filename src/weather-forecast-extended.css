@@ -1,9 +1,10 @@
 ha-card {
   height: 100%;
+  min-height: fit-content;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: 6px;;
+  padding-bottom: 8px;
 }
 
 .weather {
@@ -19,7 +20,7 @@ ha-card {
 }
 
 .weather .condition {
-    font-size: var(--ha-font-size-xl);
+    font-size: 15px;
     line-height: normal;
     background-color: rgba(0, 0, 0, 0.3);
     width: fit-content;
@@ -31,7 +32,7 @@ ha-card {
 }
 
 .weather .temp {
-    font-size: var(--ha-font-size-5xl);
+    font-size: 30px;
     line-height: normal;
     font-weight: bolder;
     background-color: rgba(0, 0, 0, 0.3);
@@ -45,9 +46,11 @@ ha-card {
 
 .forecast-container {
   flex: 1;
+  min-height: fit-content;
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 4px
 }
 
 .divider {
@@ -67,12 +70,24 @@ ha-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: fit-content;
+  flex: 1;
+  margin-top: 2px;
+  /* iOS scroll improvements */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 
-/* Forecasts can increase the height based on a user setting, in this case flex: 1 needs to be set to the hourly or daily container */
-.forecast-hourly-container {
-  flex: 1
-}
+/* @supports (hanging-punctuation: first)
+  and (font: -apple-system-body)
+  and (-webkit-appearance: none) {
+  .forecast-daily-container,
+  .forecast-hourly-container { */
+    /* Safari doesn't play well with 'min-height: fit-content' inside flex containers  */
+    /* min-height: -webkit-fill-available;
+  }
+} */
 
 .fade-left,
 .fade-right {
@@ -103,7 +118,9 @@ ha-card {
 }
 
 .forecast {
+  flex: 1;
   height: 100%;
+  min-height: fit-content;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 16px;
   scroll-padding-right: 16px;
@@ -112,7 +129,15 @@ ha-card {
   display: flex;
   justify-content: space-around;
   gap: var(--dynamic-gap, 20px); /* fallback */
-  padding: 14px 16px;
+  padding: 8px 16px;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .forecast {
+    /* Disable scroll snapping on iOS to prevent issues with touch scrolling */
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .forecast.daily {
@@ -126,28 +151,10 @@ ha-card {
   --temp-bar-max: 50;
 }
 
-.forecast.daily .temperature-bar {
-  width: var(--temp-bar-width);
-  height: 50px;
-  margin: 4px auto;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  position: relative;
-}
-
-.forecast.daily .temperature-bar-inner {
-  position: absolute;
-  width: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 4px;
-}
-
 .forecast.hourly {
   --min-gap: 16px;
   --icon-size: 25px;
   --icon-container-width: 25px;
-  /* --icon-container-height: 70px; */
-
   /* Variables used for calculations in CSS rules of "forecast-item .icon-container" */
   --translate-content-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
   --translate-container-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
@@ -156,7 +163,9 @@ ha-card {
 }
 
 .forecast::-webkit-scrollbar {
-  height: 0px;
+  display: none;
+  height: 0;
+  width: 0;
 }
 
 .forecast-item {
@@ -228,12 +237,22 @@ ha-card {
   justify-content: center;
 }
 
+.forecast.hourly .forecast-item .translate-container {
+  min-height: 80px;
+}
+
 .forecast-item .icon-container {
   /* Vertically icon translation based on temperature for hourly forecast */
   --item-temp: 0; /* Correct value will be set in renderForecastItem() */
   --max-translation: calc((var(--translate-container-height) - var(--translate-content-height)) / 2);
   --percentual-translation: calc((var(--item-temp) - var(--min-temp)) / (var(--max-temp) - var(--min-temp)));
   transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
+  display: flex;
+  flex-direction: column;
+}
+
+.forecast.daily .forecast-item .icon-container {
+  flex: 1;
 }
 
 .forecast-image-icon {
@@ -244,6 +263,23 @@ ha-card {
 .forecast-image-icon > * {
   width: var(--icon-size);
   height: var(--icon-size);
+}
+
+.forecast.daily .temperature-bar {
+  flex: 1;
+  min-height: 40px;
+  width: var(--temp-bar-width);
+  margin: 8px auto;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+}
+
+.forecast.daily .temperature-bar-inner {
+  position: absolute;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
 }
 
 /* Styles from weather.ts */

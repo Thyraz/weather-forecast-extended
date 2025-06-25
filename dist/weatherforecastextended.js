@@ -1855,7 +1855,7 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
 
 
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  height: 100%;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: space-evenly;\n  display: flex;\n}\n\n.forecast-header {\n  width: 100%;\n  height: 150px;\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  background-image: url(\"pouring.8b4e549f.jpg\");\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  gap: var(--dynamic-gap, 20px);\n  padding: 0 16px;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow-x: auto;\n  overflow-y: hidden;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --icon-container-height: auto;\n}\n\n.forecast.hourly {\n  --min-gap: 10px;\n  --icon-size: 20px;\n  --icon-container-width: 30px;\n  --icon-container-height: 70px;\n  --translate-content-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  height: var(--icon-container-height);\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--icon-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  height: 100%;\n  min-height: -moz-fit-content;\n  min-height: fit-content;\n  flex-direction: column;\n  padding-bottom: 8px;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.5 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-shrink: 0;\n}\n\n.weather .condition {\n  width: -moz-fit-content;\n  width: fit-content;\n  background-color: #0000004d;\n  border-radius: 100px;\n  margin-top: 10px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 4px 15px;\n  font-size: 15px;\n  line-height: normal;\n}\n\n.weather .temp {\n  width: -moz-fit-content;\n  width: fit-content;\n  background-color: #0000004d;\n  border-radius: 100px;\n  margin-top: 15px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 2px 17px;\n  font-size: 30px;\n  font-weight: bolder;\n  line-height: normal;\n}\n\n.forecast-container {\n  min-height: -moz-fit-content;\n  min-height: fit-content;\n  height: 100%;\n  flex-direction: column;\n  flex: 1;\n  gap: 4px;\n  display: flex;\n}\n\n.divider {\n  height: 4px;\n  background-color: var(--primary-background-color);\n}\n\n.forecast-container .divider {\n  border-radius: 2px;\n  margin: 0 16px;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  min-height: -moz-fit-content;\n  min-height: fit-content;\n  -webkit-overflow-scrolling: touch;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: 1;\n  justify-content: center;\n  margin-top: 2px;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  width: 16px;\n  pointer-events: none;\n  z-index: 2;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  height: 100%;\n  min-height: -moz-fit-content;\n  min-height: fit-content;\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  gap: var(--dynamic-gap, 20px);\n  flex: 1;\n  padding: 8px 16px;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow-x: auto;\n  overflow-y: hidden;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    scroll-snap-type: none;\n    -webkit-overflow-scrolling: touch;\n  }\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --icon-container-height: auto;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  height: 100%;\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast .new-day {\n  background-color: #7a7a7a1a;\n  border-radius: 5px;\n  margin-left: 2px;\n  margin-right: 2px;\n  font-weight: bold;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  min-height: 5px;\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: 1;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  min-height: 80px;\n}\n\n.forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: 1;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.forecast.daily .temperature-bar {\n  min-height: 40px;\n  width: var(--temp-bar-width);\n  background-color: #ffffff1a;\n  border-radius: 4px;\n  flex: 1;\n  margin: 8px auto;\n  position: relative;\n}\n\n.forecast.daily .temperature-bar-inner {\n  width: 100%;\n  background-color: #fffc;\n  border-radius: 4px;\n  position: absolute;\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
@@ -1863,11 +1863,74 @@ const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 `;
 
 
+var $1e69f76b05a816eb$exports = {};
+$1e69f76b05a816eb$exports = new URL("sunny.301a5a2f.jpg", import.meta.url).toString();
+
+
+var $1dfaab2e4e5ecad6$exports = {};
+$1dfaab2e4e5ecad6$exports = new URL("pouring.4a0d35b1.jpg", import.meta.url).toString();
+
+
+var $b6117c6cfcd5d9bd$exports = {};
+$b6117c6cfcd5d9bd$exports = new URL("partly-cloudy.be4a5eb1.jpg", import.meta.url).toString();
+
+
+var $b109536a5a876912$exports = {};
+$b109536a5a876912$exports = new URL("fog.2846236b.jpg", import.meta.url).toString();
+
+
+var $9f87ed3faa3b9e08$exports = {};
+$9f87ed3faa3b9e08$exports = new URL("hail.78bf0bf9.jpg", import.meta.url).toString();
+
+
+var $a72aedec7f87ee16$exports = {};
+$a72aedec7f87ee16$exports = new URL("lightning-rainy.a39732b3.jpg", import.meta.url).toString();
+
+
+var $95746abd7ffe8eef$exports = {};
+$95746abd7ffe8eef$exports = new URL("lightning.dd08d9a9.jpg", import.meta.url).toString();
+
+
+var $299ff7583b1b6519$exports = {};
+$299ff7583b1b6519$exports = new URL("rainy.110f5e84.jpg", import.meta.url).toString();
+
+
+var $2cc4706dea59c3c7$exports = {};
+$2cc4706dea59c3c7$exports = new URL("snowy-rainy.e7cec085.jpg", import.meta.url).toString();
+
+
+var $114809334059eb6d$exports = {};
+$114809334059eb6d$exports = new URL("snowy.3d2d1d5d.jpg", import.meta.url).toString();
+
+
+var $126f314ae001decd$exports = {};
+$126f314ae001decd$exports = new URL("windy-variant.9bbb3048.jpg", import.meta.url).toString();
+
+
+var $31e27610007c5cf3$exports = {};
+$31e27610007c5cf3$exports = new URL("windy.7fde666b.jpg", import.meta.url).toString();
+
+
+const $04b2058bf019e2da$export$d0bd520bd5ddb657 = {
+    pouring: (0, (/*@__PURE__*/$parcel$interopDefault($1dfaab2e4e5ecad6$exports))),
+    sunny: (0, (/*@__PURE__*/$parcel$interopDefault($1e69f76b05a816eb$exports))),
+    partlycloudy: (0, (/*@__PURE__*/$parcel$interopDefault($b6117c6cfcd5d9bd$exports))),
+    fog: (0, (/*@__PURE__*/$parcel$interopDefault($b109536a5a876912$exports))),
+    hail: (0, (/*@__PURE__*/$parcel$interopDefault($9f87ed3faa3b9e08$exports))),
+    lightningrainy: (0, (/*@__PURE__*/$parcel$interopDefault($a72aedec7f87ee16$exports))),
+    lightning: (0, (/*@__PURE__*/$parcel$interopDefault($95746abd7ffe8eef$exports))),
+    rainy: (0, (/*@__PURE__*/$parcel$interopDefault($299ff7583b1b6519$exports))),
+    snowyrainy: (0, (/*@__PURE__*/$parcel$interopDefault($2cc4706dea59c3c7$exports))),
+    snowy: (0, (/*@__PURE__*/$parcel$interopDefault($114809334059eb6d$exports))),
+    windyvariant: (0, (/*@__PURE__*/$parcel$interopDefault($126f314ae001decd$exports))),
+    windy: (0, (/*@__PURE__*/$parcel$interopDefault($31e27610007c5cf3$exports)))
+};
+
+
 class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
     // Called by HA
     setConfig(config) {
         this._config = config;
-        this._header = config.header === "" ? (0, $f58f44579a4747ac$export$45b790e32b2810ee) : config.header;
         this._entity = config.entity;
         // call set hass() to immediately adjust to a changed entity
         // while editing the entity in the card editor
@@ -1884,9 +1947,10 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
     }
     getGridOptions() {
         const minRows = 1;
-        var rows = 0;
-        rows += this._config.daily_forecast !== false ? 3 : 0;
-        rows += this._config.hourly_forecast !== false ? 3 : 0;
+        var rows = 2.5;
+        rows += this._config.daily_forecast !== false ? 2.5 : 0;
+        rows += this._config.hourly_forecast !== false ? 3.0 : 0;
+        rows = Math.floor(rows);
         return {
             columns: 12,
             rows: rows,
@@ -1952,7 +2016,10 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
             const daily = this.shadowRoot.querySelector(".forecast.daily");
             const hourly = this.shadowRoot.querySelector(".forecast.daily");
             if (!card || !daily && !hourly) return;
-            this._resizeObserver = new ResizeObserver(()=>this._updateGap());
+            this._resizeObserver = new ResizeObserver(()=>{
+                this._updateGap();
+                this._setTranslationContentHeight();
+            });
             this._resizeObserver.observe(card);
             // Call once for the initial size
             this._updateGap();
@@ -1962,6 +2029,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
             console.log(this._forecastDailyEvent.forecast);
             console.log("State");
             console.log(this._state);
+            console.log(this._hass);
         }
     }
     // Render methods
@@ -1978,6 +2046,15 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
             this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
             this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
         }
+        // Calculate min/max temperatures for daily forecast temperature bar chart
+        if (this._forecastDailyEvent?.forecast?.length) {
+            const dailyTemps = this._forecastDailyEvent.forecast.flatMap((item)=>[
+                    item.temperature,
+                    item.templow
+                ].filter((temp)=>typeof temp === "number"));
+            this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
+            this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
+        }
         if (this._status === "unavailable") return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
         <ha-card class="unavailable">
           <p>${this._name} is unavailable.</p>
@@ -1986,18 +2063,35 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
         const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
         const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-      <ha-card header="${this._header}">
-        <div class="forecast-header"></div>
-        ${showDaily ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-            <div class="forecast daily">
-              ${this._forecastDailyEvent.forecast.map((item)=>this.renderForecastItem(item, "daily"))}
-            </div>
+      <ha-card>
+        <div class="weather" style="background-image: url(${this._getWeatherBgImage(this._state.state)})">
+          <div class="temp">${this._hass.formatEntityAttributeValue(this._state, "temperature") || this._state.state}</div>
+          <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+        </div>
+        ${showDaily || showHourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <div class="divider"></div>
           ` : ""}
-        ${showHourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-            <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
-              ${this._forecastHourlyEvent.forecast.map((item)=>this.renderForecastItem(item, "hourly"))}
-            </div>
-          ` : ""}
+        <div class="forecast-container">
+          <div class="forecast-daily-container">
+            <div class="fade-left"></div>
+            <div class="fade-right"></div>
+            ${showDaily ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                <div class="forecast daily">
+                  ${this._forecastDailyEvent.forecast.map((item)=>this.renderForecastItem(item, "daily"))}
+                </div>
+              ` : ""}
+          </div>
+        <div class="divider"></div>
+          <div class="forecast-hourly-container">
+            <div class="fade-left"></div>
+            <div class="fade-right"></div>
+            ${showHourly ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
+                  ${this._forecastHourlyEvent.forecast.map((item)=>this.renderForecastItem(item, "hourly"))}
+                </div>
+              ` : ""}
+          </div>
+        </div>
       </ha-card>
     `;
     }
@@ -2018,12 +2112,15 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
       <div class=${hourly && newDay ? "new-day" : ""}>
         ${hourly ? newDay ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this._hass.locale, this._hass.config) : (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this._hass.locale, this._hass.config)}
       </div>
-      <div class="day-of-month">
-        ${shouldShow.dayOfMonth ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(date, this._hass.locale, this._hass.config)}` : ""}
-      </div>
-      <div class="${newDay ? "ampm-hidden" : "ampm"}">
-        ${shouldShow.amPm ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(date, this._hass.locale, this._hass.config)}` : ""}
-      </div>
+      ${shouldShow.dayOfMonth ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        <div class="day-of-month">
+          ${(0, $2e3b0c24d7649e32$export$9ba7591c5b128371)(date, this._hass.locale, this._hass.config)}
+        </div>
+        ` : ""}
+      ${shouldShow.amPm ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+        <div class="${newDay ? "ampm-hidden" : "ampm"}">
+          ${(0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(date, this._hass.locale, this._hass.config)}
+        </div>` : ""}
       <div class="translate-container">
         <div class="icon-container" style=${hourly ? `--item-temp: ${item.temperature}` : ""}>
             ${item.condition ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2034,6 +2131,11 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
           <div class="temp">
             ${Math.round(item.temperature)}°
           </div>
+          ${!hourly && shouldShow.tempLow ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <div class="temperature-bar">
+              <div class="temperature-bar-inner" style=${this._getTemperatureBarStyle(item.temperature, item.templow)}></div>
+            </div>
+          ` : ""}
           <div class="templow">
             ${shouldShow.tempLow ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${Math.round(item.templow)}°` : hourly ? "" : "—"}
           </div>
@@ -2051,6 +2153,13 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
     // Private methods
     _hasValidValue(item) {
         return typeof item !== "undefined" && item !== null;
+    }
+    _getWeatherBgImage(state) {
+        // this._state.state is a string like "snowy-rainy"
+        // The WeatherImages object keys are like "snowyrainy"
+        // So we need to remove the hyphens from the state string
+        const imageKey = state.replace(/-/g, "");
+        return (0, $04b2058bf019e2da$export$d0bd520bd5ddb657)[imageKey] ?? (0, $04b2058bf019e2da$export$d0bd520bd5ddb657).partlycloudy; // Fallback
     }
     _updateGap() {
         const container = this.shadowRoot.querySelector("ha-card");
@@ -2076,15 +2185,26 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $ab210b2da7b39b9d$ex
         });
         this._oldContainerWidth = containerWidth;
     }
+    _getTemperatureBarStyle(maxTemp, minTemp) {
+        const total = this._dailyMaxTemp - this._dailyMinTemp;
+        if (!total) return "";
+        const top = (this._dailyMaxTemp - maxTemp) / total * 100;
+        const bottom = (this._dailyMaxTemp - minTemp) / total * 100;
+        const height = bottom - top;
+        return `top: ${top}%; height: ${height}%;`;
+    }
     // Queries the height of the temperature text element and saves it as a CSS variable
     // So it can be used for the CSS calculation of the vertical icon translation in the hourly forecast
     // (based on the temperature)
     _setTranslationContentHeight() {
         const hourly = this.shadowRoot.querySelector(".forecast.hourly");
         if (!hourly) return;
-        const container = hourly.querySelector(".icon-container");
-        if (!container) return;
-        const contentHeight = container.offsetHeight;
+        const translateContainer = hourly.querySelector(".translate-container");
+        const iconContainer = hourly.querySelector(".icon-container");
+        if (!translateContainer || !iconContainer) return;
+        const containerHeight = translateContainer.offsetHeight;
+        const contentHeight = iconContainer.offsetHeight;
+        hourly.style.setProperty("--translate-container-height", `${containerHeight}px`);
         hourly.style.setProperty("--translate-content-height", `${contentHeight}px`);
     }
     constructor(...args){

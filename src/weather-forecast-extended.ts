@@ -20,7 +20,6 @@ type SubscriptionMap = Record<ForecastType, Promise<() => void> | undefined>;
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
   @state() private _config: LovelaceCardConfig;
-  @state() private _header: string | typeof nothing;
   @state() private _entity: string;
   @state() private _name: string;
   @state() private _state: WeatherEntity;
@@ -102,7 +101,8 @@ export class WeatherForecastExtended extends LitElement {
       type,
       (event) => {
         if (type === "hourly") this._forecastHourlyEvent = event;
-        if (type === "daily")  this._forecastDailyEvent = event;
+        if (type === "daily") this._forecastDailyEvent = event;
+        this._calcualteMinMaxTemps();
       }
     ).catch(e => {
       this._subscriptions[type] = undefined;
@@ -198,24 +198,6 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
-    // Calculate min/max temperatures for hourly forecast vertical icon translation
-    if (this._forecastHourlyEvent?.forecast?.length) {
-      const temps = this._forecastHourlyEvent.forecast
-        .map(item => item.temperature)
-        .filter(temp => typeof temp === "number");
-      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
-      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
-    }
-
-    // Calculate min/max temperatures for daily forecast temperature bar chart
-    if (this._forecastDailyEvent?.forecast?.length) {
-      const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
-        [item.temperature, item.templow].filter(temp => typeof temp === "number")
-      );
-      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
-      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
-    }
-
     if (this._status === "unavailable") {
       return html`
         <ha-card class="unavailable">
@@ -246,7 +228,7 @@ export class WeatherForecastExtended extends LitElement {
             ${showDaily
               ? html`
                 <div class="forecast daily">
-                  ${this._forecastDailyEvent.forecast.map((item) => this.renderForecastItem(item, "daily"))}
+                  ${this._forecastDailyEvent.forecast.map((item) => this._renderForecastItem(item, "daily"))}
                 </div>
               `
               : ""
@@ -259,7 +241,7 @@ export class WeatherForecastExtended extends LitElement {
             ${showHourly
               ? html`
                 <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
-                  ${this._forecastHourlyEvent.forecast.map((item) => this.renderForecastItem(item, "hourly"))}
+                  ${this._forecastHourlyEvent.forecast.map((item) => this._renderForecastItem(item, "hourly"))}
                 </div>
               `
               : ""
@@ -270,7 +252,7 @@ export class WeatherForecastExtended extends LitElement {
     `;
   }
 
-  renderForecastItem(item: ForecastAttribute, type: ForecastType): TemplateResult | typeof nothing {
+  private _renderForecastItem(item: ForecastAttribute, type: ForecastType): TemplateResult | typeof nothing {
     if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition))
     return nothing;
 
@@ -288,26 +270,7 @@ export class WeatherForecastExtended extends LitElement {
 
     return html`
     <div class="forecast-item">
-      <div class=${hourly && newDay ? 'new-day' : ''}>
-        ${hourly
-        ? (newDay
-          ? formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
-          : formatHour(date, this._hass!.locale, this._hass!.config))
-        : formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
-        }
-      </div>
-      <div class="day-of-month">
-        ${shouldShow.dayOfMonth
-        ? html`${formatDateDayTwoDigit(date, this._hass!.locale, this._hass!.config)}`
-        : ""
-        }
-      </div>
-      <div class="${newDay ? 'ampm-hidden' : 'ampm'}">
-        ${shouldShow.amPm
-        ? html`${formatDayPeriod(date, this._hass!.locale, this._hass!.config)}`
-        : ""
-        }
-      </div>
+      ${this._renderForeCastItemTopText(item, type)}
       <div class="translate-container">
         <div class="icon-container" style=${hourly
           ? `--item-temp: ${item.temperature}`
@@ -354,9 +317,55 @@ export class WeatherForecastExtended extends LitElement {
     `;
   };
 
+  // Render subelements
+  private _renderForeCastItemTopText(item: ForecastAttribute, type: ForecastType): TemplateResult | typeof nothing {
+    if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) {
+      return nothing;
+    }
+    const date = new Date(item.datetime);
+    const newDay = isNewDay(date, this._hass);
+    const hourly = type === "hourly";
+
+    return html`
+      <div class="${hourly && newDay ? 'new-day' : ''}">
+        ${hourly
+          ? (newDay
+            ? formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
+            : formatHour(date, this._hass!.locale, this._hass!.config))
+          : formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)}
+      </div>
+      ${!hourly && !newDay
+        ? html`<div class="day-of-month">${formatDateDayTwoDigit(date, this._hass!.locale, this._hass!.config)}</div>`
+        : ""
+      }
+      ${hourly && useAmPm(this._hass!.locale)
+        ? html`<div class="${newDay ? 'ampm-hidden' : 'ampm'}">${formatDayPeriod(date, this._hass!.locale, this._hass!.config)}</div>`
+        : ""
+      }
+    `;
+  }
+
   // Private methods
   private _hasValidValue(item?: any): boolean {
     return typeof item !== "undefined" && item !== null;
+  }
+
+  private _calcualteMinMaxTemps() {
+    if (this._forecastHourlyEvent?.forecast?.length) {
+      const temps = this._forecastHourlyEvent.forecast
+        .map(item => item.temperature)
+        .filter(temp => typeof temp === "number");
+      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
+      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
+    }
+
+    if (this._forecastDailyEvent?.forecast?.length) {
+      const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
+        [item.temperature, item.templow].filter(temp => typeof temp === "number")
+      );
+      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
+      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
+    }
   }
 
   private _getWeatherBgImage(state: string): string {
