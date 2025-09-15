@@ -1,17 +1,15 @@
 import type { PropertyValues } from "lit";
-import { BooleanAttributePart, TemplateResult, LitElement, html, nothing } from "lit";
+import { TemplateResult, LitElement, html, nothing } from "lit";
 import { state } from "lit/decorators";
 import { formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
-import type { ForecastEvent, ModernForecastType, WeatherEntity, ForecastAttribute } from "./weather";
-import {
-  getForecast,
-  getWeatherStateIcon,
-  subscribeForecast
-} from "./weather";
+import type { ForecastEvent, WeatherEntity, ForecastAttribute } from "./weather";
+import { subscribeForecast } from "./weather";
 import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { LovelaceGridOptions } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { WeatherImages } from './weather-images';
+import "./components/wfe-daily-list";
+import "./components/wfe-hourly-list";
 
 // Private types
 type ForecastType = "hourly" | "daily";
@@ -102,7 +100,9 @@ export class WeatherForecastExtended extends LitElement {
       type,
       (event) => {
         if (type === "hourly") this._forecastHourlyEvent = event;
-        if (type === "daily")  this._forecastDailyEvent = event;
+        if (type === "daily") this._forecastDailyEvent = event;
+        this._calculateMinMaxTemps();
+         // Hourly translation dimensions recalculation happens inside wfe-hourly-list
       }
     ).catch(e => {
       this._subscriptions[type] = undefined;
@@ -142,7 +142,9 @@ export class WeatherForecastExtended extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unsubscribeForecastEvents();
-    this._resizeObserver.disconnect();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
   }
 
   updated(changedProps: PropertyValues) {
@@ -158,30 +160,20 @@ export class WeatherForecastExtended extends LitElement {
     if (!this._resizeObserver) {
       const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
       const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
-      const hourly = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
+      const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
 
       if (!card || (!daily && !hourly))
         return;
 
-      this._resizeObserver = new ResizeObserver(() => {
-        this._updateGap();
-        this._setTranslationContentHeight();
-      });
+       this._resizeObserver = new ResizeObserver(() => {
+         this._updateGap();
+       });
       this._resizeObserver.observe(card);
 
       // Call once for the initial size
       this._updateGap()
 
-      // Set translation content height for hourly forecast
-      this._setTranslationContentHeight();
-
-      console.log("FORECAST");
-      console.log(this._forecastDailyEvent.forecast)
-
-      console.log("State");
-      console.log(this._state)
-
-      console.log(this._hass);
+  // Hourly translation heights are handled inside wfe-hourly-list
     }
   }
 
@@ -246,7 +238,12 @@ export class WeatherForecastExtended extends LitElement {
             ${showDaily
               ? html`
                 <div class="forecast daily">
-                  ${this._forecastDailyEvent.forecast.map((item) => this.renderForecastItem(item, "daily"))}
+                  <wfe-daily-list
+                    .hass=${this._hass}
+                    .forecast=${this._forecastDailyEvent!.forecast}
+                    .min=${this._dailyMinTemp}
+                    .max=${this._dailyMaxTemp}
+                  ></wfe-daily-list>
                 </div>
               `
               : ""
@@ -258,8 +255,14 @@ export class WeatherForecastExtended extends LitElement {
             <div class="fade-right"></div>
             ${showHourly
               ? html`
-                <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
-                  ${this._forecastHourlyEvent.forecast.map((item) => this.renderForecastItem(item, "hourly"))}
+                <div class="forecast hourly"
+                  style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined
+                    ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};`
+                    : nothing}>
+                  <wfe-hourly-list
+                    .hass=${this._hass}
+                    .forecast=${this._forecastHourlyEvent!.forecast}
+                  ></wfe-hourly-list>
                 </div>
               `
               : ""
@@ -270,93 +273,23 @@ export class WeatherForecastExtended extends LitElement {
     `;
   }
 
-  renderForecastItem(item: ForecastAttribute, type: ForecastType): TemplateResult | typeof nothing {
-    if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition))
-    return nothing;
-
-    const date = new Date(item.datetime);
-    const newDay = isNewDay(date, this._hass);
-    const hourly = type === "hourly";
-
-    const shouldShow = {
-      dayOfMonth: !hourly,
-      amPm: hourly && useAmPm(this._hass!.locale),
-      tempLow: this._hasValidValue(item.templow) && !hourly,
-      precipitation: this._hasValidValue(item.precipitation),
-      precipitationProbability: this._hasValidValue(item.precipitation_probability)
-    };
-
-    return html`
-    <div class="forecast-item">
-      <div class=${hourly && newDay ? 'new-day' : ''}>
-        ${hourly
-        ? (newDay
-          ? formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
-          : formatHour(date, this._hass!.locale, this._hass!.config))
-        : formatDateWeekdayShort(date, this._hass!.locale, this._hass!.config)
-        }
-      </div>
-      <div class="day-of-month">
-        ${shouldShow.dayOfMonth
-        ? html`${formatDateDayTwoDigit(date, this._hass!.locale, this._hass!.config)}`
-        : ""
-        }
-      </div>
-      <div class="${newDay ? 'ampm-hidden' : 'ampm'}">
-        ${shouldShow.amPm
-        ? html`${formatDayPeriod(date, this._hass!.locale, this._hass!.config)}`
-        : ""
-        }
-      </div>
-      <div class="translate-container">
-        <div class="icon-container" style=${hourly
-          ? `--item-temp: ${item.temperature}`
-          : ""}>
-            ${item.condition
-            ? html`
-              <div class="forecast-image-icon">
-              ${getWeatherStateIcon(item.condition!, this, !(item.is_daytime || item.is_daytime === undefined))}
-              </div>
-              `
-            : ""
-            }
-          <div class="temp">
-            ${Math.round(item.temperature)}°
-          </div>
-          ${!hourly && shouldShow.tempLow ? html`
-            <div class="temperature-bar">
-              <div class="temperature-bar-inner" style=${this._getTemperatureBarStyle(item.temperature, item.templow)}></div>
-            </div>
-          ` : ""}
-          <div class="templow">
-            ${shouldShow.tempLow
-            ? html`${Math.round(item.templow)}°`
-            : hourly
-              ? ""
-              : "—"
-            }
-          </div>
-        </div>
-      </div>
-      <div class="precipitation ${item.precipitation > 0.3 ? 'active' : ''}">
-        ${shouldShow.precipitation
-        ? html`${item.precipitation.toFixed(1)}`
-        : "—"
-        }
-      </div>
-      <div class="precipitationprobability ${item.precipitation_probability > 30 ? 'active' : ''}">
-        ${shouldShow.precipitationProbability
-        ? html`${item.precipitation_probability}%`
-        : "—"
-        }
-      </div>
-    </div>
-    `;
-  };
-
   // Private methods
-  private _hasValidValue(item?: any): boolean {
-    return typeof item !== "undefined" && item !== null;
+  private _calculateMinMaxTemps() {
+    if (this._forecastHourlyEvent?.forecast?.length) {
+      const temps = this._forecastHourlyEvent.forecast
+        .map(item => item.temperature)
+        .filter(temp => typeof temp === "number");
+      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
+      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
+    }
+
+    if (this._forecastDailyEvent?.forecast?.length) {
+      const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
+        [item.temperature, item.templow].filter(temp => typeof temp === "number")
+      );
+      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
+      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
+    }
   }
 
   private _getWeatherBgImage(state: string): string {
@@ -396,34 +329,5 @@ export class WeatherForecastExtended extends LitElement {
     });
 
     this._oldContainerWidth = containerWidth;
-  }
-
-  private _getTemperatureBarStyle(maxTemp: number, minTemp: number): string {
-    const total = this._dailyMaxTemp - this._dailyMinTemp;
-    if (!total) return "";
-
-    const top = ((this._dailyMaxTemp - maxTemp) / total) * 100;
-    const bottom = ((this._dailyMaxTemp - minTemp) / total) * 100;
-    const height = bottom - top;
-
-    return `top: ${top}%; height: ${height}%;`;
-  }
-
-  // Queries the height of the temperature text element and saves it as a CSS variable
-  // So it can be used for the CSS calculation of the vertical icon translation in the hourly forecast
-  // (based on the temperature)
-  private _setTranslationContentHeight() {
-    const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement | null;
-    if (!hourly) return;
-
-    const translateContainer = hourly.querySelector('.translate-container') as HTMLElement | null;
-    const iconContainer = hourly.querySelector('.icon-container') as HTMLElement | null;
-    if (!translateContainer || !iconContainer) return;
-
-    const containerHeight = translateContainer.offsetHeight;
-    const contentHeight = iconContainer.offsetHeight;
-
-    hourly.style.setProperty('--translate-container-height', `${containerHeight}px`);
-    hourly.style.setProperty('--translate-content-height', `${contentHeight}px`);
   }
 }
