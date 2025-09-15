@@ -1,9 +1,15 @@
 ha-card {
+  /* Auto-size by default, but also respect explicit heights from the parent */
   height: 100%;
+  min-height: fit-content;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+<<<<<<< HEAD
   padding-bottom: 6px;;
+=======
+  padding-bottom: 8px;
+>>>>>>> dev
 }
 
 .weather {
@@ -19,7 +25,11 @@ ha-card {
 }
 
 .weather .condition {
+<<<<<<< HEAD
     font-size: var(--ha-font-size-xl);
+=======
+    font-size: 15px;
+>>>>>>> dev
     line-height: normal;
     background-color: rgba(0, 0, 0, 0.3);
     width: fit-content;
@@ -31,7 +41,11 @@ ha-card {
 }
 
 .weather .temp {
+<<<<<<< HEAD
     font-size: var(--ha-font-size-5xl);
+=======
+    font-size: 30px;
+>>>>>>> dev
     line-height: normal;
     font-weight: bolder;
     background-color: rgba(0, 0, 0, 0.3);
@@ -44,10 +58,19 @@ ha-card {
 }
 
 .forecast-container {
+<<<<<<< HEAD
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
+=======
+  /* Allow the forecast section to grow when the card is taller */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+>>>>>>> dev
 }
 
 .divider {
@@ -66,6 +89,7 @@ ha-card {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
   justify-content: center;
 }
 
@@ -74,6 +98,26 @@ ha-card {
   flex: 1
 }
 
+=======
+  justify-content: flex-start;
+  flex: 1 1 auto; /* allow growth with card height */
+  margin-top: 2px;
+  /* iOS scroll improvements */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+/* Safari/WebKit: keep content fully visible without forcing fill-available heights */
+@supports (-webkit-touch-callout: none) {
+  .forecast-daily-container {
+    overflow: visible;
+    padding-bottom: 6px; /* extra safety space for last line */
+  }
+}
+
+
+>>>>>>> dev
 .fade-left,
 .fade-right {
   position: absolute;
@@ -103,29 +147,65 @@ ha-card {
 }
 
 .forecast {
+<<<<<<< HEAD
   height: 100%;
+=======
+  /* Allow this row to expand when parent is taller */
+  flex: 1 1 auto;
+  height: auto;
+>>>>>>> dev
   scroll-snap-type: x mandatory;
   scroll-padding-left: 16px;
   scroll-padding-right: 16px;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible; /* prevent vertical clipping of last line in Safari */
   display: flex;
+  align-items: stretch; /* stretch items so they can use additional height */
   justify-content: space-around;
   gap: var(--dynamic-gap, 20px); /* fallback */
+<<<<<<< HEAD
   padding: 14px 16px;
+=======
+  padding: 8px 16px 10px; /* slight bottom padding for descenders */
+}
+
+@supports (-webkit-touch-callout: none) {
+  .forecast {
+    padding-bottom: 12px; /* a touch more space on Safari */
+  }
+}
+
+/* Make custom element wrappers layout-transparent so their children
+   become direct flex items of the forecast container */
+.forecast wfe-daily-list,
+.forecast wfe-hourly-list {
+  display: contents;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .forecast {
+    /* Disable scroll snapping on iOS to prevent issues with touch scrolling */
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
+  }
+>>>>>>> dev
 }
 
 .forecast.daily {
   --min-gap: 30px;
   --icon-size: 40px;
   --icon-container-width: 40px;
+<<<<<<< HEAD
   --icon-container-height: auto;
+=======
+>>>>>>> dev
     /* Variables for the temperature bars in the daily forecast */
   --temp-bar-width: 8px;
   --temp-bar-min: -20;
   --temp-bar-max: 50;
 }
 
+<<<<<<< HEAD
 .forecast.daily .temperature-bar {
   width: var(--temp-bar-width);
   height: 50px;
@@ -142,12 +222,17 @@ ha-card {
   border-radius: 4px;
 }
 
+=======
+>>>>>>> dev
 .forecast.hourly {
   --min-gap: 16px;
   --icon-size: 25px;
   --icon-container-width: 25px;
+<<<<<<< HEAD
   /* --icon-container-height: 70px; */
 
+=======
+>>>>>>> dev
   /* Variables used for calculations in CSS rules of "forecast-item .icon-container" */
   --translate-content-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
   --translate-container-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
@@ -156,7 +241,13 @@ ha-card {
 }
 
 .forecast::-webkit-scrollbar {
+<<<<<<< HEAD
   height: 0px;
+=======
+  display: none;
+  height: 0;
+  width: 0;
+>>>>>>> dev
 }
 
 .forecast-item {
@@ -179,6 +270,14 @@ ha-card {
   margin-top: -4px;
   font-size: 13px;
   opacity: 0.3;
+<<<<<<< HEAD
+=======
+}
+
+/* In daily grid, avoid negative margin that can collapse track sizing in Safari */
+.forecast.daily .day-of-month {
+  margin-top: 0;
+>>>>>>> dev
 }
 
 .forecast .ampm,
@@ -207,6 +306,8 @@ ha-card {
 .forecast .precipitationprobability {
   opacity: 0.3;
   color: var(--state-climate-cool-color);
+  margin-bottom: 2px;
+  min-height: 1.15em;
 }
 
 .forecast .precipitation.active,
@@ -214,28 +315,87 @@ ha-card {
   opacity: 1.0;
 }
 
+<<<<<<< HEAD
+=======
+.forecast.daily .forecast-item {
+  display: grid;
+  /* rows: weekday, day-of-month, main area (icon+bar+templow), precipitation */
+  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;
+  row-gap: 4px;
+  align-content: start;
+}
+
+/* Ensure the first two text rows don't overlap and size to their content */
+.forecast.daily .forecast-item > .date,
+.forecast.daily .forecast-item > .day-of-month,
+.forecast.daily .forecast-item > .precipitation,
+.forecast.daily .forecast-item > .precipitationprobability {
+  min-height: auto;
+}
+
+.forecast.daily .forecast-item > .date { grid-row: 1; }
+.forecast.daily .forecast-item > .day-of-month { grid-row: 2; }
+.forecast.daily .forecast-item > .translate-container { grid-row: 3; }
+.forecast.daily .forecast-item > .precipitation,
+.forecast.daily .forecast-item > .precipitationprobability { grid-row: 4; }
+
+>>>>>>> dev
 .forecast.daily .precipitationprobability {
   display: none;
 }
 
 .forecast-item .translate-container {
   width: var(--icon-container-width);
+<<<<<<< HEAD
   /* height: var(--icon-container-height); */
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+=======
+  flex: 1 1 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* avoid centering which can clip bottom text in Safari */
+}
+
+/* Ensure daily main area has at least some height even when all rows are content-sized */
+.forecast.daily .forecast-item > .translate-container {
+  min-height: 80px;
+}
+
+.forecast.hourly .forecast-item .translate-container {
+  min-height: 80px;
+>>>>>>> dev
   justify-content: center;
 }
 
 .forecast-item .icon-container {
+<<<<<<< HEAD
   /* Vertically icon translation based on temperature for hourly forecast */
   --item-temp: 0; /* Correct value will be set in renderForecastItem() */
+=======
+  display: flex;
+  flex-direction: column;
+}
+
+.forecast.hourly .forecast-item .icon-container {
+  /* Vertically icon translation based on temperature for hourly forecast */
+  --item-temp: 0; /* Correct value will be set in render */
+>>>>>>> dev
   --max-translation: calc((var(--translate-container-height) - var(--translate-content-height)) / 2);
   --percentual-translation: calc((var(--item-temp) - var(--min-temp)) / (var(--max-temp) - var(--min-temp)));
   transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
 }
 
+<<<<<<< HEAD
+=======
+.forecast.daily .forecast-item .icon-container { flex: 0 0 auto; }
+.forecast.daily .temperature-bar { flex: 1 1 auto; }
+
+>>>>>>> dev
 .forecast-image-icon {
   display: flex;
   justify-content: center;
@@ -244,6 +404,26 @@ ha-card {
 .forecast-image-icon > * {
   width: var(--icon-size);
   height: var(--icon-size);
+<<<<<<< HEAD
+=======
+}
+
+.forecast.daily .temperature-bar {
+  flex: 1;
+  min-height: 40px;
+  width: var(--temp-bar-width);
+  margin: 8px auto;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+}
+
+.forecast.daily .temperature-bar-inner {
+  position: absolute;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+>>>>>>> dev
 }
 
 /* Styles from weather.ts */

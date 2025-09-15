@@ -16,7 +16,12 @@
     }
   },
   "scripts": {
+<<<<<<< HEAD
     "build": "parcel build",
+=======
+    "build": "parcel build --target module",
+    "build:all": "parcel build",
+>>>>>>> dev
     "debug": "parcel build --target debug",
     "watch": "parcel watch --target debug"
   },

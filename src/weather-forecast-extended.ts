@@ -1,4 +1,5 @@
 import type { PropertyValues } from "lit";
+<<<<<<< HEAD
 import { BooleanAttributePart, TemplateResult, LitElement, html, nothing } from "lit";
 import { state } from "lit/decorators";
 import { formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
@@ -8,10 +9,22 @@ import {
   getWeatherStateIcon,
   subscribeForecast
 } from "./weather";
+=======
+import { TemplateResult, LitElement, html, nothing } from "lit";
+import { state } from "lit/decorators";
+import { formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
+import type { ForecastEvent, WeatherEntity, ForecastAttribute } from "./weather";
+import { subscribeForecast } from "./weather";
+>>>>>>> dev
 import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { LovelaceGridOptions } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { WeatherImages } from './weather-images';
+<<<<<<< HEAD
+=======
+import "./components/wfe-daily-list";
+import "./components/wfe-hourly-list";
+>>>>>>> dev
 
 // Private types
 type ForecastType = "hourly" | "daily";
@@ -20,7 +33,6 @@ type SubscriptionMap = Record<ForecastType, Promise<() => void> | undefined>;
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
   @state() private _config: LovelaceCardConfig;
-  @state() private _header: string | typeof nothing;
   @state() private _entity: string;
   @state() private _name: string;
   @state() private _state: WeatherEntity;
@@ -102,7 +114,13 @@ export class WeatherForecastExtended extends LitElement {
       type,
       (event) => {
         if (type === "hourly") this._forecastHourlyEvent = event;
+<<<<<<< HEAD
         if (type === "daily")  this._forecastDailyEvent = event;
+=======
+        if (type === "daily") this._forecastDailyEvent = event;
+        this._calculateMinMaxTemps();
+         // Hourly translation dimensions recalculation happens inside wfe-hourly-list
+>>>>>>> dev
       }
     ).catch(e => {
       this._subscriptions[type] = undefined;
@@ -142,7 +160,9 @@ export class WeatherForecastExtended extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unsubscribeForecastEvents();
-    this._resizeObserver.disconnect();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
   }
 
   updated(changedProps: PropertyValues) {
@@ -158,20 +178,31 @@ export class WeatherForecastExtended extends LitElement {
     if (!this._resizeObserver) {
       const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
       const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
+<<<<<<< HEAD
       const hourly = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
+=======
+      const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
+>>>>>>> dev
 
       if (!card || (!daily && !hourly))
         return;
 
+<<<<<<< HEAD
       this._resizeObserver = new ResizeObserver(() => {
         this._updateGap();
         this._setTranslationContentHeight();
       });
+=======
+       this._resizeObserver = new ResizeObserver(() => {
+         this._updateGap();
+       });
+>>>>>>> dev
       this._resizeObserver.observe(card);
 
       // Call once for the initial size
       this._updateGap()
 
+<<<<<<< HEAD
       // Set translation content height for hourly forecast
       this._setTranslationContentHeight();
 
@@ -182,6 +213,9 @@ export class WeatherForecastExtended extends LitElement {
       console.log(this._state)
 
       console.log(this._hass);
+=======
+  // Hourly translation heights are handled inside wfe-hourly-list
+>>>>>>> dev
     }
   }
 
@@ -246,7 +280,16 @@ export class WeatherForecastExtended extends LitElement {
             ${showDaily
               ? html`
                 <div class="forecast daily">
+<<<<<<< HEAD
                   ${this._forecastDailyEvent.forecast.map((item) => this.renderForecastItem(item, "daily"))}
+=======
+                  <wfe-daily-list
+                    .hass=${this._hass}
+                    .forecast=${this._forecastDailyEvent!.forecast}
+                    .min=${this._dailyMinTemp}
+                    .max=${this._dailyMaxTemp}
+                  ></wfe-daily-list>
+>>>>>>> dev
                 </div>
               `
               : ""
@@ -258,8 +301,19 @@ export class WeatherForecastExtended extends LitElement {
             <div class="fade-right"></div>
             ${showHourly
               ? html`
+<<<<<<< HEAD
                 <div class="forecast hourly" style="--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};">
                   ${this._forecastHourlyEvent.forecast.map((item) => this.renderForecastItem(item, "hourly"))}
+=======
+                <div class="forecast hourly"
+                  style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined
+                    ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};`
+                    : nothing}>
+                  <wfe-hourly-list
+                    .hass=${this._hass}
+                    .forecast=${this._forecastHourlyEvent!.forecast}
+                  ></wfe-hourly-list>
+>>>>>>> dev
                 </div>
               `
               : ""
@@ -270,6 +324,7 @@ export class WeatherForecastExtended extends LitElement {
     `;
   }
 
+<<<<<<< HEAD
   renderForecastItem(item: ForecastAttribute, type: ForecastType): TemplateResult | typeof nothing {
     if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition))
     return nothing;
@@ -357,6 +412,33 @@ export class WeatherForecastExtended extends LitElement {
   // Private methods
   private _hasValidValue(item?: any): boolean {
     return typeof item !== "undefined" && item !== null;
+=======
+  // Private methods
+  private _calculateMinMaxTemps() {
+    if (this._forecastHourlyEvent?.forecast?.length) {
+      const temps = this._forecastHourlyEvent.forecast
+        .map(item => item.temperature)
+        .filter(temp => typeof temp === "number");
+      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
+      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
+    }
+
+    if (this._forecastDailyEvent?.forecast?.length) {
+      const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
+        [item.temperature, item.templow].filter(temp => typeof temp === "number")
+      );
+      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
+      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
+    }
+  }
+
+  private _getWeatherBgImage(state: string): string {
+    // this._state.state is a string like "snowy-rainy"
+    // The WeatherImages object keys are like "snowyrainy"
+    // So we need to remove the hyphens from the state string
+    const imageKey = state.replace(/-/g, '') as keyof typeof WeatherImages;
+    return WeatherImages[imageKey] ?? WeatherImages.partlycloudy; // Fallback
+>>>>>>> dev
   }
 
   private _getWeatherBgImage(state: string): string {
