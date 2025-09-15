@@ -1,4 +1,5 @@
 ha-card {
+  /* Auto-size by default, but also respect explicit heights from the parent */
   height: 100%;
   min-height: fit-content;
   display: flex;
@@ -45,12 +46,12 @@ ha-card {
 }
 
 .forecast-container {
-  flex: 1;
-  min-height: fit-content;
-  height: 100%;
+  /* Allow the forecast section to grow when the card is taller */
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px
+  gap: 4px;
+  flex: 1 1 auto;
 }
 
 .divider {
@@ -69,9 +70,8 @@ ha-card {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: fit-content;
-  flex: 1;
+  justify-content: flex-start;
+  flex: 1 1 auto; /* allow growth with card height */
   margin-top: 2px;
   /* iOS scroll improvements */
   -webkit-overflow-scrolling: touch;
@@ -79,15 +79,14 @@ ha-card {
   overscroll-behavior-x: contain;
 }
 
-/* @supports (hanging-punctuation: first)
-  and (font: -apple-system-body)
-  and (-webkit-appearance: none) {
-  .forecast-daily-container,
-  .forecast-hourly-container { */
-    /* Safari doesn't play well with 'min-height: fit-content' inside flex containers  */
-    /* min-height: -webkit-fill-available;
+/* Safari/WebKit: keep content fully visible without forcing fill-available heights */
+@supports (-webkit-touch-callout: none) {
+  .forecast-daily-container {
+    overflow: visible;
+    padding-bottom: 6px; /* extra safety space for last line */
   }
-} */
+}
+
 
 .fade-left,
 .fade-right {
@@ -118,18 +117,32 @@ ha-card {
 }
 
 .forecast {
-  flex: 1;
-  height: 100%;
-  min-height: fit-content;
+  /* Allow this row to expand when parent is taller */
+  flex: 1 1 auto;
+  height: auto;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 16px;
   scroll-padding-right: 16px;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible; /* prevent vertical clipping of last line in Safari */
   display: flex;
+  align-items: stretch; /* stretch items so they can use additional height */
   justify-content: space-around;
   gap: var(--dynamic-gap, 20px); /* fallback */
-  padding: 8px 16px;
+  padding: 8px 16px 10px; /* slight bottom padding for descenders */
+}
+
+@supports (-webkit-touch-callout: none) {
+  .forecast {
+    padding-bottom: 12px; /* a touch more space on Safari */
+  }
+}
+
+/* Make custom element wrappers layout-transparent so their children
+   become direct flex items of the forecast container */
+.forecast wfe-daily-list,
+.forecast wfe-hourly-list {
+  display: contents;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -144,7 +157,6 @@ ha-card {
   --min-gap: 30px;
   --icon-size: 40px;
   --icon-container-width: 40px;
-  --icon-container-height: auto;
     /* Variables for the temperature bars in the daily forecast */
   --temp-bar-width: 8px;
   --temp-bar-min: -20;
@@ -190,6 +202,11 @@ ha-card {
   opacity: 0.3;
 }
 
+/* In daily grid, avoid negative margin that can collapse track sizing in Safari */
+.forecast.daily .day-of-month {
+  margin-top: 0;
+}
+
 .forecast .ampm,
 .forecast .ampm-hidden {
   min-height: 5px;
@@ -216,6 +233,8 @@ ha-card {
 .forecast .precipitationprobability {
   opacity: 0.3;
   color: var(--state-climate-cool-color);
+  margin-bottom: 2px;
+  min-height: 1.15em;
 }
 
 .forecast .precipitation.active,
@@ -223,37 +242,67 @@ ha-card {
   opacity: 1.0;
 }
 
+.forecast.daily .forecast-item {
+  display: grid;
+  /* rows: weekday, day-of-month, main area (icon+bar+templow), precipitation */
+  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;
+  row-gap: 4px;
+  align-content: start;
+}
+
+/* Ensure the first two text rows don't overlap and size to their content */
+.forecast.daily .forecast-item > .date,
+.forecast.daily .forecast-item > .day-of-month,
+.forecast.daily .forecast-item > .precipitation,
+.forecast.daily .forecast-item > .precipitationprobability {
+  min-height: auto;
+}
+
+.forecast.daily .forecast-item > .date { grid-row: 1; }
+.forecast.daily .forecast-item > .day-of-month { grid-row: 2; }
+.forecast.daily .forecast-item > .translate-container { grid-row: 3; }
+.forecast.daily .forecast-item > .precipitation,
+.forecast.daily .forecast-item > .precipitationprobability { grid-row: 4; }
+
 .forecast.daily .precipitationprobability {
   display: none;
 }
 
 .forecast-item .translate-container {
   width: var(--icon-container-width);
-  /* height: var(--icon-container-height); */
-  flex: 1;
+  flex: 1 1 auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* avoid centering which can clip bottom text in Safari */
+}
+
+/* Ensure daily main area has at least some height even when all rows are content-sized */
+.forecast.daily .forecast-item > .translate-container {
+  min-height: 80px;
 }
 
 .forecast.hourly .forecast-item .translate-container {
   min-height: 80px;
+  justify-content: center;
 }
 
 .forecast-item .icon-container {
-  /* Vertically icon translation based on temperature for hourly forecast */
-  --item-temp: 0; /* Correct value will be set in renderForecastItem() */
-  --max-translation: calc((var(--translate-container-height) - var(--translate-content-height)) / 2);
-  --percentual-translation: calc((var(--item-temp) - var(--min-temp)) / (var(--max-temp) - var(--min-temp)));
-  transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
   display: flex;
   flex-direction: column;
 }
 
-.forecast.daily .forecast-item .icon-container {
-  flex: 1;
+.forecast.hourly .forecast-item .icon-container {
+  /* Vertically icon translation based on temperature for hourly forecast */
+  --item-temp: 0; /* Correct value will be set in render */
+  --max-translation: calc((var(--translate-container-height) - var(--translate-content-height)) / 2);
+  --percentual-translation: calc((var(--item-temp) - var(--min-temp)) / (var(--max-temp) - var(--min-temp)));
+  transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
 }
+
+.forecast.daily .forecast-item .icon-container { flex: 0 0 auto; }
+.forecast.daily .temperature-bar { flex: 1 1 auto; }
 
 .forecast-image-icon {
   display: flex;
