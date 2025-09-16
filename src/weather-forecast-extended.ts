@@ -1,8 +1,7 @@
 import type { PropertyValues } from "lit";
-import { TemplateResult, LitElement, html, nothing } from "lit";
+import { LitElement, html, nothing } from "lit";
 import { state } from "lit/decorators";
-import { formatHour, formatDayPeriod, formatDateWeekdayShort, formatDateDayTwoDigit, isNewDay, useAmPm } from "./date-time";
-import type { ForecastEvent, WeatherEntity, ForecastAttribute } from "./weather";
+import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
 import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { LovelaceGridOptions } from "./types";
