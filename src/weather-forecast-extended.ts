@@ -449,7 +449,7 @@ export class WeatherForecastExtended extends LitElement {
         this._startMomentum(container, velocity);
       } else {
         container.classList.remove("dragging");
-        this._stopMomentum();
+        this._alignToNearestItem(container);
       }
     };
 
@@ -459,11 +459,15 @@ export class WeatherForecastExtended extends LitElement {
     container.addEventListener("pointercancel", onPointerEnd);
   }
 
-  private _stopMomentum() {
+  private _cancelMomentumFrame() {
     if (this._momentumFrame !== undefined) {
       cancelAnimationFrame(this._momentumFrame);
       this._momentumFrame = undefined;
     }
+  }
+
+  private _stopMomentum() {
+    this._cancelMomentumFrame();
     if (this._momentumContainer) {
       this._momentumContainer.classList.remove("momentum");
       this._momentumContainer.classList.remove("dragging");
@@ -511,14 +515,14 @@ export class WeatherForecastExtended extends LitElement {
 
       if (container.scrollLeft <= 0 || container.scrollLeft >= maxScrollable) {
         container.scrollLeft = Math.max(0, Math.min(container.scrollLeft, maxScrollable));
-        this._stopMomentum();
+        this._alignToNearestItem(container);
         return;
       }
 
       const deceleration = 0.00375; // px per ms^2
       const deltaV = deceleration * dt;
       if (Math.abs(velocity) <= deltaV) {
-        this._stopMomentum();
+        this._alignToNearestItem(container);
         return;
       }
 
@@ -528,5 +532,70 @@ export class WeatherForecastExtended extends LitElement {
     };
 
     this._momentumFrame = requestAnimationFrame(step);
+  }
+
+  private _alignToNearestItem(container: HTMLElement) {
+    this._cancelMomentumFrame();
+    this._momentumContainer = container;
+
+    const items = Array.from(container.querySelectorAll<HTMLElement>(".forecast-item"));
+    if (!items.length) {
+      this._stopMomentum();
+      return;
+    }
+
+    const style = getComputedStyle(container);
+    const paddingLeft = parseFloat(style.paddingLeft || "0");
+    const containerRect = container.getBoundingClientRect();
+    const alignStart = containerRect.left + paddingLeft;
+
+    let closest: HTMLElement | null = null;
+    let minDistance = Number.POSITIVE_INFINITY;
+
+    for (const item of items) {
+      const rect = item.getBoundingClientRect();
+      const distance = Math.abs(rect.left - alignStart);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closest = item;
+      }
+    }
+
+    if (!closest) {
+      this._stopMomentum();
+      return;
+    }
+
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const target = container.scrollLeft + (closest.getBoundingClientRect().left - alignStart);
+    const clampedTarget = Math.max(0, Math.min(target, maxScroll));
+
+    if (Math.abs(container.scrollLeft - clampedTarget) <= 0.5) {
+      container.scrollLeft = clampedTarget;
+      this._stopMomentum();
+      return;
+    }
+
+    container.classList.add("momentum");
+    container.classList.remove("dragging");
+
+    const settle = () => {
+      if (!container.isConnected) {
+        this._stopMomentum();
+        return;
+      }
+
+      const diff = Math.abs(container.scrollLeft - clampedTarget);
+      if (diff <= 0.5) {
+        container.scrollLeft = clampedTarget;
+        this._stopMomentum();
+        return;
+      }
+
+      this._momentumFrame = requestAnimationFrame(settle);
+    };
+
+    container.scrollTo({ left: clampedTarget, behavior: "smooth" });
+    this._momentumFrame = requestAnimationFrame(settle);
   }
 }
