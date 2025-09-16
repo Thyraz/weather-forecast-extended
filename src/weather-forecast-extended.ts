@@ -39,12 +39,20 @@ export class WeatherForecastExtended extends LitElement {
     pointerId: number | null;
     startX: number;
     scrollLeft: number;
+    lastTime: number;
+    lastScrollLeft: number;
+    velocity: number;
   } = {
     active: false,
     pointerId: null,
     startX: 0,
     scrollLeft: 0,
+    lastTime: 0,
+    lastScrollLeft: 0,
+    velocity: 0,
   };
+  private _momentumFrame?: number;
+  private _momentumContainer?: HTMLElement;
 
   // Called by HA
   setConfig(config: LovelaceCardConfig) {
@@ -155,6 +163,7 @@ export class WeatherForecastExtended extends LitElement {
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
+    this._stopMomentum();
   }
 
   updated(changedProps: PropertyValues) {
@@ -353,10 +362,22 @@ export class WeatherForecastExtended extends LitElement {
     container.dataset.dragInit = "true";
 
     const onPointerDown = (ev: PointerEvent) => {
-      if ((ev.button !== undefined && ev.button !== 0) || !container.isConnected) {
+      if (!container.isConnected) {
+        this._stopMomentum();
+        return;
+      }
+
+      this._stopMomentum();
+
+      if (ev.button !== undefined && ev.button !== 0) {
         return;
       }
       if (ev.pointerType !== "mouse" && ev.pointerType !== "pen") {
+        return;
+      }
+
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (maxScroll <= 0) {
         return;
       }
 
@@ -365,6 +386,9 @@ export class WeatherForecastExtended extends LitElement {
         pointerId: ev.pointerId,
         startX: ev.clientX,
         scrollLeft: container.scrollLeft,
+        lastTime: ev.timeStamp,
+        lastScrollLeft: container.scrollLeft,
+        velocity: 0,
       };
 
       try {
@@ -374,6 +398,7 @@ export class WeatherForecastExtended extends LitElement {
       }
 
       container.classList.add("grabbing");
+      container.classList.add("dragging");
     };
 
     const onPointerMove = (ev: PointerEvent) => {
@@ -383,6 +408,13 @@ export class WeatherForecastExtended extends LitElement {
 
       const deltaX = ev.clientX - this._dragState.startX;
       container.scrollLeft = this._dragState.scrollLeft - deltaX;
+      const dt = ev.timeStamp - this._dragState.lastTime;
+      if (dt > 0) {
+        const velocity = (container.scrollLeft - this._dragState.lastScrollLeft) / dt;
+        this._dragState.velocity = velocity;
+      }
+      this._dragState.lastTime = ev.timeStamp;
+      this._dragState.lastScrollLeft = container.scrollLeft;
       ev.preventDefault();
     };
 
@@ -391,11 +423,16 @@ export class WeatherForecastExtended extends LitElement {
         return;
       }
 
+      const velocity = this._dragState.velocity;
+
       this._dragState = {
         active: false,
         pointerId: null,
         startX: 0,
         scrollLeft: 0,
+        lastTime: 0,
+        lastScrollLeft: 0,
+        velocity: 0,
       };
 
       try {
@@ -407,11 +444,89 @@ export class WeatherForecastExtended extends LitElement {
       }
 
       container.classList.remove("grabbing");
+      const threshold = 0.005;
+      if (Math.abs(velocity) > threshold) {
+        this._startMomentum(container, velocity);
+      } else {
+        container.classList.remove("dragging");
+        this._stopMomentum();
+      }
     };
 
     container.addEventListener("pointerdown", onPointerDown);
     container.addEventListener("pointermove", onPointerMove, { passive: false });
     container.addEventListener("pointerup", onPointerEnd);
     container.addEventListener("pointercancel", onPointerEnd);
+  }
+
+  private _stopMomentum() {
+    if (this._momentumFrame !== undefined) {
+      cancelAnimationFrame(this._momentumFrame);
+      this._momentumFrame = undefined;
+    }
+    if (this._momentumContainer) {
+      this._momentumContainer.classList.remove("momentum");
+      this._momentumContainer.classList.remove("dragging");
+      this._momentumContainer = undefined;
+    }
+  }
+
+  private _startMomentum(container: HTMLElement, initialVelocity: number) {
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll <= 0) {
+      container.classList.remove("dragging");
+      return;
+    }
+
+    this._stopMomentum();
+
+    let velocity = initialVelocity;
+    const maxVelocity = 5;
+    if (Math.abs(velocity) > maxVelocity) {
+      velocity = Math.sign(velocity) * maxVelocity;
+    }
+    let lastTimestamp: number | null = null;
+
+    container.classList.remove("dragging");
+    container.classList.add("momentum");
+    this._momentumContainer = container;
+
+    const step = (timestamp: number) => {
+      if (!container.isConnected) {
+        this._stopMomentum();
+        return;
+      }
+
+      if (lastTimestamp === null) {
+        lastTimestamp = timestamp;
+        this._momentumFrame = requestAnimationFrame(step);
+        return;
+      }
+
+      const dt = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      container.scrollLeft += velocity * dt;
+      const maxScrollable = container.scrollWidth - container.clientWidth;
+
+      if (container.scrollLeft <= 0 || container.scrollLeft >= maxScrollable) {
+        container.scrollLeft = Math.max(0, Math.min(container.scrollLeft, maxScrollable));
+        this._stopMomentum();
+        return;
+      }
+
+      const deceleration = 0.00375; // px per ms^2
+      const deltaV = deceleration * dt;
+      if (Math.abs(velocity) <= deltaV) {
+        this._stopMomentum();
+        return;
+      }
+
+      velocity -= Math.sign(velocity) * deltaV;
+
+      this._momentumFrame = requestAnimationFrame(step);
+    };
+
+    this._momentumFrame = requestAnimationFrame(step);
   }
 }

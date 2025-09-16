@@ -194,6 +194,11 @@ ha-card {
   -webkit-user-select: none;
 }
 
+.forecast.hourly.dragging,
+.forecast.hourly.momentum {
+  scroll-snap-type: none;
+}
+
 .forecast.hourly.grabbing {
   cursor: grabbing;
 }
