@@ -34,6 +34,17 @@ export class WeatherForecastExtended extends LitElement {
   private _dailyMinTemp?: number;
   private _dailyMaxTemp?: number;
   private _hass;
+  private _dragState: {
+    active: boolean;
+    pointerId: number | null;
+    startX: number;
+    scrollLeft: number;
+  } = {
+    active: false,
+    pointerId: null,
+    startX: 0,
+    scrollLeft: 0,
+  };
 
   // Called by HA
   setConfig(config: LovelaceCardConfig) {
@@ -156,10 +167,15 @@ export class WeatherForecastExtended extends LitElement {
       this._subscribeForecastEvents();
     }
 
+    const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
+    const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
+    const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
+
+    if (hourly) {
+      this._initDragScroll(hourly);
+    }
+
     if (!this._resizeObserver) {
-      const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
-      const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
-      const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
 
       if (!card || (!daily && !hourly))
         return;
@@ -328,5 +344,74 @@ export class WeatherForecastExtended extends LitElement {
     });
 
     this._oldContainerWidth = containerWidth;
+  }
+
+  private _initDragScroll(container: HTMLElement) {
+    if (container.dataset.dragInit === "true") {
+      return;
+    }
+    container.dataset.dragInit = "true";
+
+    const onPointerDown = (ev: PointerEvent) => {
+      if ((ev.button !== undefined && ev.button !== 0) || !container.isConnected) {
+        return;
+      }
+      if (ev.pointerType !== "mouse" && ev.pointerType !== "pen") {
+        return;
+      }
+
+      this._dragState = {
+        active: true,
+        pointerId: ev.pointerId,
+        startX: ev.clientX,
+        scrollLeft: container.scrollLeft,
+      };
+
+      try {
+        container.setPointerCapture(ev.pointerId);
+      } catch (err) {
+        // Some browsers may throw if capture fails; ignore.
+      }
+
+      container.classList.add("grabbing");
+    };
+
+    const onPointerMove = (ev: PointerEvent) => {
+      if (!this._dragState.active || ev.pointerId !== this._dragState.pointerId) {
+        return;
+      }
+
+      const deltaX = ev.clientX - this._dragState.startX;
+      container.scrollLeft = this._dragState.scrollLeft - deltaX;
+      ev.preventDefault();
+    };
+
+    const onPointerEnd = (ev: PointerEvent) => {
+      if (ev.pointerId !== this._dragState.pointerId) {
+        return;
+      }
+
+      this._dragState = {
+        active: false,
+        pointerId: null,
+        startX: 0,
+        scrollLeft: 0,
+      };
+
+      try {
+        if (container.hasPointerCapture?.(ev.pointerId)) {
+          container.releasePointerCapture(ev.pointerId);
+        }
+      } catch (err) {
+        // Ignore release errors; not critical.
+      }
+
+      container.classList.remove("grabbing");
+    };
+
+    container.addEventListener("pointerdown", onPointerDown);
+    container.addEventListener("pointermove", onPointerMove, { passive: false });
+    container.addEventListener("pointerup", onPointerEnd);
+    container.addEventListener("pointercancel", onPointerEnd);
   }
 }

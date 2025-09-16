@@ -189,6 +189,13 @@ ha-card {
   --translate-container-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
   --min-temp: -20; /* Default value, will be set in render() */
   --max-temp: 50; /* Default value, will be set in render() */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.forecast.hourly.grabbing {
+  cursor: grabbing;
 }
 
 .forecast::-webkit-scrollbar {
