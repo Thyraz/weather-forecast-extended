@@ -9,6 +9,7 @@ import { styles } from "./weather-forecast-extended.styles";
 import { WeatherImages } from './weather-images';
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
+import { enableMomentumScroll } from "./utils/momentum-scroll";
 
 // Private types
 type ForecastType = "hourly" | "daily";
@@ -34,25 +35,8 @@ export class WeatherForecastExtended extends LitElement {
   private _dailyMinTemp?: number;
   private _dailyMaxTemp?: number;
   private _hass;
-  private _dragState: {
-    active: boolean;
-    pointerId: number | null;
-    startX: number;
-    scrollLeft: number;
-    lastTime: number;
-    lastScrollLeft: number;
-    velocity: number;
-  } = {
-    active: false,
-    pointerId: null,
-    startX: 0,
-    scrollLeft: 0,
-    lastTime: 0,
-    lastScrollLeft: 0,
-    velocity: 0,
-  };
-  private _momentumFrame?: number;
-  private _momentumContainer?: HTMLElement;
+  private _hourlyMomentumCleanup?: () => void;
+  private _hourlyMomentumElement?: HTMLElement;
 
   // Called by HA
   setConfig(config: LovelaceCardConfig) {
@@ -163,7 +147,11 @@ export class WeatherForecastExtended extends LitElement {
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
-    this._stopMomentum();
+    if (this._hourlyMomentumCleanup) {
+      this._hourlyMomentumCleanup();
+      this._hourlyMomentumCleanup = undefined;
+      this._hourlyMomentumElement = undefined;
+    }
   }
 
   updated(changedProps: PropertyValues) {
@@ -182,6 +170,10 @@ export class WeatherForecastExtended extends LitElement {
 
     if (hourly) {
       this._initDragScroll(hourly);
+    } else if (this._hourlyMomentumCleanup) {
+      this._hourlyMomentumCleanup();
+      this._hourlyMomentumCleanup = undefined;
+      this._hourlyMomentumElement = undefined;
     }
 
     if (!this._resizeObserver) {
@@ -356,246 +348,18 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   private _initDragScroll(container: HTMLElement) {
-    if (container.dataset.dragInit === "true") {
-      return;
-    }
-    container.dataset.dragInit = "true";
-
-    const onPointerDown = (ev: PointerEvent) => {
-      if (!container.isConnected) {
-        this._stopMomentum();
-        return;
-      }
-
-      this._stopMomentum();
-
-      if (ev.button !== undefined && ev.button !== 0) {
-        return;
-      }
-      if (ev.pointerType !== "mouse" && ev.pointerType !== "pen") {
-        return;
-      }
-
-      const maxScroll = container.scrollWidth - container.clientWidth;
-      if (maxScroll <= 0) {
-        return;
-      }
-
-      this._dragState = {
-        active: true,
-        pointerId: ev.pointerId,
-        startX: ev.clientX,
-        scrollLeft: container.scrollLeft,
-        lastTime: ev.timeStamp,
-        lastScrollLeft: container.scrollLeft,
-        velocity: 0,
-      };
-
-      try {
-        container.setPointerCapture(ev.pointerId);
-      } catch (err) {
-        // Some browsers may throw if capture fails; ignore.
-      }
-
-      container.classList.add("grabbing");
-      container.classList.add("dragging");
-    };
-
-    const onPointerMove = (ev: PointerEvent) => {
-      if (!this._dragState.active || ev.pointerId !== this._dragState.pointerId) {
-        return;
-      }
-
-      const deltaX = ev.clientX - this._dragState.startX;
-      container.scrollLeft = this._dragState.scrollLeft - deltaX;
-      const dt = ev.timeStamp - this._dragState.lastTime;
-      if (dt > 0) {
-        const velocity = (container.scrollLeft - this._dragState.lastScrollLeft) / dt;
-        this._dragState.velocity = velocity;
-      }
-      this._dragState.lastTime = ev.timeStamp;
-      this._dragState.lastScrollLeft = container.scrollLeft;
-      ev.preventDefault();
-    };
-
-    const onPointerEnd = (ev: PointerEvent) => {
-      if (ev.pointerId !== this._dragState.pointerId) {
-        return;
-      }
-
-      const velocity = this._dragState.velocity;
-
-      this._dragState = {
-        active: false,
-        pointerId: null,
-        startX: 0,
-        scrollLeft: 0,
-        lastTime: 0,
-        lastScrollLeft: 0,
-        velocity: 0,
-      };
-
-      try {
-        if (container.hasPointerCapture?.(ev.pointerId)) {
-          container.releasePointerCapture(ev.pointerId);
-        }
-      } catch (err) {
-        // Ignore release errors; not critical.
-      }
-
-      container.classList.remove("grabbing");
-      const threshold = 0.005;
-      if (Math.abs(velocity) > threshold) {
-        this._startMomentum(container, velocity);
-      } else {
-        container.classList.remove("dragging");
-        this._alignToNearestItem(container);
-      }
-    };
-
-    container.addEventListener("pointerdown", onPointerDown);
-    container.addEventListener("pointermove", onPointerMove, { passive: false });
-    container.addEventListener("pointerup", onPointerEnd);
-    container.addEventListener("pointercancel", onPointerEnd);
-  }
-
-  private _cancelMomentumFrame() {
-    if (this._momentumFrame !== undefined) {
-      cancelAnimationFrame(this._momentumFrame);
-      this._momentumFrame = undefined;
-    }
-  }
-
-  private _stopMomentum() {
-    this._cancelMomentumFrame();
-    if (this._momentumContainer) {
-      this._momentumContainer.classList.remove("momentum");
-      this._momentumContainer.classList.remove("dragging");
-      this._momentumContainer = undefined;
-    }
-  }
-
-  private _startMomentum(container: HTMLElement, initialVelocity: number) {
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll <= 0) {
-      container.classList.remove("dragging");
+    if (this._hourlyMomentumElement === container) {
       return;
     }
 
-    this._stopMomentum();
-
-    let velocity = initialVelocity;
-    const maxVelocity = 5;
-    if (Math.abs(velocity) > maxVelocity) {
-      velocity = Math.sign(velocity) * maxVelocity;
-    }
-    let lastTimestamp: number | null = null;
-
-    container.classList.remove("dragging");
-    container.classList.add("momentum");
-    this._momentumContainer = container;
-
-    const step = (timestamp: number) => {
-      if (!container.isConnected) {
-        this._stopMomentum();
-        return;
-      }
-
-      if (lastTimestamp === null) {
-        lastTimestamp = timestamp;
-        this._momentumFrame = requestAnimationFrame(step);
-        return;
-      }
-
-      const dt = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-
-      container.scrollLeft += velocity * dt;
-      const maxScrollable = container.scrollWidth - container.clientWidth;
-
-      if (container.scrollLeft <= 0 || container.scrollLeft >= maxScrollable) {
-        container.scrollLeft = Math.max(0, Math.min(container.scrollLeft, maxScrollable));
-        this._alignToNearestItem(container);
-        return;
-      }
-
-      const deceleration = 0.00375; // px per ms^2
-      const deltaV = deceleration * dt;
-      if (Math.abs(velocity) <= deltaV) {
-        this._alignToNearestItem(container);
-        return;
-      }
-
-      velocity -= Math.sign(velocity) * deltaV;
-
-      this._momentumFrame = requestAnimationFrame(step);
-    };
-
-    this._momentumFrame = requestAnimationFrame(step);
-  }
-
-  private _alignToNearestItem(container: HTMLElement) {
-    this._cancelMomentumFrame();
-    this._momentumContainer = container;
-
-    const items = Array.from(container.querySelectorAll<HTMLElement>(".forecast-item"));
-    if (!items.length) {
-      this._stopMomentum();
-      return;
+    if (this._hourlyMomentumCleanup) {
+      this._hourlyMomentumCleanup();
+      this._hourlyMomentumCleanup = undefined;
     }
 
-    const style = getComputedStyle(container);
-    const paddingLeft = parseFloat(style.paddingLeft || "0");
-    const containerRect = container.getBoundingClientRect();
-    const alignStart = containerRect.left + paddingLeft;
-
-    let closest: HTMLElement | null = null;
-    let minDistance = Number.POSITIVE_INFINITY;
-
-    for (const item of items) {
-      const rect = item.getBoundingClientRect();
-      const distance = Math.abs(rect.left - alignStart);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closest = item;
-      }
-    }
-
-    if (!closest) {
-      this._stopMomentum();
-      return;
-    }
-
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    const target = container.scrollLeft + (closest.getBoundingClientRect().left - alignStart);
-    const clampedTarget = Math.max(0, Math.min(target, maxScroll));
-
-    if (Math.abs(container.scrollLeft - clampedTarget) <= 0.5) {
-      container.scrollLeft = clampedTarget;
-      this._stopMomentum();
-      return;
-    }
-
-    container.classList.add("momentum");
-    container.classList.remove("dragging");
-
-    const settle = () => {
-      if (!container.isConnected) {
-        this._stopMomentum();
-        return;
-      }
-
-      const diff = Math.abs(container.scrollLeft - clampedTarget);
-      if (diff <= 0.5) {
-        container.scrollLeft = clampedTarget;
-        this._stopMomentum();
-        return;
-      }
-
-      this._momentumFrame = requestAnimationFrame(settle);
-    };
-
-    container.scrollTo({ left: clampedTarget, behavior: "smooth" });
-    this._momentumFrame = requestAnimationFrame(settle);
+    this._hourlyMomentumElement = container;
+    this._hourlyMomentumCleanup = enableMomentumScroll(container, {
+      snapSelector: ".forecast-item",
+    });
   }
 }
