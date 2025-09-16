@@ -21,7 +21,7 @@ ha-card {
 
 .weather .condition {
     font-size: var(--ha-font-size-xl);
-    line-height: normal;
+    line-height: calc( 10px + var(--ha-font-size-xl) );
     background-color: rgba(0, 0, 0, 0.3);
     width: fit-content;
     margin-top: 10px;
@@ -33,7 +33,7 @@ ha-card {
 
 .weather .temp {
     font-size: var(--ha-font-size-5xl);
-    line-height: normal;
+    line-height: calc( 10px + var(--ha-font-size-5xl) );
     font-weight: bolder;
     background-color: rgba(0, 0, 0, 0.3);
     width: fit-content;
