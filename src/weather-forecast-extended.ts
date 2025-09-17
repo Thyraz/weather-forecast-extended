@@ -156,6 +156,14 @@ export class WeatherForecastExtended extends LitElement {
 
   updated(changedProps: PropertyValues) {
      super.updated(changedProps);
+
+    const forecastHourlyChanged = changedProps.has("_forecastHourlyEvent");
+    const forecastDailyChanged = changedProps.has("_forecastDailyEvent");
+
+    if (forecastHourlyChanged || forecastDailyChanged) {
+      this._calculateMinMaxTemps();
+    }
+
     if (!this._config || !this._hass) {
       return;
     }
@@ -204,24 +212,6 @@ export class WeatherForecastExtended extends LitElement {
           ${this._name} not found.
         </hui-warning>
       `;
-    }
-
-    // Calculate min/max temperatures for hourly forecast vertical icon translation
-    if (this._forecastHourlyEvent?.forecast?.length) {
-      const temps = this._forecastHourlyEvent.forecast
-        .map(item => item.temperature)
-        .filter(temp => typeof temp === "number");
-      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
-      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
-    }
-
-    // Calculate min/max temperatures for daily forecast temperature bar chart
-    if (this._forecastDailyEvent?.forecast?.length) {
-      const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
-        [item.temperature, item.templow].filter(temp => typeof temp === "number")
-      );
-      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
-      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
     }
 
     if (this._status === "unavailable") {
@@ -291,21 +281,31 @@ export class WeatherForecastExtended extends LitElement {
 
   // Private methods
   private _calculateMinMaxTemps() {
+    let hourlyMin: number | undefined;
+    let hourlyMax: number | undefined;
+    let dailyMin: number | undefined;
+    let dailyMax: number | undefined;
+
     if (this._forecastHourlyEvent?.forecast?.length) {
       const temps = this._forecastHourlyEvent.forecast
         .map(item => item.temperature)
         .filter(temp => typeof temp === "number");
-      this._hourlyMinTemp = temps.length ? Math.min(...temps) : undefined;
-      this._hourlyMaxTemp = temps.length ? Math.max(...temps) : undefined;
+      hourlyMin = temps.length ? Math.min(...temps) : undefined;
+      hourlyMax = temps.length ? Math.max(...temps) : undefined;
     }
 
     if (this._forecastDailyEvent?.forecast?.length) {
       const dailyTemps = this._forecastDailyEvent.forecast.flatMap(item =>
         [item.temperature, item.templow].filter(temp => typeof temp === "number")
       );
-      this._dailyMinTemp = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
-      this._dailyMaxTemp = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
+      dailyMin = dailyTemps.length ? Math.min(...dailyTemps) : undefined;
+      dailyMax = dailyTemps.length ? Math.max(...dailyTemps) : undefined;
     }
+
+    this._hourlyMinTemp = hourlyMin;
+    this._hourlyMaxTemp = hourlyMax;
+    this._dailyMinTemp = dailyMin;
+    this._dailyMaxTemp = dailyMax;
   }
 
   private _getWeatherBgImage(state: string): string {
