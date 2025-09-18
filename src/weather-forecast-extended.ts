@@ -36,8 +36,8 @@ export class WeatherForecastExtended extends LitElement {
   private _dailyMinTemp?: number;
   private _dailyMaxTemp?: number;
   private _hass;
-  private _hourlyMomentumCleanup?: () => void;
-  private _hourlyMomentumElement?: HTMLElement;
+  private _momentumCleanup: Partial<Record<ForecastType, () => void>> = {};
+  private _momentumElement: Partial<Record<ForecastType, HTMLElement>> = {};
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
@@ -172,11 +172,9 @@ export class WeatherForecastExtended extends LitElement {
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
-    if (this._hourlyMomentumCleanup) {
-      this._hourlyMomentumCleanup();
-      this._hourlyMomentumCleanup = undefined;
-      this._hourlyMomentumElement = undefined;
-    }
+    Object.values(this._momentumCleanup).forEach(cleanup => cleanup?.());
+    this._momentumCleanup = {};
+    this._momentumElement = {};
   }
 
   updated(changedProps: PropertyValues) {
@@ -201,12 +199,16 @@ export class WeatherForecastExtended extends LitElement {
     const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
     const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
 
+    if (daily) {
+      this._initDragScroll("daily", daily);
+    } else {
+      this._teardownDragScroll("daily");
+    }
+
     if (hourly) {
-      this._initDragScroll(hourly);
-    } else if (this._hourlyMomentumCleanup) {
-      this._hourlyMomentumCleanup();
-      this._hourlyMomentumCleanup = undefined;
-      this._hourlyMomentumElement = undefined;
+      this._initDragScroll("hourly", hourly);
+    } else {
+      this._teardownDragScroll("hourly");
     }
 
     if (!this._resizeObserver) {
@@ -379,18 +381,23 @@ export class WeatherForecastExtended extends LitElement {
     this._oldContainerWidth = containerWidth;
   }
 
-  private _initDragScroll(container: HTMLElement) {
-    if (this._hourlyMomentumElement === container) {
+  private _teardownDragScroll(type: ForecastType) {
+    if (this._momentumCleanup[type]) {
+      this._momentumCleanup[type]!();
+      delete this._momentumCleanup[type];
+      delete this._momentumElement[type];
+    }
+  }
+
+  private _initDragScroll(type: ForecastType, container: HTMLElement) {
+    if (this._momentumElement[type] === container) {
       return;
     }
 
-    if (this._hourlyMomentumCleanup) {
-      this._hourlyMomentumCleanup();
-      this._hourlyMomentumCleanup = undefined;
-    }
+    this._teardownDragScroll(type);
 
-    this._hourlyMomentumElement = container;
-    this._hourlyMomentumCleanup = enableMomentumScroll(container, {
+    this._momentumElement[type] = container;
+    this._momentumCleanup[type] = enableMomentumScroll(container, {
       snapSelector: ".forecast-item",
     });
   }

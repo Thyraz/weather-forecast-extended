@@ -6,6 +6,8 @@ interface DragState {
   lastTime: number;
   lastScrollLeft: number;
   velocity: number;
+  hasMoved: boolean;
+  captured: boolean;
 }
 
 interface MomentumOptions {
@@ -31,6 +33,8 @@ const DEFAULT_OPTIONS: MomentumOptions = {
 
 const stateMap = new WeakMap<HTMLElement, ContainerState>();
 
+const DRAG_ACTIVATION_THRESHOLD = 4;
+
 const createDragState = (): DragState => ({
   active: false,
   pointerId: null,
@@ -39,6 +43,8 @@ const createDragState = (): DragState => ({
   lastTime: 0,
   lastScrollLeft: 0,
   velocity: 0,
+  hasMoved: false,
+  captured: false,
 });
 
 export const enableMomentumScroll = (
@@ -236,16 +242,11 @@ export const enableMomentumScroll = (
       lastTime: ev.timeStamp,
       lastScrollLeft: container.scrollLeft,
       velocity: 0,
+      hasMoved: false,
+      captured: false,
     };
 
-    try {
-      container.setPointerCapture(ev.pointerId);
-    } catch (err) {
-      /* Ignore pointer capture issues */
-    }
-
     container.classList.add("grabbing");
-    container.classList.add("dragging");
   };
 
   const onPointerMove = (ev: PointerEvent) => {
@@ -254,6 +255,23 @@ export const enableMomentumScroll = (
     }
 
     const deltaX = ev.clientX - state.drag.startX;
+    if (!state.drag.hasMoved && Math.abs(deltaX) > DRAG_ACTIVATION_THRESHOLD) {
+      state.drag.hasMoved = true;
+      state.drag.lastTime = ev.timeStamp;
+      state.drag.lastScrollLeft = container.scrollLeft;
+      container.classList.add("dragging");
+      try {
+        container.setPointerCapture(ev.pointerId);
+        state.drag.captured = true;
+      } catch (err) {
+        state.drag.captured = false;
+      }
+    }
+
+    if (!state.drag.hasMoved) {
+      return;
+    }
+
     container.scrollLeft = state.drag.scrollLeft - deltaX;
     const dt = ev.timeStamp - state.drag.lastTime;
     if (dt > 0) {
@@ -270,18 +288,23 @@ export const enableMomentumScroll = (
       return;
     }
 
-    const velocity = state.drag.velocity;
+    const { velocity, captured, pointerId, hasMoved } = state.drag;
     resetDragState();
 
     try {
-      if (container.hasPointerCapture?.(ev.pointerId)) {
-        container.releasePointerCapture(ev.pointerId);
+      if (captured && pointerId !== null && container.hasPointerCapture?.(pointerId)) {
+        container.releasePointerCapture(pointerId);
       }
     } catch (err) {
       /* Ignore release errors */
     }
 
     container.classList.remove("grabbing");
+    if (!hasMoved) {
+      container.classList.remove("dragging");
+      return;
+    }
+
     if (Math.abs(velocity) > options.threshold) {
       startMomentum(velocity);
     } else {

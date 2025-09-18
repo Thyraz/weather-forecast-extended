@@ -185,10 +185,13 @@ ha-card {
   --min-gap: 30px;
   --icon-size: 40px;
   --icon-container-width: 40px;
-    /* Variables for the temperature bars in the daily forecast */
+  /* Variables for the temperature bars in the daily forecast */
   --temp-bar-width: 8px;
   --temp-bar-min: -20;
   --temp-bar-max: 50;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .forecast.daily .temperature-bar {
@@ -224,11 +227,14 @@ ha-card {
 }
 
 .forecast.hourly.dragging,
-.forecast.hourly.momentum {
+.forecast.hourly.momentum,
+.forecast.daily.dragging,
+.forecast.daily.momentum {
   scroll-snap-type: none;
 }
 
-.forecast.hourly.grabbing {
+.forecast.hourly.grabbing,
+.forecast.daily.grabbing {
   cursor: grabbing;
 }
 
