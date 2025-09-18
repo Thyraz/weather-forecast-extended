@@ -224,10 +224,10 @@ ha-card {
 
 .forecast .new-day {
   font-weight: bold;
-  margin-left: 2px;
-  margin-right: 2px;
+  margin: -2px -10px -2px -10px;
+  padding: 2px 10px 2px 10px;
   background-color: rgba(122, 122, 122, 0.1);
-  border-radius: 5px;
+  border-radius: 20px;
 }
 
 .forecast .day-of-month {
