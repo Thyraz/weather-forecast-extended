@@ -214,6 +214,14 @@ ha-card {
   background: transparent;
 }
 
+.forecast {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox, Safari 18.2+, Chromium 121+ */
+}
+.forecast::-webkit-scrollbar {
+    display: none;  /* Older Safari and Chromium */
+}
+
 .forecast-item {
   scroll-snap-align: start;
   text-align: center;
