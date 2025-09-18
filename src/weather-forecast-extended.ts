@@ -3,8 +3,8 @@ import { LitElement, html, nothing } from "lit";
 import { state } from "lit/decorators";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
-import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
-import { LovelaceGridOptions } from "./types";
+import type { HomeAssistant } from "custom-card-helpers";
+import { LovelaceGridOptions, WeatherForecastExtendedConfig } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { WeatherImages } from './weather-images';
 import "./components/wfe-daily-list";
@@ -17,7 +17,7 @@ type SubscriptionMap = Record<ForecastType, Promise<() => void> | undefined>;
 
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
-  @state() private _config: LovelaceCardConfig;
+  @state() private _config: WeatherForecastExtendedConfig;
   @state() private _header: string | typeof nothing;
   @state() private _entity: string;
   @state() private _name: string;
@@ -39,9 +39,16 @@ export class WeatherForecastExtended extends LitElement {
   private _hourlyMomentumElement?: HTMLElement;
 
   // Called by HA
-  setConfig(config: LovelaceCardConfig) {
-    this._config = config;
-    this._entity = config.entity;
+  setConfig(config: WeatherForecastExtendedConfig) {
+    const defaults: WeatherForecastExtendedConfig = {
+      type: "custom:weather-forecast-extended-card",
+      hourly_forecast: config.hourly_forecast ?? true,
+      daily_forecast: config.daily_forecast ?? true,
+      ...config,
+    };
+
+    this._config = defaults;
+    this._entity = defaults.entity;
     // call set hass() to immediately adjust to a changed entity
     // while editing the entity in the card editor
     if (this._hass) {
@@ -61,10 +68,10 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   public getGridOptions(): LovelaceGridOptions {
-    const minRows = 1;
+    const minRows = 3;
     var rows = 2.5;
-    rows += this._config.daily_forecast !== false ? 2.5 : 0;
-    rows += this._config.hourly_forecast !== false ? 3.0 : 0;
+    rows += this._config.daily_forecast !== false ? 3 : 0;
+    rows += this._config.hourly_forecast !== false ? 2.5 : 0;
 
     rows = Math.floor(rows);
 
@@ -78,6 +85,21 @@ export class WeatherForecastExtended extends LitElement {
 
   // Load styles using LitElement
   static styles = styles;
+
+  static async getConfigElement() {
+    await import("./editor/weather-forecast-extended-editor");
+    return document.createElement("weather-forecast-extended-editor");
+  }
+
+  static getStubConfig(hass: HomeAssistant): WeatherForecastExtendedConfig {
+    const weatherEntity = Object.keys(hass?.states ?? {}).find(entityId => entityId.startsWith("weather."));
+    return {
+      type: "custom:weather-forecast-extended-card",
+      entity: weatherEntity ?? "weather.home",
+      hourly_forecast: true,
+      daily_forecast: true,
+    };
+  }
 
   // Forecast subscriptions
   private _needForecastSubscription() {
