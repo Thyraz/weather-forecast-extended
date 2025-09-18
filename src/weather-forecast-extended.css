@@ -47,21 +47,49 @@ ha-card {
   /* Allow the forecast section to grow when the card is taller */
   width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
   flex: 1 1 auto;
   padding-top: 4px;
   padding-bottom: 20px;
 }
 
+.forecast-container.orientation-vertical {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.forecast-container.orientation-horizontal {
+  flex-direction: row;
+  gap: 0;
+  align-items: stretch;
+}
+
 .divider {
-  height: 4px;
   background-color: var(--primary-background-color);
 }
 
-.forecast-container .divider {
-  margin: 14px 16px 4px 16px;
+.card-divider {
+  height: 4px;
+}
+
+.forecast-divider {
   border-radius: 2px;
+}
+
+.forecast-container.orientation-vertical > .forecast-divider {
+  height: 4px;
+  margin: 14px 16px 4px 16px;
+}
+
+.forecast-container.orientation-horizontal > .forecast-divider {
+  width: 4px;
+  margin: 16px 0 0 0;
+  flex: 0 0 4px;
+  align-self: stretch;
+}
+
+.forecast-container.orientation-horizontal > .forecast-daily-container,
+.forecast-container.orientation-horizontal > .forecast-hourly-container {
+  flex: 1 1 0%;
 }
 
 .forecast-daily-container,

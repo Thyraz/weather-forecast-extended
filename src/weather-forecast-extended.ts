@@ -1,5 +1,6 @@
 import type { PropertyValues } from "lit";
 import { LitElement, html, nothing } from "lit";
+import { classMap } from "lit/directives/class-map.js";
 import { state } from "lit/decorators";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
@@ -42,9 +43,10 @@ export class WeatherForecastExtended extends LitElement {
   setConfig(config: WeatherForecastExtendedConfig) {
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
+      ...config,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
-      ...config,
+      orientation: config.orientation ?? "vertical",
     };
 
     this._config = defaults;
@@ -98,6 +100,7 @@ export class WeatherForecastExtended extends LitElement {
       entity: weatherEntity ?? "weather.home",
       hourly_forecast: true,
       daily_forecast: true,
+      orientation: "vertical",
     };
   }
 
@@ -246,6 +249,12 @@ export class WeatherForecastExtended extends LitElement {
 
     const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
     const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
+    const orientation = this._config.orientation ?? "vertical";
+    const containerClassMap = {
+      "forecast-container": true,
+      "orientation-horizontal": orientation === "horizontal",
+      "orientation-vertical": orientation !== "horizontal",
+    };
 
     return html`
       <ha-card>
@@ -255,11 +264,11 @@ export class WeatherForecastExtended extends LitElement {
         </div>
         ${showDaily || showHourly
           ? html`
-            <div class="divider"></div>
+            <div class="divider card-divider"></div>
           `
           : ""
         }
-        <div class="forecast-container">
+        <div class=${classMap(containerClassMap)}>
           <div class="forecast-daily-container">
             <div class="fade-left"></div>
             <div class="fade-right"></div>
@@ -278,7 +287,7 @@ export class WeatherForecastExtended extends LitElement {
               : ""
             }
           </div>
-        <div class="divider"></div>
+          <div class="divider forecast-divider"></div>
           <div class="forecast-hourly-container">
             <div class="fade-left"></div>
             <div class="fade-right"></div>

@@ -6,7 +6,8 @@ import type { WeatherForecastExtendedConfig } from "../types";
 type HaFormSelector =
   | { entity: { domain?: string } }
   | { boolean: {} }
-  | { text: {} };
+  | { text: {} }
+  | { select: { options: Array<{ value: string; label: string }> } };
 
 type HaFormSchema = {
   name: keyof WeatherForecastExtendedConfig | "entity" | "name" | "hourly_forecast" | "daily_forecast";
@@ -29,14 +30,27 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     { name: "name", selector: { text: {} }, optional: true },
     { name: "hourly_forecast", selector: { boolean: {} } },
     { name: "daily_forecast", selector: { boolean: {} } },
+    {
+      name: "orientation",
+      selector: {
+        select: {
+          options: [
+            { value: "vertical", label: "Vertical" },
+            { value: "horizontal", label: "Horizontal" },
+          ],
+        },
+      },
+      optional: true,
+    },
   ];
 
   public setConfig(config: WeatherForecastExtendedConfig): void {
     this._config = {
       type: "custom:weather-forecast-extended-card",
+      ...config,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
-      ...config,
+      orientation: config.orientation ?? "vertical",
     };
   }
 
@@ -91,6 +105,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_hourly") || "Show hourly forecast";
       case "daily_forecast":
         return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_daily") || "Show daily forecast";
+      case "orientation":
+        return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
       default:
         return schema.name;
     }
