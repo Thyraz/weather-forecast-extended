@@ -36,7 +36,7 @@ export class WFEDailyList extends LitElement {
   const newDay = isNewDay(date, this.hass.config as any);
 
     return html`
-      <div class="forecast-item">
+      <div class="forecast-item" @click=${() => this._handleSelect(item)}>
         <div class="date">${formatDateWeekdayShort(date, this.hass.locale as any, this.hass.config as any)}</div>
         ${!newDay ? html`<div class="day-of-month">${formatDateDayTwoDigit(date, this.hass.locale as any, this.hass.config as any)}</div>` : ""}
         <div class="translate-container">
@@ -52,6 +52,17 @@ export class WFEDailyList extends LitElement {
         ${this._renderPrecipitationInfo(item)}
       </div>
     `;
+  }
+
+  private _handleSelect(item: ForecastAttribute) {
+    if (!item?.datetime) return;
+    this.dispatchEvent(new CustomEvent("wfe-daily-selected", {
+      detail: {
+        datetime: item.datetime,
+      },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
   private _renderTemperatureBar(item: ForecastAttribute): TemplateResult | typeof nothing {
