@@ -9,7 +9,7 @@ ha-card {
 
 .weather {
   width: 100%;
-  height: calc(2.5 * var(--row-height));
+  height: calc(2.3 * var(--row-height));
   /* Background image will be set via JS */
   background-size: cover;
   background-position: center;
@@ -51,6 +51,7 @@ ha-card {
   flex-direction: column;
   gap: 4px;
   flex: 1 1 auto;
+  padding-bottom: 10px;
 }
 
 .divider {
@@ -59,7 +60,7 @@ ha-card {
 }
 
 .forecast-container .divider {
-  margin: 0px 16px;
+  margin: 8px 16px 0px 16px;
   border-radius: 2px;
 }
 
@@ -71,7 +72,7 @@ ha-card {
   flex-direction: column;
   justify-content: flex-start;
   flex: 1 1 auto; /* allow growth with card height */
-  margin-top: 2px;
+  /* margin-top: 2px; */
   /* iOS scroll improvements */
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
@@ -82,7 +83,7 @@ ha-card {
 @supports (-webkit-touch-callout: none) {
   .forecast-daily-container {
     overflow: visible;
-    padding-bottom: 6px; /* extra safety space for last line */
+    /* padding-bottom: 6px; extra safety space for last line */
   }
 }
 
@@ -128,7 +129,7 @@ ha-card {
   align-items: stretch; /* stretch items so they can use additional height */
   justify-content: space-around;
   gap: var(--dynamic-gap, 20px); /* fallback */
-  padding: 8px 16px 10px; /* slight bottom padding for descenders */
+  padding: 8px 16px 0px;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -164,8 +165,8 @@ ha-card {
 
 .forecast.daily .temperature-bar {
   width: var(--temp-bar-width);
-  height: 50px;
-  margin: 4px auto;
+  height: 32px;
+  margin: 0px auto 4px auto;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   position: relative;
@@ -207,6 +208,12 @@ ha-card {
   height: 0px;
 }
 
+.forecast::-webkit-scrollbar-thumb,
+.forecast::-webkit-scrollbar-track,
+.forecast::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .forecast-item {
   scroll-snap-align: start;
   text-align: center;
@@ -230,13 +237,13 @@ ha-card {
 }
 
 /* In daily grid, avoid negative margin that can collapse track sizing in Safari */
-.forecast.daily .day-of-month {
+/* .forecast.daily .day-of-month {
   margin-top: 0;
-}
+} */
 
 .forecast .ampm,
 .forecast .ampm-hidden {
-  min-height: 5px;
+  /* min-height: 5px; */
   margin-top: -4px;
   font-size: 11px;
   opacity: 0.3;
@@ -264,6 +271,10 @@ ha-card {
   min-height: 1.15em;
 }
 
+.forecast.daily .forecast-item > .precipitation {
+  line-height: 1.15em;
+}
+
 .forecast .precipitation.active,
 .forecast .precipitationprobability.active {
   opacity: 1.0;
@@ -273,7 +284,7 @@ ha-card {
   display: grid;
   /* rows: weekday, day-of-month, main area (icon+bar+templow), precipitation */
   grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;
-  row-gap: 4px;
+  /* row-gap: 4px; */
   align-content: start;
 }
 
@@ -311,7 +322,7 @@ ha-card {
 }
 
 .forecast.hourly .forecast-item .translate-container {
-  min-height: 80px;
+  /* min-height: 80px; */
   justify-content: center;
 }
 
