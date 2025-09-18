@@ -271,6 +271,7 @@ export class WeatherForecastExtended extends LitElement {
                     .forecast=${this._forecastDailyEvent!.forecast}
                     .min=${this._dailyMinTemp}
                     .max=${this._dailyMaxTemp}
+                    @wfe-daily-selected=${this._handleDailySelected}
                   ></wfe-daily-list>
                 </div>
               `
@@ -383,5 +384,49 @@ export class WeatherForecastExtended extends LitElement {
     this._hourlyMomentumCleanup = enableMomentumScroll(container, {
       snapSelector: ".forecast-item",
     });
+  }
+
+  private _handleDailySelected(ev: CustomEvent<{ datetime: string }>) {
+    const datetime = ev.detail?.datetime;
+    if (!datetime || !this._forecastHourlyEvent?.forecast?.length) {
+      return;
+    }
+
+    const targetDate = new Date(datetime);
+    const targetDay = targetDate.getDate();
+    const targetMonth = targetDate.getMonth();
+    const targetYear = targetDate.getFullYear();
+
+    const hourlyForecast = this._forecastHourlyEvent.forecast;
+    const targetIndex = hourlyForecast.findIndex((entry) => {
+      const entryDate = new Date(entry.datetime);
+      return (
+        entryDate.getDate() === targetDay &&
+        entryDate.getMonth() === targetMonth &&
+        entryDate.getFullYear() === targetYear
+      );
+    });
+
+    const hourlyContainer = this.shadowRoot?.querySelector<HTMLElement>(".forecast.hourly");
+    if (!hourlyContainer) {
+      return;
+    }
+
+    if (targetIndex <= 0) {
+      hourlyContainer.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
+
+    const hourlyItems = Array.from(hourlyContainer.querySelectorAll<HTMLElement>(".forecast-item"));
+    const targetItem = hourlyItems[targetIndex];
+    if (!targetItem) {
+      return;
+    }
+
+    const containerRect = hourlyContainer.getBoundingClientRect();
+    const itemRect = targetItem.getBoundingClientRect();
+    const offset = itemRect.left - containerRect.left + hourlyContainer.scrollLeft - 16; // account for padding
+
+    hourlyContainer.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
   }
 }
