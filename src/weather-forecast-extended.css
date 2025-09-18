@@ -16,6 +16,7 @@ ha-card {
   border-top-left-radius: var(--ha-card-border-radius, 12px);
   border-top-right-radius: var(--ha-card-border-radius, 12px);
   flex-shrink: 0;
+  color: white;
 }
 
 .weather .condition {
@@ -198,15 +199,25 @@ ha-card {
   width: var(--temp-bar-width);
   height: 32px;
   margin: 0px auto 4px auto;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
   position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.forecast.daily .temperature-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--primary-text-color, rgba(255, 255, 255, 1));
+  opacity: 0.1;
+  pointer-events: none;
 }
 
 .forecast.daily .temperature-bar-inner {
   position: absolute;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--primary-text-color, rgba(255, 255, 255, 1));
+  opacity: 0.5;
   border-radius: 4px;
 }
 
@@ -268,6 +279,7 @@ ha-card {
   font-weight: bold;
   margin: -0px -8px -0px -8px;
   padding: 0px 8px 0px 8px;
+  color: white;
   background-color: var(--state-climate-cool-color);
   border-radius: 20px;
 }
