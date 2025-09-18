@@ -4,7 +4,6 @@ ha-card {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: 6px;;
 }
 
 .weather {
@@ -51,7 +50,8 @@ ha-card {
   flex-direction: column;
   gap: 4px;
   flex: 1 1 auto;
-  padding-bottom: 10px;
+  padding-top: 4px;
+  padding-bottom: 20px;
 }
 
 .divider {
@@ -60,7 +60,7 @@ ha-card {
 }
 
 .forecast-container .divider {
-  margin: 8px 16px 0px 16px;
+  margin: 14px 16px 4px 16px;
   border-radius: 2px;
 }
 
@@ -124,7 +124,7 @@ ha-card {
   scroll-padding-left: 16px;
   scroll-padding-right: 16px;
   overflow-x: auto;
-  overflow-y: visible; /* prevent vertical clipping of last line in Safari */
+  overflow-y: clip; /* no vertical scrolling in case of a few px overflow */
   display: flex;
   align-items: stretch; /* stretch items so they can use additional height */
   justify-content: space-around;
@@ -232,9 +232,9 @@ ha-card {
 
 .forecast .new-day {
   font-weight: bold;
-  margin: -2px -10px -2px -10px;
-  padding: 2px 10px 2px 10px;
-  background-color: rgba(122, 122, 122, 0.1);
+  margin: -0px -8px -0px -8px;
+  padding: 0px 8px 0px 8px;
+  background-color: var(--state-climate-cool-color);
   border-radius: 20px;
 }
 
