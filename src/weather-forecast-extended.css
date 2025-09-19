@@ -275,6 +275,12 @@ ha-card {
   flex-direction: column;
 }
 
+.forecast.hourly .forecast-item {
+  width: var(--icon-container-width);
+  align-items: center;
+  overflow: visible;
+}
+
 .forecast .new-day {
   font-weight: bold;
   margin: -0px -8px -0px -8px;
@@ -282,6 +288,9 @@ ha-card {
   color: white;
   background-color: var(--state-climate-cool-color);
   border-radius: 20px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .forecast .day-of-month {
@@ -290,10 +299,25 @@ ha-card {
   opacity: 0.3;
 }
 
-/* In daily grid, avoid negative margin that can collapse track sizing in Safari */
-/* .forecast.daily .day-of-month {
-  margin-top: 0;
-} */
+.forecast .date.sunrise {
+  color: var(--orange-color, #ff9800);
+  font-weight: 500;
+}
+
+.forecast .date.sunset {
+  color: var(--purple-color, #926bc7);
+  font-weight: 500;
+}
+
+.forecast.hourly .date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-container-width);
+  margin: 0 auto;
+  text-align: center;
+  white-space: nowrap;
+}
 
 .forecast .ampm,
 .forecast .ampm-hidden {

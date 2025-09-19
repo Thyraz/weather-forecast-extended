@@ -19,4 +19,17 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   hourly_forecast?: boolean;
   daily_forecast?: boolean;
   orientation?: "vertical" | "horizontal";
+  show_sun_times?: boolean;
+  sun_use_home_coordinates?: boolean;
+  sun_latitude?: number | string;
+  sun_longitude?: number | string;
 }
+
+export interface SunCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
+export type SunEventType = "sunrise" | "sunset";
+
+export type SunTimesByDay = Record<string, Partial<Record<SunEventType, number>>>;

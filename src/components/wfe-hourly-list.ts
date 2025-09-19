@@ -1,7 +1,10 @@
+import type { PropertyValues } from "lit";
 import { LitElement, html, nothing, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import SunCalc from "suncalc";
+import type { SunCoordinates, SunEventType, SunTimesByDay } from "../types";
 import type { ForecastAttribute } from "../weather";
-import { formatDayPeriod, formatDateWeekdayShort, formatHour, isNewDay, useAmPm } from "../date-time";
+import { formatDayPeriod, formatDateWeekdayShort, formatHour, formatHourMinute, isNewDay, useAmPm } from "../date-time";
 import { getWeatherStateIcon } from "../weather";
 import type { HomeAssistant } from "custom-card-helpers";
 
@@ -9,7 +12,10 @@ import type { HomeAssistant } from "custom-card-helpers";
 export class WFEHourlyList extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) forecast: ForecastAttribute[] = [];
+  @property({ attribute: false }) showSunTimes = false;
+  @property({ attribute: false }) sunCoordinates?: SunCoordinates;
   private _resizeObserver?: ResizeObserver;
+  private _sunTimesByDay: SunTimesByDay = {};
 
   protected createRenderRoot() {
     // Render in light DOM so parent CSS applies
@@ -34,9 +40,19 @@ export class WFEHourlyList extends LitElement {
     this.updateComplete.then(() => this._recalculateTranslationHeights());
   }
 
+  protected willUpdate(changedProps: PropertyValues<this>): void {
+    if (
+      changedProps.has("forecast") ||
+      changedProps.has("sunCoordinates") ||
+      changedProps.has("showSunTimes")
+    ) {
+      this._calculateSunTimes();
+    }
+  }
+
   render() {
     if (!this.forecast?.length) return nothing;
-    return html`${this.forecast.map((item) => this._renderHourlyItem(item))}`;
+    return html`${this.forecast.map((item, index) => this._renderHourlyItem(item, index))}`;
   }
 
   private _setupResizeObserver() {
@@ -67,23 +83,38 @@ export class WFEHourlyList extends LitElement {
     return typeof item !== "undefined" && item !== null;
   }
 
-  private _renderHourlyItem(item: ForecastAttribute): TemplateResult | typeof nothing {
+  private _renderHourlyItem(item: ForecastAttribute, index: number): TemplateResult | typeof nothing {
     if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) {
       return nothing;
     }
 
     const date = new Date(item.datetime);
     const newDay = isNewDay(date, this.hass.config as any);
+    const sunEvent = this._getSunEventForHour(date, index);
+    const eventDate = sunEvent ? new Date(sunEvent.timestamp) : undefined;
+    const dateClasses = ["date"];
+    if (newDay) {
+      dateClasses.push("new-day");
+    }
+    if (sunEvent) {
+      dateClasses.push(sunEvent.type);
+    }
+
+    const dateLabel = sunEvent
+      ? formatHourMinute(eventDate!, this.hass.locale as any, this.hass.config as any)
+      : newDay
+        ? formatDateWeekdayShort(date, this.hass.locale as any, this.hass.config as any)
+        : formatHour(date, this.hass.locale as any, this.hass.config as any);
+
+    const showAmPm = useAmPm(this.hass.locale as any);
+    const amPmDate = eventDate ?? date;
+    const amPmLabel = showAmPm ? formatDayPeriod(amPmDate, this.hass.locale as any, this.hass.config as any) : undefined;
 
     return html`
       <div class="forecast-item">
-        <div class="date ${newDay ? 'new-day' : ''}">
-          ${newDay
-            ? formatDateWeekdayShort(date, this.hass.locale as any, this.hass.config as any)
-            : formatHour(date, this.hass.locale as any, this.hass.config as any)}
-        </div>
-        ${useAmPm(this.hass.locale as any)
-          ? html`<div class="${newDay ? 'ampm-hidden' : 'ampm'}">${formatDayPeriod(date, this.hass.locale as any, this.hass.config as any)}</div>`
+        <div class="${dateClasses.join(" ")}">${dateLabel}</div>
+        ${showAmPm
+          ? html`<div class="${newDay ? 'ampm-hidden' : 'ampm'}">${amPmLabel ?? ""}</div>`
           : ""}
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
@@ -119,6 +150,140 @@ export class WFEHourlyList extends LitElement {
           </div>`
         : nothing}
     `;
+  }
+
+  private _calculateSunTimes() {
+    if (!this.showSunTimes || !this.sunCoordinates || !this.forecast?.length) {
+      this._sunTimesByDay = {};
+      return;
+    }
+
+    const { latitude, longitude } = this.sunCoordinates;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      this._sunTimesByDay = {};
+      return;
+    }
+
+    const sunTimes: SunTimesByDay = {};
+
+    for (const item of this.forecast) {
+      if (!item?.datetime) {
+        continue;
+      }
+
+      const date = new Date(item.datetime);
+      if (!Number.isFinite(date.getTime())) {
+        continue;
+      }
+
+      const key = this._formatDayKey(date);
+      if (sunTimes[key]) {
+        continue;
+      }
+
+      const baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      let times = SunCalc.getTimes(baseDate, latitude, longitude);
+      let sunrise = this._toTimestamp(times.sunrise);
+      let sunset = this._toTimestamp(times.sunset);
+      // Keep rendered day aligned with the calendar day of the forecast even if
+      // user and forecast locations sit in very different time zones.
+      const dayShift = this._determineDayShift(key, sunrise, sunset);
+      if (dayShift !== 0) {
+        const shiftedDate = new Date(baseDate);
+        shiftedDate.setDate(shiftedDate.getDate() + dayShift);
+        times = SunCalc.getTimes(shiftedDate, latitude, longitude);
+        sunrise = this._toTimestamp(times.sunrise);
+        sunset = this._toTimestamp(times.sunset);
+      }
+      sunTimes[key] = {};
+      if (sunrise !== undefined) {
+        sunTimes[key].sunrise = sunrise;
+      }
+      if (sunset !== undefined) {
+        sunTimes[key].sunset = sunset;
+      }
+    }
+
+    this._sunTimesByDay = sunTimes;
+  }
+
+  private _getSunEventForHour(date: Date, index: number): { type: SunEventType; timestamp: number } | undefined {
+    if (!this.showSunTimes || !this._sunTimesByDay) {
+      return undefined;
+    }
+
+    const key = this._formatDayKey(date);
+    const times = this._sunTimesByDay[key];
+    if (!times) {
+      return undefined;
+    }
+
+    const start = date.getTime();
+    if (!Number.isFinite(start)) {
+      return undefined;
+    }
+    const end = this._getIntervalEnd(index, start);
+
+    if (times.sunrise !== undefined && times.sunrise >= start && times.sunrise < end) {
+      return { type: "sunrise", timestamp: times.sunrise };
+    }
+
+    if (times.sunset !== undefined && times.sunset >= start && times.sunset < end) {
+      return { type: "sunset", timestamp: times.sunset };
+    }
+
+    return undefined;
+  }
+
+  private _getIntervalEnd(index: number, start: number): number {
+    const next = this.forecast?.[index + 1];
+    if (next?.datetime) {
+      const nextDate = new Date(next.datetime);
+      const nextTime = nextDate.getTime();
+      if (Number.isFinite(nextTime) && nextTime > start) {
+        return nextTime;
+      }
+    }
+    // Fallback to one hour window if we can't determine the next step
+    return start + 60 * 60 * 1000;
+  }
+
+  private _formatDayKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  private _toTimestamp(value?: Date): number | undefined {
+    if (!value) {
+      return undefined;
+    }
+    const time = value.getTime();
+    return Number.isFinite(time) ? time : undefined;
+  }
+
+  private _determineDayShift(targetKey: string, sunrise?: number, sunset?: number): number {
+    // Returns +1/-1 when sunrise/sunset fall on the previous/next day once
+    // rendered in the user's local time zone. That happens when the forecast
+    // location is many hours away from the viewer.
+    const evaluate = (timestamp?: number): number => {
+      if (timestamp === undefined) {
+        return 0;
+      }
+      const eventKey = this._formatDayKey(new Date(timestamp));
+      if (eventKey === targetKey) {
+        return 0;
+      }
+      return eventKey < targetKey ? 1 : -1;
+    };
+
+    const sunriseShift = evaluate(sunrise);
+    if (sunriseShift !== 0) {
+      return sunriseShift;
+    }
+
+    return evaluate(sunset);
   }
 }
 

@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { WeatherForecastExtendedConfig } from "../types";
@@ -24,6 +24,64 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @state() private _config?: WeatherForecastExtendedConfig;
+
+  static styles = css`
+    .sun-section {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sun-section h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .sun-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .sun-option input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sun-option span {
+      flex: 1;
+    }
+
+    .sun-coordinates {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sun-field {
+      display: flex;
+      flex: 1 1 120px;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .sun-field input {
+      font: inherit;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      background: var(--ha-card-background, #fff);
+      color: var(--primary-text-color);
+    }
+
+    .sun-field input:disabled {
+      opacity: 0.6;
+    }
+  `;
 
   private readonly _schema: HaFormSchema[] = [
     { name: "entity", selector: { entity: { domain: "weather" } } },
@@ -67,28 +125,61 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         .computeLabel=${this._computeLabel}
         @value-changed=${this._handleValueChanged}
       ></ha-form>
+      <div class="sun-section">
+        <h4>Sunrise & Sunset</h4>
+        <label class="sun-option">
+          <input
+            type="checkbox"
+            name="show_sun_times"
+            .checked=${this._config.show_sun_times ?? false}
+            @change=${this._handleSunToggleChange}
+          />
+          <span>Show sunrise & sunset</span>
+        </label>
+        ${this._config.show_sun_times
+          ? html`
+            <label class="sun-option">
+              <input
+                type="checkbox"
+                name="sun_use_home_coordinates"
+                .checked=${this._config.sun_use_home_coordinates ?? true}
+                @change=${this._handleSunToggleChange}
+              />
+              <span>Use Home Assistant location</span>
+            </label>
+            <div class="sun-coordinates">
+              <label class="sun-field">
+                <span>Latitude</span>
+                <input
+                  type="text"
+                  name="sun_latitude"
+                  placeholder="e.g. 48.137"
+                  .value=${String(this._config.sun_latitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+              <label class="sun-field">
+                <span>Longitude</span>
+                <input
+                  type="text"
+                  name="sun_longitude"
+                  placeholder="e.g. 11.575"
+                  .value=${String(this._config.sun_longitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+            </div>
+          `
+          : nothing}
+      </div>
     `;
   }
 
   private _handleValueChanged(event: CustomEvent<{ value: Partial<WeatherForecastExtendedConfig> }>) {
     event.stopPropagation();
-    if (!this._config) {
-      return;
-    }
-
-    const value = event.detail.value;
-    const updated: WeatherForecastExtendedConfig = {
-      ...this._config,
-      ...value,
-      type: "custom:weather-forecast-extended-card",
-    };
-
-    if (!updated.name) {
-      delete (updated as Partial<WeatherForecastExtendedConfig>).name;
-    }
-
-    this._config = updated;
-    fireEvent(this, "config-changed", { config: updated });
+    this._updateConfig(event.detail.value);
   }
 
   private _computeLabel = (schema: HaFormSchema) => {
@@ -111,6 +202,46 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return schema.name;
     }
   };
+
+  private _handleSunToggleChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    const key = target.name as keyof WeatherForecastExtendedConfig;
+    this._updateConfig({ [key]: target.checked } as Partial<WeatherForecastExtendedConfig>);
+  }
+
+  private _handleSunInputChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    const key = target.name as keyof WeatherForecastExtendedConfig;
+    const value = target.value.trim();
+    const update: Partial<WeatherForecastExtendedConfig> = {};
+    (update as any)[key] = value === "" ? undefined : value;
+    this._updateConfig(update);
+  }
+
+  private _updateConfig(changes: Partial<WeatherForecastExtendedConfig>) {
+    if (!this._config) {
+      return;
+    }
+
+    const updated: WeatherForecastExtendedConfig = {
+      ...this._config,
+      ...changes,
+      type: "custom:weather-forecast-extended-card",
+    };
+
+    if (!updated.name) {
+      delete (updated as Partial<WeatherForecastExtendedConfig>).name;
+    }
+
+    this._config = updated;
+    fireEvent(this, "config-changed", { config: updated });
+  }
 }
 
 declare global {

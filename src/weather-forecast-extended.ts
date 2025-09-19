@@ -5,7 +5,7 @@ import { state } from "lit/decorators";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
 import type { HomeAssistant } from "custom-card-helpers";
-import { LovelaceGridOptions, WeatherForecastExtendedConfig } from "./types";
+import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { WeatherImages } from './weather-images';
 import "./components/wfe-daily-list";
@@ -38,6 +38,8 @@ export class WeatherForecastExtended extends LitElement {
   private _hass;
   private _momentumCleanup: Partial<Record<ForecastType, () => void>> = {};
   private _momentumElement: Partial<Record<ForecastType, HTMLElement>> = {};
+  private _sunCoordinateCacheKey?: string;
+  private _sunCoordinateCache?: SunCoordinates;
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
@@ -47,6 +49,8 @@ export class WeatherForecastExtended extends LitElement {
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
+      show_sun_times: config.show_sun_times ?? false,
+      sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
     };
 
     this._config = defaults;
@@ -251,6 +255,8 @@ export class WeatherForecastExtended extends LitElement {
 
     const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
     const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
+    const sunCoordinates = this._resolveSunCoordinates();
+    const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates);
     const orientation = this._config.orientation ?? "vertical";
     const containerClassMap = {
       "forecast-container": true,
@@ -302,6 +308,8 @@ export class WeatherForecastExtended extends LitElement {
                   <wfe-hourly-list
                     .hass=${this._hass}
                     .forecast=${this._forecastHourlyEvent!.forecast}
+                    .showSunTimes=${showSunTimes}
+                    .sunCoordinates=${sunCoordinates}
                   ></wfe-hourly-list>
                 </div>
               `
@@ -340,6 +348,68 @@ export class WeatherForecastExtended extends LitElement {
     this._hourlyMaxTemp = hourlyMax;
     this._dailyMinTemp = dailyMin;
     this._dailyMaxTemp = dailyMax;
+  }
+
+  private _resolveSunCoordinates(): SunCoordinates | undefined {
+    if (!this._config?.show_sun_times) {
+      this._sunCoordinateCacheKey = undefined;
+      this._sunCoordinateCache = undefined;
+      return undefined;
+    }
+
+    const useHome = this._config.sun_use_home_coordinates ?? true;
+    if (useHome) {
+      const latitude = this._parseCoordinate(this._hass?.config?.latitude, -90, 90);
+      const longitude = this._parseCoordinate(this._hass?.config?.longitude, -180, 180);
+      if (latitude !== undefined && longitude !== undefined) {
+        const key = `${latitude},${longitude}`;
+        if (this._sunCoordinateCacheKey === key && this._sunCoordinateCache) {
+          return this._sunCoordinateCache;
+        }
+        const coords: SunCoordinates = { latitude, longitude };
+        this._sunCoordinateCacheKey = key;
+        this._sunCoordinateCache = coords;
+        return coords;
+      }
+      this._sunCoordinateCacheKey = undefined;
+      this._sunCoordinateCache = undefined;
+      return undefined;
+    }
+
+    const latitude = this._parseCoordinate(this._config.sun_latitude, -90, 90);
+    const longitude = this._parseCoordinate(this._config.sun_longitude, -180, 180);
+    if (latitude === undefined || longitude === undefined) {
+      this._sunCoordinateCacheKey = undefined;
+      this._sunCoordinateCache = undefined;
+      return undefined;
+    }
+
+    const key = `${latitude},${longitude}`;
+    if (this._sunCoordinateCacheKey === key && this._sunCoordinateCache) {
+      return this._sunCoordinateCache;
+    }
+
+    const coords: SunCoordinates = { latitude, longitude };
+    this._sunCoordinateCacheKey = key;
+    this._sunCoordinateCache = coords;
+    return coords;
+  }
+
+  private _parseCoordinate(value: number | string | undefined, min: number, max: number): number | undefined {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+
+    const numericValue = typeof value === "number" ? value : parseFloat(value);
+    if (!Number.isFinite(numericValue)) {
+      return undefined;
+    }
+
+    if (numericValue < min || numericValue > max) {
+      return undefined;
+    }
+
+    return numericValue;
   }
 
   private _getWeatherBgImage(state: string): string {

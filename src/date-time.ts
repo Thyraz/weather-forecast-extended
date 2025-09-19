@@ -40,6 +40,17 @@ const formatTimeMem = memoizeOne(
     })
 );
 
+export const formatHourMinute = (
+  dateObj: Date,
+  locale: LocaleSettings,
+  config: HassConfig
+) => {
+  const parts = formatTimeMem(locale, config.time_zone).formatToParts(dateObj);
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "";
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "";
+  return `${hour}:${minute}`;
+};
+
 // from frontend/src/common/datetime/use_am_pm.ts
 export enum TimeFormat {
   language = "language",
@@ -124,6 +135,5 @@ export const isNewDay = (
 
   return hourPart.value === "00";
 }
-
 
 
