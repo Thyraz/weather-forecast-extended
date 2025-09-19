@@ -99,17 +99,25 @@ export class WFEHourlyList extends LitElement {
     `;
   }
 
-  private _renderPrecipitationInfo(item: ForecastAttribute): TemplateResult {
+  private _renderPrecipitationInfo(item: ForecastAttribute): TemplateResult | typeof nothing {
     const hasPrecipitation = this._hasValidValue(item.precipitation);
     const hasPrecipitationProbability = this._hasValidValue(item.precipitation_probability);
 
+    if (!hasPrecipitation && !hasPrecipitationProbability) {
+      return nothing;
+    }
+
     return html`
-      <div class="precipitation ${((item.precipitation ?? 0) as number) > 0.3 ? 'active' : ''}">
-        ${hasPrecipitation ? html`${(item.precipitation as number).toFixed(1)}` : "—"}
-      </div>
-      <div class="precipitationprobability ${((item.precipitation_probability ?? 0) as number) > 30 ? 'active' : ''}">
-        ${hasPrecipitationProbability ? html`${item.precipitation_probability}%` : "—"}
-      </div>
+      ${hasPrecipitation
+        ? html`<div class="precipitation ${((item.precipitation ?? 0) as number) > 0.3 ? 'active' : ''}">
+            ${(item.precipitation as number).toFixed(1)}
+          </div>`
+        : nothing}
+      ${hasPrecipitationProbability
+        ? html`<div class="precipitationprobability ${((item.precipitation_probability ?? 0) as number) > 30 ? 'active' : ''}">
+            ${item.precipitation_probability}%
+          </div>`
+        : nothing}
     `;
   }
 }
