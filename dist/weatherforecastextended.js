@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.1df5bd7e.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.ee49b470.js").then(()=>parcelRequire("bwZCh"));
 
 });
 
@@ -1960,7 +1960,7 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-shrink: 0;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 10px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 4px 15px;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 15px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 2px 17px;\n  font-weight: bolder;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  -webkit-overflow-scrolling: touch;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast-daily-container {\n    overflow: visible;\n  }\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  flex: auto;\n  height: auto;\n  padding: 8px 16px 0;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    scroll-snap-type: none;\n    -webkit-overflow-scrolling: touch;\n  }\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast .new-day {\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  border-radius: 20px;\n  margin: 0 -8px;\n  padding: 0 8px;\n  font-weight: bold;\n  position: relative;\n  left: 50%;\n  transform: translateX(-50%);\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 1.15em;\n  margin-bottom: 2px;\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 1.15em;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-shrink: 0;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 10px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 4px 15px;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 15px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 2px 17px;\n  font-weight: bolder;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  -webkit-overflow-scrolling: touch;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast-daily-container {\n    overflow: visible;\n  }\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  flex: auto;\n  height: auto;\n  padding: 8px 16px 0;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    scroll-snap-type: none;\n    -webkit-overflow-scrolling: touch;\n  }\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast .new-day {\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  border-radius: 20px;\n  margin: 0 -8px;\n  padding: 0 8px;\n  font-weight: bold;\n  position: relative;\n  left: 50%;\n  transform: translateX(-50%);\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 1.15em;\n  margin-bottom: 2px;\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 1.15em;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $j8KxL.css)`
@@ -1972,64 +1972,153 @@ var $1e69f76b05a816eb$exports = {};
 $1e69f76b05a816eb$exports = new URL("sunny.5ac2086f.jpg", import.meta.url).toString();
 
 
+var $6f4eee4b7ab1d2c4$exports = {};
+$6f4eee4b7ab1d2c4$exports = new URL("clear-night.059d725f.jpg", import.meta.url).toString();
+
+
 var $1dfaab2e4e5ecad6$exports = {};
 $1dfaab2e4e5ecad6$exports = new URL("pouring.5a333e69.jpg", import.meta.url).toString();
+
+
+var $74c55a13473312a4$exports = {};
+$74c55a13473312a4$exports = new URL("pouring-night.e2dddca9.jpg", import.meta.url).toString();
 
 
 var $b6117c6cfcd5d9bd$exports = {};
 $b6117c6cfcd5d9bd$exports = new URL("partly-cloudy.89da2a52.jpg", import.meta.url).toString();
 
 
+var $a9a1bc2c22cf59f3$exports = {};
+$a9a1bc2c22cf59f3$exports = new URL("partly-cloudy-night.1b74815d.jpg", import.meta.url).toString();
+
+
 var $b109536a5a876912$exports = {};
 $b109536a5a876912$exports = new URL("fog.23e90e7d.jpg", import.meta.url).toString();
+
+
+var $a3b323e168a50f51$exports = {};
+$a3b323e168a50f51$exports = new URL("fog-night.6cfe565c.jpg", import.meta.url).toString();
 
 
 var $9f87ed3faa3b9e08$exports = {};
 $9f87ed3faa3b9e08$exports = new URL("hail.c8969e30.jpg", import.meta.url).toString();
 
 
+var $869fdc2814f026c6$exports = {};
+$869fdc2814f026c6$exports = new URL("hail-night.2f55972b.jpg", import.meta.url).toString();
+
+
 var $a72aedec7f87ee16$exports = {};
 $a72aedec7f87ee16$exports = new URL("lightning-rainy.207e6de4.jpg", import.meta.url).toString();
+
+
+var $9f6c8c4db02a9586$exports = {};
+$9f6c8c4db02a9586$exports = new URL("lightning-rainy-night.7bb6ca13.jpg", import.meta.url).toString();
 
 
 var $95746abd7ffe8eef$exports = {};
 $95746abd7ffe8eef$exports = new URL("lightning.36584782.jpg", import.meta.url).toString();
 
 
+var $fee7f30ca42b4f5a$exports = {};
+$fee7f30ca42b4f5a$exports = new URL("lightning-night.220aa10f.jpg", import.meta.url).toString();
+
+
 var $299ff7583b1b6519$exports = {};
 $299ff7583b1b6519$exports = new URL("rainy.5a087102.jpg", import.meta.url).toString();
+
+
+var $4110dd39f4d2e7e2$exports = {};
+$4110dd39f4d2e7e2$exports = new URL("rainy-night.68ef5d1e.jpg", import.meta.url).toString();
 
 
 var $2cc4706dea59c3c7$exports = {};
 $2cc4706dea59c3c7$exports = new URL("snowy-rainy.9901343f.jpg", import.meta.url).toString();
 
 
+var $e8f2fc5f40842f73$exports = {};
+$e8f2fc5f40842f73$exports = new URL("snowy-rainy-night.3afa6ed4.jpg", import.meta.url).toString();
+
+
 var $114809334059eb6d$exports = {};
 $114809334059eb6d$exports = new URL("snowy.82eee996.jpg", import.meta.url).toString();
+
+
+var $f788577b12612ac3$exports = {};
+$f788577b12612ac3$exports = new URL("snowy-night.cee013c0.jpg", import.meta.url).toString();
 
 
 var $126f314ae001decd$exports = {};
 $126f314ae001decd$exports = new URL("windy-variant.6ac24345.jpg", import.meta.url).toString();
 
 
+var $2efcd540ca9cfbb1$exports = {};
+$2efcd540ca9cfbb1$exports = new URL("windy-variant-night.efb03746.jpg", import.meta.url).toString();
+
+
 var $31e27610007c5cf3$exports = {};
 $31e27610007c5cf3$exports = new URL("windy.638cf534.jpg", import.meta.url).toString();
 
 
+var $c41890a932496ec8$exports = {};
+$c41890a932496ec8$exports = new URL("windy-night.c9f868f2.jpg", import.meta.url).toString();
+
+
 const $04b2058bf019e2da$export$d0bd520bd5ddb657 = {
-    pouring: (0, (/*@__PURE__*/$parcel$interopDefault($1dfaab2e4e5ecad6$exports))),
-    sunny: (0, (/*@__PURE__*/$parcel$interopDefault($1e69f76b05a816eb$exports))),
-    partlycloudy: (0, (/*@__PURE__*/$parcel$interopDefault($b6117c6cfcd5d9bd$exports))),
-    fog: (0, (/*@__PURE__*/$parcel$interopDefault($b109536a5a876912$exports))),
-    hail: (0, (/*@__PURE__*/$parcel$interopDefault($9f87ed3faa3b9e08$exports))),
-    lightningrainy: (0, (/*@__PURE__*/$parcel$interopDefault($a72aedec7f87ee16$exports))),
-    lightning: (0, (/*@__PURE__*/$parcel$interopDefault($95746abd7ffe8eef$exports))),
-    rainy: (0, (/*@__PURE__*/$parcel$interopDefault($299ff7583b1b6519$exports))),
-    snowyrainy: (0, (/*@__PURE__*/$parcel$interopDefault($2cc4706dea59c3c7$exports))),
-    snowy: (0, (/*@__PURE__*/$parcel$interopDefault($114809334059eb6d$exports))),
-    windyvariant: (0, (/*@__PURE__*/$parcel$interopDefault($126f314ae001decd$exports))),
-    windy: (0, (/*@__PURE__*/$parcel$interopDefault($31e27610007c5cf3$exports)))
+    pouring: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($1dfaab2e4e5ecad6$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($74c55a13473312a4$exports)))
+    },
+    sunny: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($1e69f76b05a816eb$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($6f4eee4b7ab1d2c4$exports)))
+    },
+    clearnight: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($1e69f76b05a816eb$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($6f4eee4b7ab1d2c4$exports)))
+    },
+    partlycloudy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($b6117c6cfcd5d9bd$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($a9a1bc2c22cf59f3$exports)))
+    },
+    fog: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($b109536a5a876912$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($a3b323e168a50f51$exports)))
+    },
+    hail: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($9f87ed3faa3b9e08$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($869fdc2814f026c6$exports)))
+    },
+    lightningrainy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($a72aedec7f87ee16$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($9f6c8c4db02a9586$exports)))
+    },
+    lightning: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($95746abd7ffe8eef$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($fee7f30ca42b4f5a$exports)))
+    },
+    rainy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($299ff7583b1b6519$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($4110dd39f4d2e7e2$exports)))
+    },
+    snowyrainy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($2cc4706dea59c3c7$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($e8f2fc5f40842f73$exports)))
+    },
+    snowy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($114809334059eb6d$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($f788577b12612ac3$exports)))
+    },
+    windyvariant: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($126f314ae001decd$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($2efcd540ca9cfbb1$exports)))
+    },
+    windy: {
+        day: (0, (/*@__PURE__*/$parcel$interopDefault($31e27610007c5cf3$exports))),
+        night: (0, (/*@__PURE__*/$parcel$interopDefault($c41890a932496ec8$exports)))
+    }
 };
+const $04b2058bf019e2da$export$80688e1fcf715020 = $04b2058bf019e2da$export$d0bd520bd5ddb657.partlycloudy;
 
 
 
@@ -2946,17 +3035,20 @@ const $aefd8b71d9c18f54$export$3bc24c4fed096b83 = (container)=>{
 
 
 
+
 class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
     // Called by HA
     setConfig(config) {
         const defaults = {
             type: "custom:weather-forecast-extended-card",
             ...config,
+            show_header: config.show_header ?? true,
             hourly_forecast: config.hourly_forecast ?? true,
             daily_forecast: config.daily_forecast ?? true,
             orientation: config.orientation ?? "vertical",
             show_sun_times: config.show_sun_times ?? false,
-            sun_use_home_coordinates: config.sun_use_home_coordinates ?? true
+            sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
+            use_night_header_backgrounds: config.use_night_header_backgrounds ?? true
         };
         this._config = defaults;
         this._entity = defaults.entity;
@@ -2972,17 +3064,41 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             const fn = this._state.attributes.friendly_name;
             this._name = fn ? fn : this._entity;
         }
+        const headerTemperatureEntity = this._config?.header_temperature_entity;
+        this._headerTemperatureState = headerTemperatureEntity ? hass.states[headerTemperatureEntity] : undefined;
     }
     getGridOptions() {
-        const minRows = 3;
-        var rows = 2.5;
-        rows += this._config.daily_forecast !== false ? 3 : 0;
-        rows += this._config.hourly_forecast !== false ? 2.5 : 0;
-        rows = Math.floor(rows);
+        if (!this._config) return {
+            columns: 12,
+            rows: 3,
+            min_columns: 6,
+            min_rows: 3
+        };
+        const orientation = this._config.orientation ?? "vertical";
+        const showHeader = this._config.show_header !== false;
+        const showDaily = this._config.daily_forecast !== false;
+        const showHourly = this._config.hourly_forecast !== false;
+        let rows = 3;
+        if (orientation === "horizontal") {
+            if (!showDaily && !showHourly) rows = showHeader ? 3 : 3;
+            else if (showDaily && showHourly) rows = showHeader ? 6 : 5;
+            else rows = showHeader ? 5 : 4;
+        } else {
+            let computed = 0;
+            if (showHeader) computed += 3;
+            if (showDaily) computed += 3;
+            if (showHourly) computed += 2;
+            if (showDaily && showHourly) computed += 1;
+            if (!showHeader && showDaily && showHourly) computed += 1;
+            if (!showHeader && (showDaily || showHourly)) computed = Math.max(computed, 4);
+            if (!showHeader && !showDaily && !showHourly) computed = 3;
+            rows = Math.max(computed, 3);
+        }
+        const minRows = rows;
         return {
             columns: 12,
             rows: rows,
-            min_columns: 6,
+            min_columns: orientation === "horizontal" ? 12 : 6,
             min_rows: minRows
         };
     }
@@ -2999,9 +3115,11 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         return {
             type: "custom:weather-forecast-extended-card",
             entity: weatherEntity ?? "weather.home",
+            show_header: true,
             hourly_forecast: true,
             daily_forecast: true,
-            orientation: "vertical"
+            orientation: "vertical",
+            use_night_header_backgrounds: true
         };
     }
     // Forecast subscriptions
@@ -3079,6 +3197,21 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         // Hourly translation heights are handled inside wfe-hourly-list
         }
     }
+    _computeHeaderTemperature() {
+        if (!this._hass || !this._state) return "";
+        const sensorState = this._headerTemperatureState;
+        if (sensorState && !this._isStateUnavailable(sensorState.state)) {
+            const formattedSensor = this._hass.formatEntityState(sensorState);
+            return formattedSensor || sensorState.state;
+        }
+        const formattedWeather = this._hass.formatEntityAttributeValue(this._state, "temperature");
+        return formattedWeather || this._state.state || "";
+    }
+    _isStateUnavailable(state) {
+        if (!state) return true;
+        const normalized = state.toLowerCase();
+        return normalized === "unavailable" || normalized === "unknown";
+    }
     // Render methods
     render() {
         if (!this._config || !this._hass) return 0, $l56HR.nothing;
@@ -3092,8 +3225,11 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
           <p>${this._name} is unavailable.</p>
         </ha-card>
       `;
-        const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
-        const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
+        const showDaily = Boolean(this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length);
+        const showHourly = Boolean(this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length);
+        const showHeader = this._config.show_header !== false;
+        const showForecasts = showDaily || showHourly;
+        const showForecastDivider = showDaily && showHourly;
         const sunCoordinates = this._resolveSunCoordinates();
         const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates);
         const orientation = this._config.orientation ?? "vertical";
@@ -3102,48 +3238,68 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             "orientation-horizontal": orientation === "horizontal",
             "orientation-vertical": orientation !== "horizontal"
         };
+        const headerClassMap = {
+            weather: true,
+            "header-only": showHeader && !showForecasts
+        };
+        const hasContent = showHeader || showForecasts;
+        if (!hasContent) {
+            const cardLabel = this._name || this._entity;
+            return (0, $l56HR.html)`
+        <hui-warning>
+          ${cardLabel} has no sections enabled.
+        </hui-warning>
+      `;
+        }
         return (0, $l56HR.html)`
       <ha-card>
-        <div class="weather" style="background-image: url(${this._getWeatherBgImage(this._state.state)})">
-          <div class="temp">${this._hass.formatEntityAttributeValue(this._state, "temperature") || this._state.state}</div>
-          <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
-        </div>
-        ${showDaily || showHourly ? (0, $l56HR.html)`
-            <div class="divider card-divider"></div>
-          ` : ""}
-        <div class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(containerClassMap)}>
-          <div class="forecast-daily-container">
-            <div class="fade-left"></div>
-            <div class="fade-right"></div>
-            ${showDaily ? (0, $l56HR.html)`
-                <div class="forecast daily">
-                  <wfe-daily-list
-                    .hass=${this._hass}
-                    .forecast=${this._forecastDailyEvent.forecast}
-                    .min=${this._dailyMinTemp}
-                    .max=${this._dailyMaxTemp}
-                    @wfe-daily-selected=${this._handleDailySelected}
-                  ></wfe-daily-list>
-                </div>
-              ` : ""}
-          </div>
-          <div class="divider forecast-divider"></div>
-          <div class="forecast-hourly-container">
-            <div class="fade-left"></div>
-            <div class="fade-right"></div>
-            ${showHourly ? (0, $l56HR.html)`
-                <div class="forecast hourly"
-                  style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};` : (0, $l56HR.nothing)}>
-                  <wfe-hourly-list
-                    .hass=${this._hass}
-                    .forecast=${this._forecastHourlyEvent.forecast}
-                    .showSunTimes=${showSunTimes}
-                    .sunCoordinates=${sunCoordinates}
-                  ></wfe-hourly-list>
-                </div>
-              ` : ""}
-          </div>
-        </div>
+        ${showHeader ? (0, $l56HR.html)`
+            <div
+              class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(headerClassMap)}
+              style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
+            >
+              <div class="temp">${this._computeHeaderTemperature()}</div>
+              <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+            </div>
+          ` : (0, $l56HR.nothing)}
+        ${showHeader && showForecasts ? (0, $l56HR.html)`<div class="divider card-divider"></div>` : (0, $l56HR.nothing)}
+        ${showForecasts ? (0, $l56HR.html)`
+            <div class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(containerClassMap)}>
+              ${showDaily ? (0, $l56HR.html)`
+                  <div class="forecast-daily-container">
+                    <div class="fade-left"></div>
+                    <div class="fade-right"></div>
+                    <div class="forecast daily">
+                      <wfe-daily-list
+                        .hass=${this._hass}
+                        .forecast=${this._forecastDailyEvent.forecast}
+                        .min=${this._dailyMinTemp}
+                        .max=${this._dailyMaxTemp}
+                        @wfe-daily-selected=${this._handleDailySelected}
+                      ></wfe-daily-list>
+                    </div>
+                  </div>
+                ` : (0, $l56HR.nothing)}
+              ${showForecastDivider ? (0, $l56HR.html)`<div class="divider forecast-divider"></div>` : (0, $l56HR.nothing)}
+              ${showHourly ? (0, $l56HR.html)`
+                  <div class="forecast-hourly-container">
+                    <div class="fade-left"></div>
+                    <div class="fade-right"></div>
+                    <div
+                      class="forecast hourly"
+                      style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};` : (0, $l56HR.nothing)}
+                    >
+                      <wfe-hourly-list
+                        .hass=${this._hass}
+                        .forecast=${this._forecastHourlyEvent.forecast}
+                        .showSunTimes=${showSunTimes}
+                        .sunCoordinates=${sunCoordinates}
+                      ></wfe-hourly-list>
+                    </div>
+                  </div>
+                ` : (0, $l56HR.nothing)}
+            </div>
+          ` : (0, $l56HR.nothing)}
       </ha-card>
     `;
     }
@@ -3171,33 +3327,15 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         this._dailyMinTemp = dailyMin;
         this._dailyMaxTemp = dailyMax;
     }
-    _resolveSunCoordinates() {
-        if (!this._config?.show_sun_times) {
+    _getLocationCoordinates() {
+        if (!this._config) {
             this._sunCoordinateCacheKey = undefined;
             this._sunCoordinateCache = undefined;
             return undefined;
         }
         const useHome = this._config.sun_use_home_coordinates ?? true;
-        if (useHome) {
-            const latitude = this._parseCoordinate(this._hass?.config?.latitude, -90, 90);
-            const longitude = this._parseCoordinate(this._hass?.config?.longitude, -180, 180);
-            if (latitude !== undefined && longitude !== undefined) {
-                const key = `${latitude},${longitude}`;
-                if (this._sunCoordinateCacheKey === key && this._sunCoordinateCache) return this._sunCoordinateCache;
-                const coords = {
-                    latitude: latitude,
-                    longitude: longitude
-                };
-                this._sunCoordinateCacheKey = key;
-                this._sunCoordinateCache = coords;
-                return coords;
-            }
-            this._sunCoordinateCacheKey = undefined;
-            this._sunCoordinateCache = undefined;
-            return undefined;
-        }
-        const latitude = this._parseCoordinate(this._config.sun_latitude, -90, 90);
-        const longitude = this._parseCoordinate(this._config.sun_longitude, -180, 180);
+        const latitude = useHome ? this._parseCoordinate(this._hass?.config?.latitude, -90, 90) : this._parseCoordinate(this._config.sun_latitude, -90, 90);
+        const longitude = useHome ? this._parseCoordinate(this._hass?.config?.longitude, -180, 180) : this._parseCoordinate(this._config.sun_longitude, -180, 180);
         if (latitude === undefined || longitude === undefined) {
             this._sunCoordinateCacheKey = undefined;
             this._sunCoordinateCache = undefined;
@@ -3213,6 +3351,10 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         this._sunCoordinateCache = coords;
         return coords;
     }
+    _resolveSunCoordinates() {
+        if (!this._config?.show_sun_times) return undefined;
+        return this._getLocationCoordinates();
+    }
     _parseCoordinate(value, min, max) {
         if (value === undefined || value === null) return undefined;
         const numericValue = typeof value === "number" ? value : parseFloat(value);
@@ -3221,11 +3363,27 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         return numericValue;
     }
     _getWeatherBgImage(state) {
-        // this._state.state is a string like "snowy-rainy"
-        // The WeatherImages object keys are like "snowyrainy"
-        // So we need to remove the hyphens from the state string
-        const imageKey = state.replace(/-/g, "");
-        return (0, $04b2058bf019e2da$export$d0bd520bd5ddb657)[imageKey] ?? (0, $04b2058bf019e2da$export$d0bd520bd5ddb657).partlycloudy; // Fallback
+        const variants = (0, $04b2058bf019e2da$export$d0bd520bd5ddb657)[state.replace(/-/g, "")];
+        const useNightBackgrounds = this._config?.use_night_header_backgrounds !== false;
+        const isDaytime = useNightBackgrounds ? this._isDaytimeNow() : true;
+        const fallback = useNightBackgrounds && !isDaytime ? (0, $04b2058bf019e2da$export$80688e1fcf715020).night : (0, $04b2058bf019e2da$export$80688e1fcf715020).day;
+        if (!variants) return fallback;
+        if (!useNightBackgrounds) return variants.day;
+        return isDaytime ? variants.day : variants.night;
+    }
+    _isDaytimeNow() {
+        const attributeValue = this._state?.attributes?.is_daytime;
+        if (typeof attributeValue === "boolean") return attributeValue;
+        const coordinates = this._getLocationCoordinates();
+        if (!coordinates) return true;
+        const now = new Date();
+        const times = (0, (/*@__PURE__*/$parcel$interopDefault($6f99bd4ef956c48f$exports))).getTimes(now, coordinates.latitude, coordinates.longitude);
+        const sunrise = times.sunrise?.getTime();
+        const sunset = times.sunset?.getTime();
+        if (typeof sunrise !== "number" || Number.isNaN(sunrise) || typeof sunset !== "number" || Number.isNaN(sunset)) return true;
+        const nowTime = now.getTime();
+        if (sunrise <= sunset) return nowTime >= sunrise && nowTime < sunset;
+        return nowTime >= sunrise || nowTime < sunset;
     }
     _updateGap() {
         const container = this.shadowRoot.querySelector("ha-card");
@@ -3327,6 +3485,9 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
 (0, $39J5i.__decorate)([
     (0, $pklEb.state)()
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_status", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_headerTemperatureState", void 0);
 (0, $39J5i.__decorate)([
     (0, $pklEb.state)()
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastDailyEvent", void 0);
