@@ -4,7 +4,7 @@ import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { WeatherForecastExtendedConfig } from "../types";
 
 type HaFormSelector =
-  | { entity: { domain?: string } }
+  | { entity: { domain?: string; device_class?: string | string[] } }
   | { boolean: {} }
   | { text: {} }
   | { select: { options: Array<{ value: string; label: string }> } };
@@ -179,6 +179,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.entity");
       case "name":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.name");
+      case "header_temperature_entity":
+        return "Header temperature sensor";
       case "show_header":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
@@ -217,6 +219,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     const baseSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
       { name: "name", selector: { text: {} }, optional: true },
+      {
+        name: "header_temperature_entity",
+        selector: { entity: { domain: "sensor", device_class: "temperature" } },
+        optional: true,
+      },
     ];
 
     const toggleNames: ToggleName[] = ["show_header", "hourly_forecast", "daily_forecast"];

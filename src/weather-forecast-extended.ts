@@ -11,6 +11,7 @@ import { WeatherImages } from './weather-images';
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
+import type { HassEntity } from "home-assistant-js-websocket";
 
 // Private types
 type ForecastType = "hourly" | "daily";
@@ -24,6 +25,7 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _name: string;
   @state() private _state: WeatherEntity;
   @state() private _status: string;
+  @state() private _headerTemperatureState?: HassEntity;
   @state() private _forecastDailyEvent?: ForecastEvent;
   @state() private _forecastHourlyEvent?: ForecastEvent;
 
@@ -72,6 +74,11 @@ export class WeatherForecastExtended extends LitElement {
       const fn = this._state.attributes.friendly_name;
       this._name = fn ? fn : this._entity;
     }
+
+    const headerTemperatureEntity = this._config?.header_temperature_entity;
+    this._headerTemperatureState = headerTemperatureEntity
+      ? (hass.states[headerTemperatureEntity] as HassEntity | undefined)
+      : undefined;
   }
 
   public getGridOptions(): LovelaceGridOptions {
@@ -282,6 +289,30 @@ export class WeatherForecastExtended extends LitElement {
     }
   }
 
+  private _computeHeaderTemperature(): string {
+    if (!this._hass || !this._state) {
+      return "";
+    }
+
+    const sensorState = this._headerTemperatureState;
+    if (sensorState && !this._isStateUnavailable(sensorState.state)) {
+      const formattedSensor = this._hass.formatEntityState(sensorState);
+      return formattedSensor || sensorState.state;
+    }
+
+    const formattedWeather = this._hass.formatEntityAttributeValue(this._state, "temperature");
+    return formattedWeather || this._state.state || "";
+  }
+
+  private _isStateUnavailable(state?: string): boolean {
+    if (!state) {
+      return true;
+    }
+
+    const normalized = state.toLowerCase();
+    return normalized === "unavailable" || normalized === "unknown";
+  }
+
   // Render methods
   render() {
     if (!this._config || !this._hass)
@@ -341,7 +372,7 @@ export class WeatherForecastExtended extends LitElement {
               class=${classMap(headerClassMap)}
               style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
             >
-              <div class="temp">${this._hass.formatEntityAttributeValue(this._state, "temperature") || this._state.state}</div>
+              <div class="temp">${this._computeHeaderTemperature()}</div>
               <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
             </div>
           `
