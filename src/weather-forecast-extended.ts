@@ -46,6 +46,7 @@ export class WeatherForecastExtended extends LitElement {
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
       ...config,
+      show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
@@ -102,6 +103,7 @@ export class WeatherForecastExtended extends LitElement {
     return {
       type: "custom:weather-forecast-extended-card",
       entity: weatherEntity ?? "weather.home",
+      show_header: true,
       hourly_forecast: true,
       daily_forecast: true,
       orientation: "vertical",
@@ -253,8 +255,11 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
-    const showDaily = this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length;
-    const showHourly = this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length;
+    const showDaily = Boolean(this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length);
+    const showHourly = Boolean(this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length);
+    const showHeader = this._config.show_header !== false;
+    const showForecasts = showDaily || showHourly;
+    const showForecastDivider = showDaily && showHourly;
     const sunCoordinates = this._resolveSunCoordinates();
     const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates);
     const orientation = this._config.orientation ?? "vertical";
@@ -264,59 +269,85 @@ export class WeatherForecastExtended extends LitElement {
       "orientation-vertical": orientation !== "horizontal",
     };
 
+    const headerClassMap = {
+      weather: true,
+      "header-only": showHeader && !showForecasts,
+    };
+
+    const hasContent = showHeader || showForecasts;
+
+    if (!hasContent) {
+      const cardLabel = this._name || this._entity;
+      return html`
+        <hui-warning>
+          ${cardLabel} has no sections enabled.
+        </hui-warning>
+      `;
+    }
+
     return html`
       <ha-card>
-        <div class="weather" style="background-image: url(${this._getWeatherBgImage(this._state.state)})">
-          <div class="temp">${this._hass.formatEntityAttributeValue(this._state, "temperature") || this._state.state}</div>
-          <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
-        </div>
-        ${showDaily || showHourly
+        ${showHeader
           ? html`
-            <div class="divider card-divider"></div>
+            <div
+              class=${classMap(headerClassMap)}
+              style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
+            >
+              <div class="temp">${this._hass.formatEntityAttributeValue(this._state, "temperature") || this._state.state}</div>
+              <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+            </div>
           `
-          : ""
-        }
-        <div class=${classMap(containerClassMap)}>
-          <div class="forecast-daily-container">
-            <div class="fade-left"></div>
-            <div class="fade-right"></div>
-            ${showDaily
-              ? html`
-                <div class="forecast daily">
-                  <wfe-daily-list
-                    .hass=${this._hass}
-                    .forecast=${this._forecastDailyEvent!.forecast}
-                    .min=${this._dailyMinTemp}
-                    .max=${this._dailyMaxTemp}
-                    @wfe-daily-selected=${this._handleDailySelected}
-                  ></wfe-daily-list>
-                </div>
-              `
-              : ""
-            }
-          </div>
-          <div class="divider forecast-divider"></div>
-          <div class="forecast-hourly-container">
-            <div class="fade-left"></div>
-            <div class="fade-right"></div>
-            ${showHourly
-              ? html`
-                <div class="forecast hourly"
-                  style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined
-                    ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};`
-                    : nothing}>
-                  <wfe-hourly-list
-                    .hass=${this._hass}
-                    .forecast=${this._forecastHourlyEvent!.forecast}
-                    .showSunTimes=${showSunTimes}
-                    .sunCoordinates=${sunCoordinates}
-                  ></wfe-hourly-list>
-                </div>
-              `
-              : ""
-            }
-          </div>
-        </div>
+          : nothing}
+        ${showHeader && showForecasts
+          ? html`<div class="divider card-divider"></div>`
+          : nothing}
+        ${showForecasts
+          ? html`
+            <div class=${classMap(containerClassMap)}>
+              ${showDaily
+                ? html`
+                  <div class="forecast-daily-container">
+                    <div class="fade-left"></div>
+                    <div class="fade-right"></div>
+                    <div class="forecast daily">
+                      <wfe-daily-list
+                        .hass=${this._hass}
+                        .forecast=${this._forecastDailyEvent!.forecast}
+                        .min=${this._dailyMinTemp}
+                        .max=${this._dailyMaxTemp}
+                        @wfe-daily-selected=${this._handleDailySelected}
+                      ></wfe-daily-list>
+                    </div>
+                  </div>
+                `
+                : nothing}
+              ${showForecastDivider
+                ? html`<div class="divider forecast-divider"></div>`
+                : nothing}
+              ${showHourly
+                ? html`
+                  <div class="forecast-hourly-container">
+                    <div class="fade-left"></div>
+                    <div class="fade-right"></div>
+                    <div
+                      class="forecast hourly"
+                      style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined
+                        ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};`
+                        : nothing}
+                    >
+                      <wfe-hourly-list
+                        .hass=${this._hass}
+                        .forecast=${this._forecastHourlyEvent!.forecast}
+                        .showSunTimes=${showSunTimes}
+                        .sunCoordinates=${sunCoordinates}
+                      ></wfe-hourly-list>
+                    </div>
+                  </div>
+                `
+                : nothing}
+            </div>
+          `
+          : nothing}
       </ha-card>
     `;
   }

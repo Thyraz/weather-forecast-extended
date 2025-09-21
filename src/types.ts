@@ -16,6 +16,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   type: "custom:weather-forecast-extended-card";
   entity: string;
   name?: string;
+  show_header?: boolean;
   hourly_forecast?: boolean;
   daily_forecast?: boolean;
   orientation?: "vertical" | "horizontal";

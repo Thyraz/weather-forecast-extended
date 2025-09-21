@@ -10,10 +10,13 @@ type HaFormSelector =
   | { select: { options: Array<{ value: string; label: string }> } };
 
 type HaFormSchema = {
-  name: keyof WeatherForecastExtendedConfig | "entity" | "name" | "hourly_forecast" | "daily_forecast";
+  name: keyof WeatherForecastExtendedConfig | "entity" | "name" | "hourly_forecast" | "daily_forecast" | "show_header";
   selector: HaFormSelector;
   optional?: boolean;
+  disabled?: boolean;
 };
+
+type ToggleName = "show_header" | "hourly_forecast" | "daily_forecast";
 
 const fireEvent = (node: HTMLElement, type: string, detail?: unknown) => {
   node.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
@@ -83,29 +86,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     }
   `;
 
-  private readonly _schema: HaFormSchema[] = [
-    { name: "entity", selector: { entity: { domain: "weather" } } },
-    { name: "name", selector: { text: {} }, optional: true },
-    { name: "hourly_forecast", selector: { boolean: {} } },
-    { name: "daily_forecast", selector: { boolean: {} } },
-    {
-      name: "orientation",
-      selector: {
-        select: {
-          options: [
-            { value: "vertical", label: "Vertical" },
-            { value: "horizontal", label: "Horizontal" },
-          ],
-        },
-      },
-      optional: true,
-    },
-  ];
-
   public setConfig(config: WeatherForecastExtendedConfig): void {
     this._config = {
       type: "custom:weather-forecast-extended-card",
       ...config,
+      show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
@@ -117,11 +102,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       return html``;
     }
 
+    const schema = this._buildSchema();
+
     return html`
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
-        .schema=${this._schema}
+        .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._handleValueChanged}
       ></ha-form>
@@ -192,6 +179,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.entity");
       case "name":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.name");
+      case "show_header":
+        return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
         return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_hourly") || "Show hourly forecast";
       case "daily_forecast":
@@ -222,6 +211,49 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     const update: Partial<WeatherForecastExtendedConfig> = {};
     (update as any)[key] = value === "" ? undefined : value;
     this._updateConfig(update);
+  }
+
+  private _buildSchema(): HaFormSchema[] {
+    const baseSchema: HaFormSchema[] = [
+      { name: "entity", selector: { entity: { domain: "weather" } } },
+      { name: "name", selector: { text: {} }, optional: true },
+    ];
+
+    const toggleNames: ToggleName[] = ["show_header", "hourly_forecast", "daily_forecast"];
+    const toggleSchemas: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
+
+    const config = this._config;
+    if (config) {
+      const enabledCount = toggleNames.reduce((count, name) =>
+        this._isSectionEnabled(name, config) ? count + 1 : count,
+      0);
+
+      toggleNames.forEach((name, index) => {
+        const isEnabled = this._isSectionEnabled(name, config);
+        toggleSchemas[index].disabled = enabledCount <= 1 && isEnabled;
+      });
+    }
+
+    baseSchema.push(...toggleSchemas);
+    baseSchema.push({
+      name: "orientation",
+      selector: {
+        select: {
+          options: [
+            { value: "vertical", label: "Vertical" },
+            { value: "horizontal", label: "Horizontal" },
+          ],
+        },
+      },
+      optional: true,
+    });
+
+    return baseSchema;
+  }
+
+  private _isSectionEnabled(name: ToggleName, config: WeatherForecastExtendedConfig): boolean {
+    const value = config[name];
+    return value !== false;
   }
 
   private _updateConfig(changes: Partial<WeatherForecastExtendedConfig>) {

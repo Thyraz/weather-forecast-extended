@@ -19,6 +19,13 @@ ha-card {
   color: white;
 }
 
+.weather.header-only {
+  height: 100%;
+  flex: 1 1 auto;
+  border-bottom-left-radius: var(--ha-card-border-radius, 12px);
+  border-bottom-right-radius: var(--ha-card-border-radius, 12px);
+}
+
 .weather .condition {
     font-size: var(--ha-font-size-xl);
     line-height: calc( 10px + var(--ha-font-size-xl) );
