@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { WeatherForecastExtendedConfig } from "../types";
@@ -10,7 +10,7 @@ type HaFormSelector =
   | { select: { options: Array<{ value: string; label: string }> } };
 
 type HaFormSchema = {
-  name: keyof WeatherForecastExtendedConfig | "entity" | "name" | "hourly_forecast" | "daily_forecast" | "show_header";
+  name: keyof WeatherForecastExtendedConfig | "entity" | "hourly_forecast" | "daily_forecast" | "show_header";
   selector: HaFormSelector;
   optional?: boolean;
   disabled?: boolean;
@@ -29,14 +29,16 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   @state() private _config?: WeatherForecastExtendedConfig;
 
   static styles = css`
-    .sun-section {
+    .sun-section,
+    .location-section {
       margin-top: 16px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .sun-section h4 {
+    .sun-section h4,
+    .location-section h4 {
       margin: 0;
       font-size: 16px;
       font-weight: 600;
@@ -112,6 +114,43 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         .computeLabel=${this._computeLabel}
         @value-changed=${this._handleValueChanged}
       ></ha-form>
+      <div class="location-section">
+        <h4>Location</h4>
+        <span>Needed for sunrise/sunset markers and day/night backgrounds</span>
+        <label class="sun-option">
+          <input
+            type="checkbox"
+            name="sun_use_home_coordinates"
+            .checked=${this._config.sun_use_home_coordinates ?? true}
+            @change=${this._handleSunToggleChange}
+          />
+          <span>Use Home Assistant location</span>
+        </label>
+        <div class="sun-coordinates">
+          <label class="sun-field">
+            <span>Latitude</span>
+            <input
+              type="text"
+              name="sun_latitude"
+              placeholder="e.g. 48.137"
+              .value=${String(this._config.sun_latitude ?? "")}
+              ?disabled=${this._config.sun_use_home_coordinates ?? true}
+              @input=${this._handleSunInputChange}
+            />
+          </label>
+          <label class="sun-field">
+            <span>Longitude</span>
+            <input
+              type="text"
+              name="sun_longitude"
+              placeholder="e.g. 11.575"
+              .value=${String(this._config.sun_longitude ?? "")}
+              ?disabled=${this._config.sun_use_home_coordinates ?? true}
+              @input=${this._handleSunInputChange}
+            />
+          </label>
+        </div>
+      </div>
       <div class="sun-section">
         <h4>Sunrise & Sunset</h4>
         <label class="sun-option">
@@ -123,43 +162,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           />
           <span>Show sunrise & sunset</span>
         </label>
-        ${this._config.show_sun_times
-          ? html`
-            <label class="sun-option">
-              <input
-                type="checkbox"
-                name="sun_use_home_coordinates"
-                .checked=${this._config.sun_use_home_coordinates ?? true}
-                @change=${this._handleSunToggleChange}
-              />
-              <span>Use Home Assistant location</span>
-            </label>
-            <div class="sun-coordinates">
-              <label class="sun-field">
-                <span>Latitude</span>
-                <input
-                  type="text"
-                  name="sun_latitude"
-                  placeholder="e.g. 48.137"
-                  .value=${String(this._config.sun_latitude ?? "")}
-                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-              <label class="sun-field">
-                <span>Longitude</span>
-                <input
-                  type="text"
-                  name="sun_longitude"
-                  placeholder="e.g. 11.575"
-                  .value=${String(this._config.sun_longitude ?? "")}
-                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-            </div>
-          `
-          : nothing}
       </div>
     `;
   }
@@ -177,10 +179,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     switch (schema.name) {
       case "entity":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.entity");
-      case "name":
-        return this.hass.localize("ui.panel.lovelace.editor.card.generic.name");
       case "header_temperature_entity":
-        return "Header temperature sensor";
+        return "Local header temperature sensor (optional)";
       case "show_header":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
@@ -189,6 +189,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_daily") || "Show daily forecast";
       case "orientation":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
+      case "use_night_header_backgrounds":
+        return "Use separate header backgrounds for nightly conditions";
       default:
         return schema.name;
     }
@@ -218,7 +220,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   private _buildSchema(): HaFormSchema[] {
     const baseSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
-      { name: "name", selector: { text: {} }, optional: true },
       {
         name: "header_temperature_entity",
         selector: { entity: { domain: "sensor", device_class: "temperature" } },
@@ -255,6 +256,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       optional: true,
     });
 
+    baseSchema.push({
+      name: "use_night_header_backgrounds",
+      selector: { boolean: {} },
+    });
+
     return baseSchema;
   }
 
@@ -273,10 +279,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ...changes,
       type: "custom:weather-forecast-extended-card",
     };
-
-    if (!updated.name) {
-      delete (updated as Partial<WeatherForecastExtendedConfig>).name;
-    }
 
     this._config = updated;
     fireEvent(this, "config-changed", { config: updated });

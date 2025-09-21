@@ -25,6 +25,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   sun_use_home_coordinates?: boolean;
   sun_latitude?: number | string;
   sun_longitude?: number | string;
+  use_night_header_backgrounds?: boolean;
 }
 
 export interface SunCoordinates {

@@ -7,11 +7,12 @@ import { subscribeForecast } from "./weather";
 import type { HomeAssistant } from "custom-card-helpers";
 import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
-import { WeatherImages } from './weather-images';
+import { DEFAULT_WEATHER_IMAGE, WeatherImages } from "./weather-images";
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
 import type { HassEntity } from "home-assistant-js-websocket";
+import SunCalc from "suncalc";
 
 // Private types
 type ForecastType = "hourly" | "daily";
@@ -54,6 +55,7 @@ export class WeatherForecastExtended extends LitElement {
       orientation: config.orientation ?? "vertical",
       show_sun_times: config.show_sun_times ?? false,
       sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
+      use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
     };
 
     this._config = defaults;
@@ -162,6 +164,7 @@ export class WeatherForecastExtended extends LitElement {
       hourly_forecast: true,
       daily_forecast: true,
       orientation: "vertical",
+      use_night_header_backgrounds: true,
     };
   }
 
@@ -460,34 +463,21 @@ export class WeatherForecastExtended extends LitElement {
     this._dailyMaxTemp = dailyMax;
   }
 
-  private _resolveSunCoordinates(): SunCoordinates | undefined {
-    if (!this._config?.show_sun_times) {
+  private _getLocationCoordinates(): SunCoordinates | undefined {
+    if (!this._config) {
       this._sunCoordinateCacheKey = undefined;
       this._sunCoordinateCache = undefined;
       return undefined;
     }
 
     const useHome = this._config.sun_use_home_coordinates ?? true;
-    if (useHome) {
-      const latitude = this._parseCoordinate(this._hass?.config?.latitude, -90, 90);
-      const longitude = this._parseCoordinate(this._hass?.config?.longitude, -180, 180);
-      if (latitude !== undefined && longitude !== undefined) {
-        const key = `${latitude},${longitude}`;
-        if (this._sunCoordinateCacheKey === key && this._sunCoordinateCache) {
-          return this._sunCoordinateCache;
-        }
-        const coords: SunCoordinates = { latitude, longitude };
-        this._sunCoordinateCacheKey = key;
-        this._sunCoordinateCache = coords;
-        return coords;
-      }
-      this._sunCoordinateCacheKey = undefined;
-      this._sunCoordinateCache = undefined;
-      return undefined;
-    }
+    const latitude = useHome
+      ? this._parseCoordinate(this._hass?.config?.latitude, -90, 90)
+      : this._parseCoordinate(this._config.sun_latitude, -90, 90);
+    const longitude = useHome
+      ? this._parseCoordinate(this._hass?.config?.longitude, -180, 180)
+      : this._parseCoordinate(this._config.sun_longitude, -180, 180);
 
-    const latitude = this._parseCoordinate(this._config.sun_latitude, -90, 90);
-    const longitude = this._parseCoordinate(this._config.sun_longitude, -180, 180);
     if (latitude === undefined || longitude === undefined) {
       this._sunCoordinateCacheKey = undefined;
       this._sunCoordinateCache = undefined;
@@ -503,6 +493,14 @@ export class WeatherForecastExtended extends LitElement {
     this._sunCoordinateCacheKey = key;
     this._sunCoordinateCache = coords;
     return coords;
+  }
+
+  private _resolveSunCoordinates(): SunCoordinates | undefined {
+    if (!this._config?.show_sun_times) {
+      return undefined;
+    }
+
+    return this._getLocationCoordinates();
   }
 
   private _parseCoordinate(value: number | string | undefined, min: number, max: number): number | undefined {
@@ -523,11 +521,50 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   private _getWeatherBgImage(state: string): string {
-    // this._state.state is a string like "snowy-rainy"
-    // The WeatherImages object keys are like "snowyrainy"
-    // So we need to remove the hyphens from the state string
-    const imageKey = state.replace(/-/g, '') as keyof typeof WeatherImages;
-    return WeatherImages[imageKey] ?? WeatherImages.partlycloudy; // Fallback
+    const variants = WeatherImages[state.replace(/-/g, '')];
+    const useNightBackgrounds = this._config?.use_night_header_backgrounds !== false;
+    const isDaytime = useNightBackgrounds ? this._isDaytimeNow() : true;
+    const fallback = useNightBackgrounds && !isDaytime
+      ? DEFAULT_WEATHER_IMAGE.night
+      : DEFAULT_WEATHER_IMAGE.day;
+
+    if (!variants) {
+      return fallback;
+    }
+
+    if (!useNightBackgrounds) {
+      return variants.day;
+    }
+
+    return isDaytime ? variants.day : variants.night;
+  }
+
+  private _isDaytimeNow(): boolean {
+    const attributeValue = this._state?.attributes?.is_daytime;
+    if (typeof attributeValue === "boolean") {
+      return attributeValue;
+    }
+
+    const coordinates = this._getLocationCoordinates();
+    if (!coordinates) {
+      return true;
+    }
+
+    const now = new Date();
+    const times = SunCalc.getTimes(now, coordinates.latitude, coordinates.longitude);
+    const sunrise = times.sunrise?.getTime();
+    const sunset = times.sunset?.getTime();
+
+    if (typeof sunrise !== "number" || Number.isNaN(sunrise) || typeof sunset !== "number" || Number.isNaN(sunset)) {
+      return true;
+    }
+
+    const nowTime = now.getTime();
+    if (sunrise <= sunset) {
+      return nowTime >= sunrise && nowTime < sunset;
+    }
+
+    return nowTime >= sunrise || nowTime < sunset;
   }
 
   private _updateGap() {
