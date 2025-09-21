@@ -75,17 +75,65 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   public getGridOptions(): LovelaceGridOptions {
-    const minRows = 3;
-    var rows = 2.5;
-    rows += this._config.daily_forecast !== false ? 3 : 0;
-    rows += this._config.hourly_forecast !== false ? 2.5 : 0;
+    if (!this._config) {
+      return {
+        columns: 12,
+        rows: 3,
+        min_columns: 6,
+        min_rows: 3,
+      };
+    }
 
-    rows = Math.floor(rows);
+    const orientation = this._config.orientation ?? "vertical";
+    const showHeader = this._config.show_header !== false;
+    const showDaily = this._config.daily_forecast !== false;
+    const showHourly = this._config.hourly_forecast !== false;
+
+    let rows = 3;
+
+    if (orientation === "horizontal") {
+      if (!showDaily && !showHourly) {
+        rows = showHeader ? 3 : 3;
+      } else if (showDaily && showHourly) {
+        rows = showHeader ? 6 : 5;
+      } else {
+        rows = showHeader ? 5 : 4;
+      }
+    } else {
+      let computed = 0;
+      if (showHeader) {
+        computed += 3;
+      }
+      if (showDaily) {
+        computed += 3;
+      }
+      if (showHourly) {
+        computed += 2;
+      }
+      if (showDaily && showHourly) {
+        computed += 1;
+      }
+      if (!showHeader && showDaily && showHourly) {
+        computed += 1;
+      }
+
+      if (!showHeader && (showDaily || showHourly)) {
+        computed = Math.max(computed, 4);
+      }
+
+      if (!showHeader && !showDaily && !showHourly) {
+        computed = 3;
+      }
+
+      rows = Math.max(computed, 3);
+    }
+
+    const minRows = rows;
 
     return {
       columns: 12,
-      rows: rows,
-      min_columns: 6,
+      rows,
+      min_columns: orientation === "horizontal" ? 12 : 6,
       min_rows: minRows,
     };
   }
