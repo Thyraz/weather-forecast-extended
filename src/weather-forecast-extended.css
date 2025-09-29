@@ -232,7 +232,7 @@ ha-card {
   --min-gap: 16px;
   --icon-size: 25px;
   --icon-container-width: 25px;
-  /* --icon-container-height: 70px; */
+  --day-marker-width: 40px;
 
   /* Variables used for calculations in CSS rules of "forecast-item .icon-container" */
   --translate-content-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
@@ -288,16 +288,26 @@ ha-card {
   overflow: visible;
 }
 
-.forecast .new-day {
-  font-weight: bold;
-  margin: -0px -8px -0px -8px;
-  padding: 0px 8px 0px 8px;
+.forecast.hourly .day-marker {
+  flex: 0 0 auto;
+  align-self: start;
+  position: sticky;
+  left: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 600;
   color: white;
   background-color: var(--state-climate-cool-color);
-  border-radius: 20px;
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 3;
+  scroll-snap-align: none;
+  width: var(--day-marker-width);
+  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2); /* Fallback if round() not available */
+  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));
+  margin-left: calc(var(--dynamic-gap) * -1 / 2);
 }
 
 .forecast .day-of-month {
@@ -326,16 +336,9 @@ ha-card {
   white-space: nowrap;
 }
 
-.forecast .ampm,
-.forecast .ampm-hidden {
-  /* min-height: 5px; */
-  margin-top: -4px;
+.forecast .ampm {
   font-size: 11px;
   opacity: 0.3;
-}
-
-.forecast .ampm-hidden {
-  opacity: 0.0 !important;
 }
 
 .forecast .temp {
@@ -367,9 +370,7 @@ ha-card {
 
 .forecast.daily .forecast-item {
   display: grid;
-  /* rows: weekday, day-of-month, main area (icon+bar+templow), precipitation */
   grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;
-  /* row-gap: 4px; */
   align-content: start;
 }
 

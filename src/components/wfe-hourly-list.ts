@@ -4,7 +4,7 @@ import { customElement, property } from "lit/decorators.js";
 import SunCalc from "suncalc";
 import type { SunCoordinates, SunEventType, SunTimesByDay } from "../types";
 import type { ForecastAttribute } from "../weather";
-import { formatDayPeriod, formatDateWeekdayShort, formatHour, formatHourMinute, isNewDay, useAmPm } from "../date-time";
+import { formatDayPeriod, formatDateWeekdayShort, formatHour, formatHourMinute, useAmPm } from "../date-time";
 import { getWeatherStateIcon } from "../weather";
 import type { HomeAssistant } from "custom-card-helpers";
 
@@ -52,7 +52,38 @@ export class WFEHourlyList extends LitElement {
 
   render() {
     if (!this.forecast?.length) return nothing;
-    return html`${this.forecast.map((item, index) => this._renderHourlyItem(item, index))}`;
+
+    const parts: TemplateResult[] = [];
+    let currentDay: string | undefined;
+
+    this.forecast.forEach((item, index) => {
+      if (!item?.datetime) {
+        return;
+      }
+
+      const date = new Date(item.datetime);
+      if (!Number.isFinite(date.getTime())) {
+        return;
+      }
+
+      const dayKey = this._formatDayKey(date);
+      if (dayKey !== currentDay) {
+        currentDay = dayKey;
+        parts.push(this._renderDayMarker(date));
+      }
+
+      const hourlyItem = this._renderHourlyItem(item, index);
+      if (hourlyItem !== nothing) {
+        parts.push(hourlyItem);
+      }
+    });
+
+    return html`${parts}`;
+  }
+
+  private _renderDayMarker(date: Date): TemplateResult {
+    const label = formatDateWeekdayShort(date, this.hass?.locale as any, this.hass?.config as any);
+    return html`<div class="day-marker">${label}</div>`;
   }
 
   private _setupResizeObserver() {
@@ -89,22 +120,16 @@ export class WFEHourlyList extends LitElement {
     }
 
     const date = new Date(item.datetime);
-    const newDay = isNewDay(date, this.hass.config as any);
     const sunEvent = this._getSunEventForHour(date, index);
     const eventDate = sunEvent ? new Date(sunEvent.timestamp) : undefined;
     const dateClasses = ["date"];
-    if (newDay) {
-      dateClasses.push("new-day");
-    }
     if (sunEvent) {
       dateClasses.push(sunEvent.type);
     }
 
     const dateLabel = sunEvent
       ? formatHourMinute(eventDate!, this.hass.locale as any, this.hass.config as any)
-      : newDay
-        ? formatDateWeekdayShort(date, this.hass.locale as any, this.hass.config as any)
-        : formatHour(date, this.hass.locale as any, this.hass.config as any);
+      : formatHour(date, this.hass.locale as any, this.hass.config as any);
 
     const showAmPm = useAmPm(this.hass.locale as any);
     const amPmDate = eventDate ?? date;
@@ -114,7 +139,7 @@ export class WFEHourlyList extends LitElement {
       <div class="forecast-item">
         <div class="${dateClasses.join(" ")}">${dateLabel}</div>
         ${showAmPm
-          ? html`<div class="${newDay ? 'ampm-hidden' : 'ampm'}">${amPmLabel ?? ""}</div>`
+          ? html`<div class="ampm">${amPmLabel ?? ""}</div>`
           : ""}
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
