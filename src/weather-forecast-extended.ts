@@ -1,6 +1,7 @@
 import type { PropertyValues } from "lit";
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { styleMap } from "lit/directives/style-map.js";
 import { state } from "lit/decorators";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
@@ -29,11 +30,13 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _headerTemperatureState?: HassEntity;
   @state() private _forecastDailyEvent?: ForecastEvent;
   @state() private _forecastHourlyEvent?: ForecastEvent;
+  @state() private _dailyGap?: number;
+  @state() private _hourlyGap?: number;
 
   // private property
   private _subscriptions: SubscriptionMap = { hourly: undefined, daily: undefined };
-  private _resizeObserver: ResizeObserver;
-  private _oldContainerWidth: number;
+  private _resizeObserver?: ResizeObserver;
+  private _oldContainerWidth?: number;
   private _hourlyMinTemp?: number;
   private _hourlyMaxTemp?: number;
   private _dailyMinTemp?: number;
@@ -360,6 +363,22 @@ export class WeatherForecastExtended extends LitElement {
 
     const hasContent = showHeader || dailyEnabled || hourlyEnabled;
 
+    const dailyStyle = this._dailyGap !== undefined
+      ? styleMap({ "--dynamic-gap": `${this._dailyGap}px` })
+      : nothing;
+
+    const hourlyStyle = (() => {
+      const styles: Record<string, string> = {};
+      if (this._hourlyGap !== undefined) {
+        styles["--dynamic-gap"] = `${this._hourlyGap}px`;
+      }
+      if (this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined) {
+        styles["--min-temp"] = `${this._hourlyMinTemp}`;
+        styles["--max-temp"] = `${this._hourlyMaxTemp}`;
+      }
+      return Object.keys(styles).length ? styleMap(styles) : nothing;
+    })();
+
     if (!hasContent) {
       const cardLabel = this._name || this._entity;
       return html`
@@ -393,7 +412,7 @@ export class WeatherForecastExtended extends LitElement {
                   <div class="forecast-daily-container">
                     <div class="fade-left"></div>
                     <div class="fade-right"></div>
-                    <div class="forecast daily">
+                    <div class="forecast daily" style=${dailyStyle}>
                       <wfe-daily-list
                         .hass=${this._hass}
                         .forecast=${dailyForecast}
@@ -415,9 +434,7 @@ export class WeatherForecastExtended extends LitElement {
                     <div class="fade-right"></div>
                     <div
                       class="forecast hourly"
-                      style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined
-                        ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};`
-                        : nothing}
+                      style=${hourlyStyle}
                     >
                       <wfe-hourly-list
                         .hass=${this._hass}
@@ -582,20 +599,38 @@ export class WeatherForecastExtended extends LitElement {
       return;
     }
 
-    ([daily, hourly]).forEach(elem => {
-      if (elem) {
-        const itemWidth = parseInt(getComputedStyle(elem).getPropertyValue("--icon-container-width"));
-        const minGap = parseInt(getComputedStyle(elem).getPropertyValue("--min-gap"));
-        const padding = 16;
-
-        const maxItems = Math.floor((containerWidth + minGap - 2*padding) / (itemWidth + minGap));
-        if (maxItems < 2) return; // Avoid divide by zero
-        const totalItemWidth = maxItems * itemWidth;
-        const gap = Math.round((containerWidth - 2*padding - totalItemWidth) / (maxItems - 1));
-
-        elem.style.setProperty("--dynamic-gap", `${gap}px`);
+    const computeGap = (elem: HTMLElement | null): number | undefined => {
+      if (!elem) {
+        return undefined;
       }
-    });
+      const styles = getComputedStyle(elem);
+      const itemWidth = parseInt(styles.getPropertyValue("--icon-container-width"));
+      const minGap = parseInt(styles.getPropertyValue("--min-gap"));
+      if (Number.isNaN(itemWidth) || Number.isNaN(minGap)) {
+        return undefined;
+      }
+      const padding = 16;
+      const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
+      if (maxItems < 2) {
+        return undefined;
+      }
+      const totalItemWidth = maxItems * itemWidth;
+      return Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
+    };
+
+    const dailyGap = computeGap(daily);
+    if (dailyGap !== undefined && dailyGap !== this._dailyGap) {
+      this._dailyGap = dailyGap;
+    } else if (dailyGap === undefined && this._dailyGap !== undefined) {
+      this._dailyGap = undefined;
+    }
+
+    const hourlyGap = computeGap(hourly);
+    if (hourlyGap !== undefined && hourlyGap !== this._hourlyGap) {
+      this._hourlyGap = hourlyGap;
+    } else if (hourlyGap === undefined && this._hourlyGap !== undefined) {
+      this._hourlyGap = undefined;
+    }
 
     this._oldContainerWidth = containerWidth;
   }
