@@ -1531,11 +1531,6 @@ class $107bb7d062dde330$export$befdefbdce210f91 {
 
 
 
-parcelRequire("1ZxoT");
-var $pklEb = parcelRequire("pklEb");
-// Code adapted from frontend/src/data/weather.ts to make it useable in custom cards
-parcelRequire("j0ZcV");
-var $l56HR = parcelRequire("l56HR");
 
 var $l56HR = parcelRequire("l56HR");
 
@@ -1578,6 +1573,12 @@ var $l56HR = parcelRequire("l56HR");
 
 
 
+
+parcelRequire("1ZxoT");
+var $pklEb = parcelRequire("pklEb");
+// Code adapted from frontend/src/data/weather.ts to make it useable in custom cards
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
 
 var $a670ed82a1e76f75$export$8b3032c22c6f26e6;
 (function(WeatherEntityFeature) {
@@ -1960,7 +1961,7 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-shrink: 0;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 10px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 4px 15px;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 15px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 2px 17px;\n  font-weight: bolder;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  -webkit-overflow-scrolling: touch;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast-daily-container {\n    overflow: visible;\n  }\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  flex: auto;\n  height: auto;\n  padding: 8px 16px 0;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    scroll-snap-type: none;\n    -webkit-overflow-scrolling: touch;\n  }\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast .new-day {\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  border-radius: 20px;\n  margin: 0 -8px;\n  padding: 0 8px;\n  font-weight: bold;\n  position: relative;\n  left: 50%;\n  transform: translateX(-50%);\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm, .forecast .ampm-hidden {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 11px;\n}\n\n.forecast .ampm-hidden {\n  opacity: 0 !important;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 1.15em;\n  margin-bottom: 2px;\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 1.15em;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-shrink: 0;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 10px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 4px 15px;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  width: fit-content;\n  margin-top: 15px;\n  margin-left: auto;\n  margin-right: 15px;\n  padding: 2px 17px;\n  font-weight: bolder;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  -webkit-overflow-scrolling: touch;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast-daily-container {\n    overflow: visible;\n  }\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  scroll-snap-type: x mandatory;\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  flex: auto;\n  height: auto;\n  padding: 8px 16px 0;\n  scroll-padding-left: 16px;\n  scroll-padding-right: 16px;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    scroll-snap-type: none;\n    -webkit-overflow-scrolling: touch;\n  }\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n  left: -8px;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 1.15em;\n  margin-bottom: 2px;\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 1.15em;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $j8KxL.css)`
@@ -2602,7 +2603,25 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
     }
     render() {
         if (!this.forecast?.length) return 0, $l56HR.nothing;
-        return (0, $l56HR.html)`${this.forecast.map((item, index)=>this._renderHourlyItem(item, index))}`;
+        const parts = [];
+        let currentDay;
+        this.forecast.forEach((item, index)=>{
+            if (!item?.datetime) return;
+            const date = new Date(item.datetime);
+            if (!Number.isFinite(date.getTime())) return;
+            const dayKey = this._formatDayKey(date);
+            if (dayKey !== currentDay) {
+                currentDay = dayKey;
+                parts.push(this._renderDayMarker(date));
+            }
+            const hourlyItem = this._renderHourlyItem(item, index);
+            if (hourlyItem !== (0, $l56HR.nothing)) parts.push(hourlyItem);
+        });
+        return (0, $l56HR.html)`${parts}`;
+    }
+    _renderDayMarker(date) {
+        const label = (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this.hass?.locale, this.hass?.config);
+        return (0, $l56HR.html)`<div class="day-marker">${label}</div>`;
     }
     _setupResizeObserver() {
         if (this._resizeObserver) return;
@@ -2630,22 +2649,20 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
     _renderHourlyItem(item, index) {
         if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) return 0, $l56HR.nothing;
         const date = new Date(item.datetime);
-        const newDay = (0, $2e3b0c24d7649e32$export$824eefb57336d873)(date, this.hass.config);
         const sunEvent = this._getSunEventForHour(date, index);
         const eventDate = sunEvent ? new Date(sunEvent.timestamp) : undefined;
         const dateClasses = [
             "date"
         ];
-        if (newDay) dateClasses.push("new-day");
         if (sunEvent) dateClasses.push(sunEvent.type);
-        const dateLabel = sunEvent ? (0, $2e3b0c24d7649e32$export$af90a3ef075406ce)(eventDate, this.hass.locale, this.hass.config) : newDay ? (0, $2e3b0c24d7649e32$export$e86782e02be44113)(date, this.hass.locale, this.hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this.hass.locale, this.hass.config);
+        const dateLabel = sunEvent ? (0, $2e3b0c24d7649e32$export$af90a3ef075406ce)(eventDate, this.hass.locale, this.hass.config) : (0, $2e3b0c24d7649e32$export$86a5557e1d677e29)(date, this.hass.locale, this.hass.config);
         const showAmPm = (0, $2e3b0c24d7649e32$export$98b044737b007ca6)(this.hass.locale);
         const amPmDate = eventDate ?? date;
         const amPmLabel = showAmPm ? (0, $2e3b0c24d7649e32$export$f57482e5e4ce715a)(amPmDate, this.hass.locale, this.hass.config) : undefined;
         return (0, $l56HR.html)`
       <div class="forecast-item">
         <div class="${dateClasses.join(" ")}">${dateLabel}</div>
-        ${showAmPm ? (0, $l56HR.html)`<div class="${newDay ? "ampm-hidden" : "ampm"}">${amPmLabel ?? ""}</div>` : ""}
+        ${showAmPm ? (0, $l56HR.html)`<div class="ampm">${amPmLabel ?? ""}</div>` : ""}
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
             <div class="forecast-image-icon">
@@ -3225,13 +3242,15 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
           <p>${this._name} is unavailable.</p>
         </ha-card>
       `;
-        const showDaily = Boolean(this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length);
-        const showHourly = Boolean(this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length);
+        const dailyEnabled = this._config.daily_forecast !== false;
+        const hourlyEnabled = this._config.hourly_forecast !== false;
         const showHeader = this._config.show_header !== false;
-        const showForecasts = showDaily || showHourly;
-        const showForecastDivider = showDaily && showHourly;
+        const showForecasts = dailyEnabled || hourlyEnabled;
+        const showForecastDivider = dailyEnabled && hourlyEnabled;
+        const dailyForecast = this._forecastDailyEvent?.forecast ?? [];
+        const hourlyForecast = this._forecastHourlyEvent?.forecast ?? [];
         const sunCoordinates = this._resolveSunCoordinates();
-        const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates);
+        const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
         const orientation = this._config.orientation ?? "vertical";
         const containerClassMap = {
             "forecast-container": true,
@@ -3242,7 +3261,19 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             weather: true,
             "header-only": showHeader && !showForecasts
         };
-        const hasContent = showHeader || showForecasts;
+        const hasContent = showHeader || dailyEnabled || hourlyEnabled;
+        const dailyStyle = this._dailyGap !== undefined ? (0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+            "--dynamic-gap": `${this._dailyGap}px`
+        }) : (0, $l56HR.nothing);
+        const hourlyStyle = (()=>{
+            const styles = {};
+            if (this._hourlyGap !== undefined) styles["--dynamic-gap"] = `${this._hourlyGap}px`;
+            if (this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined) {
+                styles["--min-temp"] = `${this._hourlyMinTemp}`;
+                styles["--max-temp"] = `${this._hourlyMaxTemp}`;
+            }
+            return Object.keys(styles).length ? (0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)(styles) : (0, $l56HR.nothing);
+        })();
         if (!hasContent) {
             const cardLabel = this._name || this._entity;
             return (0, $l56HR.html)`
@@ -3265,14 +3296,14 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         ${showHeader && showForecasts ? (0, $l56HR.html)`<div class="divider card-divider"></div>` : (0, $l56HR.nothing)}
         ${showForecasts ? (0, $l56HR.html)`
             <div class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(containerClassMap)}>
-              ${showDaily ? (0, $l56HR.html)`
+              ${dailyEnabled ? (0, $l56HR.html)`
                   <div class="forecast-daily-container">
                     <div class="fade-left"></div>
                     <div class="fade-right"></div>
-                    <div class="forecast daily">
+                    <div class="forecast daily" style=${dailyStyle}>
                       <wfe-daily-list
                         .hass=${this._hass}
-                        .forecast=${this._forecastDailyEvent.forecast}
+                        .forecast=${dailyForecast}
                         .min=${this._dailyMinTemp}
                         .max=${this._dailyMaxTemp}
                         @wfe-daily-selected=${this._handleDailySelected}
@@ -3281,17 +3312,17 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                   </div>
                 ` : (0, $l56HR.nothing)}
               ${showForecastDivider ? (0, $l56HR.html)`<div class="divider forecast-divider"></div>` : (0, $l56HR.nothing)}
-              ${showHourly ? (0, $l56HR.html)`
+              ${hourlyEnabled ? (0, $l56HR.html)`
                   <div class="forecast-hourly-container">
                     <div class="fade-left"></div>
                     <div class="fade-right"></div>
                     <div
                       class="forecast hourly"
-                      style=${this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined ? `--min-temp: ${this._hourlyMinTemp}; --max-temp: ${this._hourlyMaxTemp};` : (0, $l56HR.nothing)}
+                      style=${hourlyStyle}
                     >
                       <wfe-hourly-list
                         .hass=${this._hass}
-                        .forecast=${this._forecastHourlyEvent.forecast}
+                        .forecast=${hourlyForecast}
                         .showSunTimes=${showSunTimes}
                         .sunCoordinates=${sunCoordinates}
                       ></wfe-hourly-list>
@@ -3392,21 +3423,24 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!container || !daily && !hourly) return;
         const containerWidth = container.clientWidth;
         if (containerWidth === this._oldContainerWidth) return;
-        [
-            daily,
-            hourly
-        ].forEach((elem)=>{
-            if (elem) {
-                const itemWidth = parseInt(getComputedStyle(elem).getPropertyValue("--icon-container-width"));
-                const minGap = parseInt(getComputedStyle(elem).getPropertyValue("--min-gap"));
-                const padding = 16;
-                const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
-                if (maxItems < 2) return; // Avoid divide by zero
-                const totalItemWidth = maxItems * itemWidth;
-                const gap = Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
-                elem.style.setProperty("--dynamic-gap", `${gap}px`);
-            }
-        });
+        const computeGap = (elem)=>{
+            if (!elem) return undefined;
+            const styles = getComputedStyle(elem);
+            const itemWidth = parseInt(styles.getPropertyValue("--icon-container-width"));
+            const minGap = parseInt(styles.getPropertyValue("--min-gap"));
+            if (Number.isNaN(itemWidth) || Number.isNaN(minGap)) return undefined;
+            const padding = 16;
+            const maxItems = Math.floor((containerWidth + minGap - 2 * padding) / (itemWidth + minGap));
+            if (maxItems < 2) return undefined;
+            const totalItemWidth = maxItems * itemWidth;
+            return Math.round((containerWidth - 2 * padding - totalItemWidth) / (maxItems - 1));
+        };
+        const dailyGap = computeGap(daily);
+        if (dailyGap !== undefined && dailyGap !== this._dailyGap) this._dailyGap = dailyGap;
+        else if (dailyGap === undefined && this._dailyGap !== undefined) this._dailyGap = undefined;
+        const hourlyGap = computeGap(hourly);
+        if (hourlyGap !== undefined && hourlyGap !== this._hourlyGap) this._hourlyGap = hourlyGap;
+        else if (hourlyGap === undefined && this._hourlyGap !== undefined) this._hourlyGap = undefined;
         this._oldContainerWidth = containerWidth;
     }
     _teardownDragScroll(type) {
@@ -3494,6 +3528,12 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
 (0, $39J5i.__decorate)([
     (0, $pklEb.state)()
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_forecastHourlyEvent", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_dailyGap", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_hourlyGap", void 0);
 
 
 customElements.define("weather-forecast-extended-card", (0, $e6159c9afb48cae5$export$53427b5d95bebd88));
