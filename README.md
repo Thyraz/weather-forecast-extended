@@ -1,10 +1,10 @@
 # Weather Forecast Extended Card
 
-![Full card with header, daily, and hourly sections](docs/img/weather-forecast-extended-vertical.jpg)
+<img src="docs/img/weather-forecast-extended-vertical.jpg" width="588">
 
-![Horizontal layout focusing on hourly forecast](docs/img/weather-forecast-extended-horizontal.jpg)
+<img src="docs/img/weather-forecast-extended-horizontal.jpg" width="942">
 
-![Card editor configuration panel](docs/img/weather-forecast-extended-editor.jpg)
+<img src="docs/img/weather-forecast-extended-editor.jpg" width="968">
 
 ## Overview
 Weather Forecast Extended is a Lovelace custom card for Home Assistant that combines a large weather header with interactive daily and hourly forecasts. The card displays the forecast from the selected `weather` entity, adapts to the dashboard grid, and adds visual context such as sunrise and sunset markers, precipitation values, and day or night specific artwork.
