@@ -337,13 +337,15 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
-    const showDaily = Boolean(this._config.daily_forecast && this._forecastDailyEvent?.forecast?.length);
-    const showHourly = Boolean(this._config.hourly_forecast && this._forecastHourlyEvent?.forecast?.length);
+    const dailyEnabled = this._config.daily_forecast !== false;
+    const hourlyEnabled = this._config.hourly_forecast !== false;
     const showHeader = this._config.show_header !== false;
-    const showForecasts = showDaily || showHourly;
-    const showForecastDivider = showDaily && showHourly;
+    const showForecasts = dailyEnabled || hourlyEnabled;
+    const showForecastDivider = dailyEnabled && hourlyEnabled;
+    const dailyForecast = this._forecastDailyEvent?.forecast ?? [];
+    const hourlyForecast = this._forecastHourlyEvent?.forecast ?? [];
     const sunCoordinates = this._resolveSunCoordinates();
-    const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates);
+    const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
     const orientation = this._config.orientation ?? "vertical";
     const containerClassMap = {
       "forecast-container": true,
@@ -356,7 +358,7 @@ export class WeatherForecastExtended extends LitElement {
       "header-only": showHeader && !showForecasts,
     };
 
-    const hasContent = showHeader || showForecasts;
+    const hasContent = showHeader || dailyEnabled || hourlyEnabled;
 
     if (!hasContent) {
       const cardLabel = this._name || this._entity;
@@ -386,7 +388,7 @@ export class WeatherForecastExtended extends LitElement {
         ${showForecasts
           ? html`
             <div class=${classMap(containerClassMap)}>
-              ${showDaily
+              ${dailyEnabled
                 ? html`
                   <div class="forecast-daily-container">
                     <div class="fade-left"></div>
@@ -394,7 +396,7 @@ export class WeatherForecastExtended extends LitElement {
                     <div class="forecast daily">
                       <wfe-daily-list
                         .hass=${this._hass}
-                        .forecast=${this._forecastDailyEvent!.forecast}
+                        .forecast=${dailyForecast}
                         .min=${this._dailyMinTemp}
                         .max=${this._dailyMaxTemp}
                         @wfe-daily-selected=${this._handleDailySelected}
@@ -406,7 +408,7 @@ export class WeatherForecastExtended extends LitElement {
               ${showForecastDivider
                 ? html`<div class="divider forecast-divider"></div>`
                 : nothing}
-              ${showHourly
+              ${hourlyEnabled
                 ? html`
                   <div class="forecast-hourly-container">
                     <div class="fade-left"></div>
@@ -419,7 +421,7 @@ export class WeatherForecastExtended extends LitElement {
                     >
                       <wfe-hourly-list
                         .hass=${this._hass}
-                        .forecast=${this._forecastHourlyEvent!.forecast}
+                        .forecast=${hourlyForecast}
                         .showSunTimes=${showSunTimes}
                         .sunCoordinates=${sunCoordinates}
                       ></wfe-hourly-list>
