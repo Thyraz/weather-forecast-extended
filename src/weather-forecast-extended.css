@@ -395,7 +395,7 @@ ha-card {
 }
 
 .forecast.daily .forecast-item > .precipitation {
-  line-height: 1.15em;
+  line-height: 18px;
 }
 
 .forecast .precipitation.active,
