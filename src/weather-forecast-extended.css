@@ -355,8 +355,43 @@ ha-card {
 .forecast .precipitationprobability {
   opacity: 0.3;
   color: var(--state-climate-cool-color);
-  margin-bottom: 2px;
-  min-height: 1.15em;
+  min-height: 20px;
+}
+
+.forecast .precipitation {
+  --precipitation-fill: 0%;
+  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);
+  --wfe-precipitation-indicator-opacity: 0.2;
+  --wfe-precipitation-indicator-padding-inline: 8px;
+  --wfe-precipitation-indicator-padding-block: 0px;
+  --wfe-precipitation-indicator-offset-top: 0px;
+  --wfe-precipitation-indicator-offset-bottom: 0px;
+  position: relative;
+  display: inline-block;
+  padding-inline: var(--wfe-precipitation-indicator-padding-inline);
+  padding-block: var(--wfe-precipitation-indicator-padding-block);
+  border-radius: var(--wfe-precipitation-indicator-radius, 4px);
+  overflow: hidden;
+  z-index: 0;
+}
+
+.forecast .precipitation::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% - var(--precipitation-fill, 0%) - var(--wfe-precipitation-indicator-offset-top, 0px));
+  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));
+  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));
+  opacity: var(--wfe-precipitation-indicator-opacity, 0.2);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  transition: top 150ms ease-in-out, background-color 150ms ease-in-out;
+}
+
+.forecast .precipitation.overflow {
+  --wfe-precipitation-indicator-color: var(--red-color, #f44336);
+  color: var(--red-color, #f44336);
 }
 
 .forecast.daily .forecast-item > .precipitation {

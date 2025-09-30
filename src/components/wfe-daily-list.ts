@@ -5,6 +5,10 @@ import { formatDateDayTwoDigit, formatDateWeekdayShort, isNewDay } from "../date
 import { getWeatherStateIcon } from "../weather";
 import type { HomeAssistant } from "custom-card-helpers";
 
+const PRECIPITATION_DISPLAY_THRESHOLD = 0.3;
+const DAILY_PRECIPITATION_MIN_SCALE = 4;
+const DAILY_PRECIPITATION_MAX_SCALE = 20;
+
 @customElement("wfe-daily-list")
 export class WFEDailyList extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
@@ -19,8 +23,12 @@ export class WFEDailyList extends LitElement {
 
   render() {
     if (!this.forecast?.length) return nothing;
+    const precipitationScale = this._computePrecipitationScale(
+      DAILY_PRECIPITATION_MIN_SCALE,
+      DAILY_PRECIPITATION_MAX_SCALE,
+    );
     return html`
-      ${this.forecast.map((item) => this._renderDailyItem(item))}
+      ${this.forecast.map((item) => this._renderDailyItem(item, precipitationScale))}
     `;
   }
 
@@ -28,12 +36,15 @@ export class WFEDailyList extends LitElement {
     return typeof item !== "undefined" && item !== null;
   }
 
-  private _renderDailyItem(item: ForecastAttribute): TemplateResult | typeof nothing {
+  private _renderDailyItem(
+    item: ForecastAttribute,
+    precipitationScale?: number,
+  ): TemplateResult | typeof nothing {
     if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) {
       return nothing;
     }
-  const date = new Date(item.datetime);
-  const newDay = isNewDay(date, this.hass.config as any);
+    const date = new Date(item.datetime);
+    const newDay = isNewDay(date, this.hass.config as any);
 
     return html`
       <div class="forecast-item" @click=${() => this._handleSelect(item)}>
@@ -49,7 +60,7 @@ export class WFEDailyList extends LitElement {
           ${this._renderTemperatureBar(item)}
           <div class="templow">${this._hasValidValue(item.templow) ? html`${Math.round(item.templow!)}°` : "—"}</div>
         </div>
-        ${this._renderPrecipitationInfo(item)}
+        ${this._renderPrecipitationInfo(item, precipitationScale)}
       </div>
     `;
   }
@@ -78,7 +89,10 @@ export class WFEDailyList extends LitElement {
     `;
   }
 
-  private _renderPrecipitationInfo(item: ForecastAttribute): TemplateResult | typeof nothing {
+  private _renderPrecipitationInfo(
+    item: ForecastAttribute,
+    precipitationScale?: number,
+  ): TemplateResult | typeof nothing {
     const hasPrecipitation = this._hasValidValue(item.precipitation);
     const hasPrecipitationProbability = this._hasValidValue(item.precipitation_probability);
 
@@ -86,9 +100,33 @@ export class WFEDailyList extends LitElement {
       return nothing;
     }
 
+    const precipitationValue = hasPrecipitation ? (item.precipitation as number) : undefined;
+    const precipitationClasses = ["precipitation"];
+    if ((precipitationValue ?? 0) > PRECIPITATION_DISPLAY_THRESHOLD) {
+      precipitationClasses.push("active");
+    }
+
+    let precipitationStyle: string | typeof nothing = nothing;
+    let overflow = false;
+
+    if (
+      precipitationScale !== undefined &&
+      precipitationValue !== undefined &&
+      precipitationValue >= PRECIPITATION_DISPLAY_THRESHOLD
+    ) {
+      const normalized = precipitationScale > 0 ? Math.min(precipitationValue / precipitationScale, 1) : 0;
+      const percent = `${(normalized * 100).toFixed(2)}%`;
+      precipitationStyle = `--precipitation-fill: ${percent};`;
+      overflow = precipitationValue > precipitationScale;
+    }
+
+    if (overflow) {
+      precipitationClasses.push("overflow");
+    }
+
     return html`
       ${hasPrecipitation
-        ? html`<div class="precipitation ${((item.precipitation ?? 0) as number) > 0.3 ? 'active' : ''}">
+        ? html`<div class="${precipitationClasses.join(" ")}" style=${precipitationStyle}>
             ${(item.precipitation as number).toFixed(1)}
           </div>`
         : nothing}
@@ -98,6 +136,24 @@ export class WFEDailyList extends LitElement {
           </div>`
         : nothing}
     `;
+  }
+
+  private _computePrecipitationScale(minScale: number, maxScale: number): number | undefined {
+    if (!this.forecast?.length) {
+      return undefined;
+    }
+
+    const values = this.forecast
+      .map((item) => (typeof item?.precipitation === "number" ? item.precipitation : undefined))
+      .filter((value): value is number => typeof value === "number");
+
+    if (!values.length) {
+      return undefined;
+    }
+
+    const highestValue = Math.max(...values);
+    const unconstrained = Math.max(minScale, highestValue);
+    return Math.min(unconstrained, maxScale);
   }
 
   private _getTemperatureBarStyle(maxTemp: number, minTemp: number): string {

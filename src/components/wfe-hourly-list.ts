@@ -8,6 +8,10 @@ import { formatDayPeriod, formatDateWeekdayShort, formatHour, formatHourMinute, 
 import { getWeatherStateIcon } from "../weather";
 import type { HomeAssistant } from "custom-card-helpers";
 
+const PRECIPITATION_DISPLAY_THRESHOLD = 0.3;
+const HOURLY_PRECIPITATION_MIN_SCALE = 1;
+const HOURLY_PRECIPITATION_MAX_SCALE = 5;
+
 @customElement("wfe-hourly-list")
 export class WFEHourlyList extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
@@ -55,6 +59,10 @@ export class WFEHourlyList extends LitElement {
 
     const parts: TemplateResult[] = [];
     let currentDay: string | undefined;
+    const precipitationScale = this._computePrecipitationScale(
+      HOURLY_PRECIPITATION_MIN_SCALE,
+      HOURLY_PRECIPITATION_MAX_SCALE,
+    );
 
     this.forecast.forEach((item, index) => {
       if (!item?.datetime) {
@@ -72,7 +80,7 @@ export class WFEHourlyList extends LitElement {
         parts.push(this._renderDayMarker(date));
       }
 
-      const hourlyItem = this._renderHourlyItem(item, index);
+      const hourlyItem = this._renderHourlyItem(item, index, precipitationScale);
       if (hourlyItem !== nothing) {
         parts.push(hourlyItem);
       }
@@ -114,7 +122,11 @@ export class WFEHourlyList extends LitElement {
     return typeof item !== "undefined" && item !== null;
   }
 
-  private _renderHourlyItem(item: ForecastAttribute, index: number): TemplateResult | typeof nothing {
+  private _renderHourlyItem(
+    item: ForecastAttribute,
+    index: number,
+    precipitationScale?: number,
+  ): TemplateResult | typeof nothing {
     if (!this._hasValidValue(item.temperature) || !this._hasValidValue(item.condition)) {
       return nothing;
     }
@@ -150,12 +162,15 @@ export class WFEHourlyList extends LitElement {
           </div>
           <div class="templow"></div>
         </div>
-        ${this._renderPrecipitationInfo(item)}
+        ${this._renderPrecipitationInfo(item, precipitationScale)}
       </div>
     `;
   }
 
-  private _renderPrecipitationInfo(item: ForecastAttribute): TemplateResult | typeof nothing {
+  private _renderPrecipitationInfo(
+    item: ForecastAttribute,
+    precipitationScale?: number,
+  ): TemplateResult | typeof nothing {
     const hasPrecipitation = this._hasValidValue(item.precipitation);
     const hasPrecipitationProbability = this._hasValidValue(item.precipitation_probability);
 
@@ -163,9 +178,33 @@ export class WFEHourlyList extends LitElement {
       return nothing;
     }
 
+    const precipitationValue = hasPrecipitation ? (item.precipitation as number) : undefined;
+    const precipitationClasses = ["precipitation"];
+    if ((precipitationValue ?? 0) > PRECIPITATION_DISPLAY_THRESHOLD) {
+      precipitationClasses.push("active");
+    }
+
+    let overflow = false;
+    let precipitationStyle: string | typeof nothing = nothing;
+
+    if (
+      precipitationScale !== undefined &&
+      precipitationValue !== undefined &&
+      precipitationValue >= PRECIPITATION_DISPLAY_THRESHOLD
+    ) {
+      const normalized = precipitationScale > 0 ? Math.min(precipitationValue / precipitationScale, 1) : 0;
+      const percent = `${(normalized * 100).toFixed(2)}%`;
+      precipitationStyle = `--precipitation-fill: ${percent};`;
+      overflow = precipitationValue > precipitationScale;
+    }
+
+    if (overflow) {
+      precipitationClasses.push("overflow");
+    }
+
     return html`
       ${hasPrecipitation
-        ? html`<div class="precipitation ${((item.precipitation ?? 0) as number) > 0.3 ? 'active' : ''}">
+        ? html`<div class="${precipitationClasses.join(" ")}" style=${precipitationStyle}>
             ${(item.precipitation as number).toFixed(1)}
           </div>`
         : nothing}
@@ -175,6 +214,24 @@ export class WFEHourlyList extends LitElement {
           </div>`
         : nothing}
     `;
+  }
+
+  private _computePrecipitationScale(minScale: number, maxScale: number): number | undefined {
+    if (!this.forecast?.length) {
+      return undefined;
+    }
+
+    const values = this.forecast
+      .map((item) => (typeof item?.precipitation === "number" ? item.precipitation : undefined))
+      .filter((value): value is number => typeof value === "number");
+
+    if (!values.length) {
+      return undefined;
+    }
+
+    const highestValue = Math.max(...values);
+    const unconstrained = Math.max(minScale, highestValue);
+    return Math.min(unconstrained, maxScale);
   }
 
   private _calculateSunTimes() {
