@@ -17,6 +17,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
   header_temperature_entity?: string;
+  header_attributes?: string[];
   show_header?: boolean;
   hourly_forecast?: boolean;
   daily_forecast?: boolean;

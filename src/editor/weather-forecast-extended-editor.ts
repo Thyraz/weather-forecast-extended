@@ -3,14 +3,24 @@ import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { WeatherForecastExtendedConfig } from "../types";
 
+type AttributeFieldName = "header_attribute_1" | "header_attribute_2" | "header_attribute_3";
+
+type EditorFormData = WeatherForecastExtendedConfig & Partial<Record<AttributeFieldName, string>>;
+
+const ATTRIBUTE_FIELD_NAMES: AttributeFieldName[] = [
+  "header_attribute_1",
+  "header_attribute_2",
+  "header_attribute_3",
+];
+
 type HaFormSelector =
   | { entity: { domain?: string; device_class?: string | string[] } }
   | { boolean: {} }
   | { text: {} }
-  | { select: { options: Array<{ value: string; label: string }> } };
+  | { select: { options: Array<{ value: string; label: string }>; custom_value?: boolean } };
 
 type HaFormSchema = {
-  name: keyof WeatherForecastExtendedConfig | "entity" | "hourly_forecast" | "daily_forecast" | "show_header";
+  name: keyof WeatherForecastExtendedConfig | "entity" | "hourly_forecast" | "daily_forecast" | "show_header" | AttributeFieldName;
   selector: HaFormSelector;
   optional?: boolean;
   disabled?: boolean;
@@ -105,11 +115,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     }
 
     const schema = this._buildSchema();
+    const formData = this._createFormData();
 
     return html`
       <ha-form
         .hass=${this.hass}
-        .data=${this._config}
+        .data=${formData}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._handleValueChanged}
@@ -166,9 +177,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     `;
   }
 
-  private _handleValueChanged(event: CustomEvent<{ value: Partial<WeatherForecastExtendedConfig> }>) {
+  private _handleValueChanged(event: CustomEvent<{ value: EditorFormData }>) {
     event.stopPropagation();
-    this._updateConfig(event.detail.value);
+    const formValue = event.detail.value;
+
+    const headerAttributes = this._extractHeaderAttributes(formValue);
+
+    const configUpdate: Partial<WeatherForecastExtendedConfig> = {
+      ...formValue,
+      header_attributes: headerAttributes,
+    };
+
+    ATTRIBUTE_FIELD_NAMES.forEach(name => {
+      delete (configUpdate as Record<string, unknown>)[name];
+    });
+
+    this._updateConfig(configUpdate);
   }
 
   private _computeLabel = (schema: HaFormSchema) => {
@@ -181,6 +205,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.entity");
       case "header_temperature_entity":
         return "Local header temperature sensor (optional)";
+      case "header_attribute_1":
+      case "header_attribute_2":
+      case "header_attribute_3":
+        return "Header attribute";
       case "show_header":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
@@ -217,6 +245,54 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     this._updateConfig(update);
   }
 
+  private _createFormData(): EditorFormData {
+    if (!this._config) {
+      return {} as EditorFormData;
+    }
+
+    const attributes = this._config.header_attributes ?? [];
+
+    const formData: EditorFormData = {
+      ...this._config,
+      header_attribute_1: attributes[0],
+      header_attribute_2: attributes[1],
+      header_attribute_3: attributes[2],
+    };
+
+    return formData;
+  }
+
+  private _extractHeaderAttributes(formValue: EditorFormData): string[] {
+    return ATTRIBUTE_FIELD_NAMES
+      .map(name => formValue[name])
+      .map(attr => (typeof attr === "string" ? attr.trim() : ""))
+      .filter(attr => attr.length > 0)
+      .slice(0, 3);
+  }
+
+  private _buildAttributeOptions(): Array<{ value: string; label: string }> {
+    if (!this.hass) {
+      return [{ value: "", label: "None" }];
+    }
+
+    const entityId = this._config?.entity;
+    if (!entityId) {
+      return [{ value: "", label: "None" }];
+    }
+
+    const entityState = this.hass.states[entityId];
+    if (!entityState) {
+      return [{ value: "", label: "None" }];
+    }
+
+    const attributeNames = Object.keys(entityState.attributes ?? {}).sort((a, b) => a.localeCompare(b));
+
+    return [
+      { value: "", label: "None" },
+      ...attributeNames.map(attribute => ({ value: attribute, label: attribute })),
+    ];
+  }
+
   private _buildSchema(): HaFormSchema[] {
     const baseSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
@@ -226,6 +302,19 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         optional: true,
       },
     ];
+
+    const attributeOptions = this._buildAttributeOptions();
+    const attributeSchemas: HaFormSchema[] = ATTRIBUTE_FIELD_NAMES.map(name => ({
+      name,
+      selector: {
+        select: {
+          options: attributeOptions,
+          custom_value: true,
+        },
+      },
+      optional: true,
+      disabled: !this._config?.entity,
+    }));
 
     const toggleNames: ToggleName[] = ["show_header", "hourly_forecast", "daily_forecast"];
     const toggleSchemas: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
@@ -242,6 +331,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       });
     }
 
+    baseSchema.push(...attributeSchemas);
     baseSchema.push(...toggleSchemas);
     baseSchema.push({
       name: "orientation",
@@ -279,6 +369,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ...changes,
       type: "custom:weather-forecast-extended-card",
     };
+
+    if (updated.header_attributes) {
+      updated.header_attributes = updated.header_attributes
+        .filter((attr, index) => index < 3 && typeof attr === "string")
+        .map(attr => attr.trim())
+        .filter(attr => attr.length > 0);
+    }
 
     this._config = updated;
     fireEvent(this, "config-changed", { config: updated });

@@ -15,6 +15,8 @@ import { enableMomentumScroll } from "./utils/momentum-scroll";
 import type { HassEntity } from "home-assistant-js-websocket";
 import SunCalc from "suncalc";
 
+const MISSING_ATTRIBUTE_TEXT = "missing";
+
 // Private types
 type ForecastType = "hourly" | "daily";
 type SubscriptionMap = Record<ForecastType, Promise<() => void> | undefined>;
@@ -49,6 +51,14 @@ export class WeatherForecastExtended extends LitElement {
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
+    // Validate config for attributes to show in the header (also limit to 3 in case user adds more in YAML mode)
+    const normalizedHeaderAttributes = Array.isArray(config.header_attributes)
+      ? config.header_attributes
+        .filter((attr, index) => index < 3 && typeof attr === "string")
+        .map(attr => attr.trim())
+        .filter(attr => attr.length > 0)
+      : [];
+
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
       ...config,
@@ -59,6 +69,7 @@ export class WeatherForecastExtended extends LitElement {
       show_sun_times: config.show_sun_times ?? false,
       sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
       use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
+      header_attributes: normalizedHeaderAttributes,
     };
 
     this._config = defaults;
@@ -163,6 +174,7 @@ export class WeatherForecastExtended extends LitElement {
     return {
       type: "custom:weather-forecast-extended-card",
       entity: weatherEntity ?? "weather.home",
+      header_attributes: [],
       show_header: true,
       hourly_forecast: true,
       daily_forecast: true,
@@ -295,30 +307,6 @@ export class WeatherForecastExtended extends LitElement {
     }
   }
 
-  private _computeHeaderTemperature(): string {
-    if (!this._hass || !this._state) {
-      return "";
-    }
-
-    const sensorState = this._headerTemperatureState;
-    if (sensorState && !this._isStateUnavailable(sensorState.state)) {
-      const formattedSensor = this._hass.formatEntityState(sensorState);
-      return formattedSensor || sensorState.state;
-    }
-
-    const formattedWeather = this._hass.formatEntityAttributeValue(this._state, "temperature");
-    return formattedWeather || this._state.state || "";
-  }
-
-  private _isStateUnavailable(state?: string): boolean {
-    if (!state) {
-      return true;
-    }
-
-    const normalized = state.toLowerCase();
-    return normalized === "unavailable" || normalized === "unknown";
-  }
-
   // Render methods
   render() {
     if (!this._config || !this._hass)
@@ -388,6 +376,8 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
+    const headerAttributes = this._computeHeaderAttributes();
+
     return html`
       <ha-card>
         ${showHeader
@@ -396,8 +386,33 @@ export class WeatherForecastExtended extends LitElement {
               class=${classMap(headerClassMap)}
               style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
             >
-              <div class="temp">${this._computeHeaderTemperature()}</div>
-              <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+              <div class="header-content">
+                ${headerAttributes.length
+                  ? html`
+                    <div class="header-attributes">
+                      ${headerAttributes.map(({ attribute, display, missing }) => {
+                        const chipClassMap = {
+                          "attribute-chip": true,
+                          missing,
+                        };
+                        const chipTitle = `${attribute}: ${display}`;
+                        return html`
+                          <div
+                            class=${classMap(chipClassMap)}
+                            title=${chipTitle}
+                          >
+                            ${display}
+                          </div>
+                        `;
+                      })}
+                    </div>
+                  `
+                  : nothing}
+                <div class="header-main">
+                  <div class="temp">${this._computeHeaderTemperature()}</div>
+                  <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+                </div>
+              </div>
             </div>
           `
           : nothing}
@@ -454,6 +469,83 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   // Private methods
+
+  // Header temperature from configured sensor or weather entity attribute
+  private _computeHeaderTemperature(): string {
+    if (!this._hass || !this._state) {
+      return "";
+    }
+
+    const sensorState = this._headerTemperatureState;
+    if (sensorState && !this._isStateUnavailable(sensorState.state)) {
+      const formattedSensor = this._hass.formatEntityState(sensorState);
+      return formattedSensor || sensorState.state;
+    }
+
+    const formattedWeather = this._hass.formatEntityAttributeValue(this._state, "temperature");
+    return formattedWeather || this._state.state || "";
+  }
+
+  private _isStateUnavailable(state?: string): boolean {
+    if (!state) {
+      return true;
+    }
+
+    const normalized = state.toLowerCase();
+    return normalized === "unavailable" || normalized === "unknown";
+  }
+
+  // Header attributes (up to 3)
+  private _computeHeaderAttributes(): Array<{ attribute: string; display: string; missing: boolean }> {
+    if (!this._config?.header_attributes?.length || !this._state || !this._hass) {
+      return [];
+    }
+
+    return this._config.header_attributes.slice(0, 3).map(attribute => this._formatHeaderAttribute(attribute));
+  }
+
+  // Format a single header attribute
+  private _formatHeaderAttribute(attribute: string): { attribute: string; display: string; missing: boolean } {
+    if (!this._state || !this._hass) {
+      return { attribute, display: MISSING_ATTRIBUTE_TEXT, missing: true };
+    }
+
+    // Check if attribute exists on the entity
+    const hasAttribute = Object.prototype.hasOwnProperty.call(this._state.attributes, attribute);
+    if (!hasAttribute) {
+      return { attribute, display: MISSING_ATTRIBUTE_TEXT, missing: true };
+    }
+
+    const rawValue = (this._state.attributes as unknown as Record<string, unknown>)[attribute];
+
+    if (rawValue === undefined || rawValue === null) {
+      return { attribute, display: MISSING_ATTRIBUTE_TEXT, missing: true };
+    }
+
+    // Try to format the attribute value using Home Assistant's built-in formatter
+    const formattedValue = this._hass.formatEntityAttributeValue(this._state, attribute);
+    const resolvedValue = formattedValue !== undefined && formattedValue !== null && formattedValue !== ""
+      ? formattedValue
+      : rawValue;
+
+    if (resolvedValue === undefined || resolvedValue === null) {
+      return { attribute, display: MISSING_ATTRIBUTE_TEXT, missing: true };
+    }
+
+    if (typeof resolvedValue === "string") {
+      if (resolvedValue.trim().length === 0) {
+        return { attribute, display: MISSING_ATTRIBUTE_TEXT, missing: true };
+      }
+      return { attribute, display: resolvedValue, missing: false };
+    }
+
+    if (typeof resolvedValue === "number" || typeof resolvedValue === "boolean") {
+      return { attribute, display: String(resolvedValue), missing: false };
+    }
+
+    return { attribute, display: JSON.stringify(resolvedValue), missing: false };
+  }
+
   private _calculateMinMaxTemps() {
     let hourlyMin: number | undefined;
     let hourlyMax: number | undefined;

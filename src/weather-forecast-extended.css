@@ -17,6 +17,8 @@ ha-card {
   border-top-right-radius: var(--ha-card-border-radius, 12px);
   flex-shrink: 0;
   color: white;
+  display: flex;
+  flex-direction: column;
 }
 
 .weather.header-only {
@@ -26,29 +28,69 @@ ha-card {
   border-bottom-right-radius: var(--ha-card-border-radius, 12px);
 }
 
+.weather .header-content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px 15px 20px 16px;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+}
+
+.weather .header-main {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.weather .header-attributes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 60%;
+}
+
+.weather .attribute-chip {
+  font-size: var(--ha-font-size-m);
+  line-height: calc(6px + var(--ha-font-size-m));
+  background-color: rgba(0, 0, 0, 0.35);
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: 12px;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather .attribute-chip.missing {
+  opacity: 0.8;
+  font-style: italic;
+}
+
 .weather .condition {
-    font-size: var(--ha-font-size-xl);
-    line-height: calc( 10px + var(--ha-font-size-xl) );
-    background-color: rgba(0, 0, 0, 0.3);
-    width: fit-content;
-    margin-top: 10px;
-    margin-left: auto;
-    margin-right: 15px;
-    padding: 4px 15px;
-    border-radius: 100px;
+  font-size: var(--ha-font-size-xl);
+  line-height: calc(10px + var(--ha-font-size-xl));
+  background-color: rgba(0, 0, 0, 0.3);
+  width: fit-content;
+  padding: 4px 15px;
+  border-radius: 100px;
 }
 
 .weather .temp {
-    font-size: var(--ha-font-size-5xl);
-    line-height: calc( 10px + var(--ha-font-size-5xl) );
-    font-weight: bolder;
-    background-color: rgba(0, 0, 0, 0.3);
-    width: fit-content;
-    margin-top: 15px;
-    margin-left: auto;
-    margin-right: 15px;
-    padding: 2px 17px;
-    border-radius: 100px;
+  font-size: var(--ha-font-size-5xl);
+  line-height: calc(10px + var(--ha-font-size-5xl));
+  font-weight: bolder;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: fit-content;
+  padding: 2px 17px;
+  border-radius: 100px;
 }
 
 .forecast-container {
