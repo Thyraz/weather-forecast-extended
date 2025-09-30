@@ -31,9 +31,10 @@ ha-card {
 .weather .header-content {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: flex-start;
-  padding: 16px 15px 20px 16px;
+  padding-block: var(--wfe-header-padding-block, 16px);
+  padding-inline: var(--wfe-header-padding-inline, 16px);
   gap: 16px;
   width: 100%;
   box-sizing: border-box;
@@ -44,16 +45,21 @@ ha-card {
   margin-left: auto;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: flex-end;
-  gap: 10px;
-  padding-top: 6px;
+  gap: var(--wfe-header-main-gap, 10px);
+  align-self: stretch;
+  min-height: 0;
 }
 
 .weather .header-attributes {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  gap: var(--wfe-header-attribute-gap, 8px);
   max-width: 60%;
+  align-self: stretch;
+  min-height: 0;
 }
 
 .weather .attribute-chip {
