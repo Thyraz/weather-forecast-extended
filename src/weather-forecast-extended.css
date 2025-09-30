@@ -108,21 +108,9 @@ ha-card {
   flex-direction: column;
   justify-content: flex-start;
   flex: 1 1 auto; /* allow growth with card height */
-  /* margin-top: 2px; */
-  /* iOS scroll improvements */
-  -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
   overscroll-behavior-x: contain;
 }
-
-/* Safari/WebKit: keep content fully visible without forcing fill-available heights */
-@supports (-webkit-touch-callout: none) {
-  .forecast-daily-container {
-    overflow: visible;
-    /* padding-bottom: 6px; extra safety space for last line */
-  }
-}
-
 
 .fade-left,
 .fade-right {
@@ -179,14 +167,6 @@ ha-card {
 .forecast wfe-daily-list,
 .forecast wfe-hourly-list {
   display: contents;
-}
-
-@supports (-webkit-touch-callout: none) {
-  .forecast {
-    /* Disable scroll snapping on iOS to prevent issues with touch scrolling */
-    scroll-snap-type: none;
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 .forecast.daily {
