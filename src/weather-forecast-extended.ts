@@ -7,12 +7,13 @@ import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
 import type { HomeAssistant } from "custom-card-helpers";
 import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
+import type { HeaderChip } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { DEFAULT_WEATHER_IMAGE, WeatherImages } from "./weather-images";
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
-import type { HassEntity } from "home-assistant-js-websocket";
+import type { HassEntity, UnsubscribeFunc } from "home-assistant-js-websocket";
 import SunCalc from "suncalc";
 
 const MISSING_ATTRIBUTE_TEXT = "missing";
@@ -20,6 +21,20 @@ const MISSING_ATTRIBUTE_TEXT = "missing";
 // Private types
 type ForecastType = "hourly" | "daily";
 type SubscriptionMap = Record<ForecastType, Promise<() => void> | undefined>;
+type HeaderChipDisplay = {
+  label: string;
+  display: string;
+  missing: boolean;
+  tooltip: string;
+  type: HeaderChip["type"];
+};
+
+type RenderTemplateEventMessage = {
+  result?: unknown;
+  listeners?: unknown;
+  error?: string;
+  level?: string;
+};
 
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
@@ -34,6 +49,7 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _forecastHourlyEvent?: ForecastEvent;
   @state() private _dailyGap?: number;
   @state() private _hourlyGap?: number;
+  @state() private _templateChipValues: Record<number, { display: string; missing: boolean }> = {};
 
   // private property
   private _subscriptions: SubscriptionMap = { hourly: undefined, daily: undefined };
@@ -44,6 +60,7 @@ export class WeatherForecastExtended extends LitElement {
   private _dailyMinTemp?: number;
   private _dailyMaxTemp?: number;
   private _hass;
+  private _templateSubscriptions: Array<Promise<UnsubscribeFunc> | undefined> = [];
   private _momentumCleanup: Partial<Record<ForecastType, () => void>> = {};
   private _momentumElement: Partial<Record<ForecastType, HTMLElement>> = {};
   private _sunCoordinateCacheKey?: string;
@@ -51,13 +68,10 @@ export class WeatherForecastExtended extends LitElement {
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
-    // Validate config for attributes to show in the header (also limit to 3 in case user adds more in YAML mode)
-    const normalizedHeaderAttributes = Array.isArray(config.header_attributes)
-      ? config.header_attributes
-        .filter((attr, index) => index < 3 && typeof attr === "string")
-        .map(attr => attr.trim())
-        .filter(attr => attr.length > 0)
-      : [];
+    const normalizedHeaderChips = this._normalizeHeaderChips(config);
+    const normalizedHeaderAttributes = normalizedHeaderChips
+      .filter(chip => chip.type === "attribute")
+      .map(chip => chip.attribute);
 
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
@@ -69,6 +83,7 @@ export class WeatherForecastExtended extends LitElement {
       show_sun_times: config.show_sun_times ?? false,
       sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
       use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
+      header_chips: normalizedHeaderChips,
       header_attributes: normalizedHeaderAttributes,
     };
 
@@ -79,6 +94,8 @@ export class WeatherForecastExtended extends LitElement {
     if (this._hass) {
       this.hass = this._hass;
     }
+
+    this._refreshTemplateSubscriptions();
   }
 
   set hass(hass: HomeAssistant) {
@@ -95,6 +112,195 @@ export class WeatherForecastExtended extends LitElement {
     this._headerTemperatureState = headerTemperatureEntity
       ? (hass.states[headerTemperatureEntity] as HassEntity | undefined)
       : undefined;
+
+    this._refreshTemplateSubscriptions();
+  }
+
+  private _normalizeHeaderChips(config: WeatherForecastExtendedConfig): HeaderChip[] {
+    const limit = 3;
+    const normalized: HeaderChip[] = [];
+
+    if (Array.isArray(config.header_chips)) {
+      for (const chip of config.header_chips) {
+        if (normalized.length >= limit || !chip || typeof chip !== "object") {
+          continue;
+        }
+
+        if (chip.type === "attribute") {
+          const attr = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
+          normalized.push({ type: "attribute", attribute: attr });
+          continue;
+        }
+
+        if (chip.type === "template") {
+          const template = typeof chip.template === "string" ? chip.template.trim() : "";
+          normalized.push({ type: "template", template });
+        }
+      }
+    }
+
+    if (normalized.length) {
+      return normalized.slice(0, limit);
+    }
+
+    const attributeEntries = Array.isArray(config.header_attributes)
+      ? config.header_attributes
+        .filter((attr, index) => index < limit && typeof attr === "string")
+        .map(attr => attr.trim())
+        .filter(attr => attr.length > 0)
+      : [];
+
+    return attributeEntries.map(attribute => ({ type: "attribute", attribute }));
+  }
+
+  private _getHeaderChips(): HeaderChip[] {
+    if (!this._config) {
+      return [];
+    }
+
+    if (Array.isArray(this._config.header_chips) && this._config.header_chips.length) {
+      return this._config.header_chips.slice(0, 3);
+    }
+
+    const attributeEntries = this._config.header_attributes ?? [];
+    return attributeEntries.slice(0, 3).map(attribute => ({ type: "attribute", attribute }));
+  }
+
+  private _refreshTemplateSubscriptions() {
+    if (!this.isConnected || !this._config || !this._hass?.connection) {
+      this._teardownTemplateSubscriptions({ clearValues: !this.isConnected });
+      return;
+    }
+
+    const chips = this._getHeaderChips();
+    const previousValues = this._templateChipValues;
+
+    this._teardownTemplateSubscriptions();
+
+    const nextSubscriptions: Array<Promise<UnsubscribeFunc> | undefined> = [];
+    const nextValues: Record<number, { display: string; missing: boolean }> = {};
+
+    chips.forEach((chip, index) => {
+      if (chip.type !== "template") {
+        this._clearTemplateChipValue(index);
+        return;
+      }
+
+      const template = chip.template.trim();
+      if (!template) {
+        nextValues[index] = { display: MISSING_ATTRIBUTE_TEXT, missing: true };
+        return;
+      }
+
+      if (previousValues[index]) {
+        nextValues[index] = previousValues[index];
+      }
+
+      const unsubscribePromise = this._subscribeTemplate(index, template);
+
+      nextSubscriptions[index] = unsubscribePromise;
+    });
+
+    this._templateSubscriptions = nextSubscriptions;
+    this._templateChipValues = { ...nextValues };
+  }
+
+  private _subscribeTemplate(index: number, template: string): Promise<UnsubscribeFunc> | undefined {
+    const connection = this._hass?.connection;
+    if (!connection) {
+      this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+      return undefined;
+    }
+
+    return connection
+      .subscribeMessage<RenderTemplateEventMessage>(
+        message => this._handleTemplateResult(index, template, message),
+        {
+          type: "render_template",
+          template,
+          strict: true,
+          report_errors: true,
+        },
+      )
+      .catch(error => {
+        // eslint-disable-next-line no-console
+        console.error("weather-forecast-extended: template subscription failed", error);
+        this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+        return undefined;
+      });
+  }
+
+  private _teardownTemplateSubscriptions({ clearValues = false }: { clearValues?: boolean } = {}) {
+    this._templateSubscriptions.forEach(subscription => {
+      subscription?.then(unsub => {
+        if (typeof unsub === "function") {
+          unsub();
+        }
+      }).catch(() => undefined);
+    });
+    this._templateSubscriptions = [];
+
+    if (clearValues && Object.keys(this._templateChipValues).length) {
+      this._templateChipValues = {};
+    }
+  }
+
+  private _handleTemplateResult(index: number, template: string, message: RenderTemplateEventMessage) {
+    if (message?.error) {
+      this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+      return;
+    }
+
+    const raw = message?.result;
+
+    if (raw === null || raw === undefined) {
+      this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+      return;
+    }
+
+    if (typeof raw === "string") {
+      const trimmed = raw.trim();
+      if (trimmed.length === 0) {
+        this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+        return;
+      }
+      this._setTemplateChipValue(index, raw, false);
+      return;
+    }
+
+    if (typeof raw === "number" || typeof raw === "boolean") {
+      this._setTemplateChipValue(index, String(raw), false);
+      return;
+    }
+
+    try {
+      this._setTemplateChipValue(index, JSON.stringify(raw), false);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("weather-forecast-extended: failed to stringify template result", template, error);
+      this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
+    }
+  }
+
+  private _setTemplateChipValue(index: number, display: string, missing: boolean) {
+    const previous = this._templateChipValues[index];
+    if (previous && previous.display === display && previous.missing === missing) {
+      return;
+    }
+
+    this._templateChipValues = {
+      ...this._templateChipValues,
+      [index]: { display, missing },
+    };
+  }
+
+  private _clearTemplateChipValue(index: number) {
+    if (!(index in this._templateChipValues)) {
+      return;
+    }
+
+    const { [index]: _removed, ...rest } = this._templateChipValues;
+    this._templateChipValues = rest;
   }
 
   public getGridOptions(): LovelaceGridOptions {
@@ -240,6 +446,7 @@ export class WeatherForecastExtended extends LitElement {
    // Lit callbacks
   connectedCallback() {
     super.connectedCallback();
+    this._refreshTemplateSubscriptions();
     if (this.hasUpdated && this._config && this._hass) {
       this._subscribeForecastEvents();
     }
@@ -247,6 +454,7 @@ export class WeatherForecastExtended extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._teardownTemplateSubscriptions({ clearValues: true });
     this._unsubscribeForecastEvents();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
@@ -376,7 +584,7 @@ export class WeatherForecastExtended extends LitElement {
       `;
     }
 
-    const headerAttributes = this._computeHeaderAttributes();
+    const headerChips = this._computeHeaderChipDisplays();
 
     return html`
       <ha-card>
@@ -387,21 +595,22 @@ export class WeatherForecastExtended extends LitElement {
               style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
             >
               <div class="header-content">
-                ${headerAttributes.length
+                ${headerChips.length
                   ? html`
                     <div class="header-attributes">
-                      ${headerAttributes.map(({ attribute, display, missing }) => {
+                      ${headerChips.map(chip => {
                         const chipClassMap = {
                           "attribute-chip": true,
-                          missing,
+                          missing: chip.missing,
+                          "template-chip": chip.type === "template",
                         };
-                        const chipTitle = `${attribute}: ${display}`;
+                        const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
                         return html`
                           <div
                             class=${classMap(chipClassMap)}
                             title=${chipTitle}
                           >
-                            ${display}
+                            ${chip.display}
                           </div>
                         `;
                       })}
@@ -495,13 +704,44 @@ export class WeatherForecastExtended extends LitElement {
     return normalized === "unavailable" || normalized === "unknown";
   }
 
-  // Header attributes (up to 3)
-  private _computeHeaderAttributes(): Array<{ attribute: string; display: string; missing: boolean }> {
-    if (!this._config?.header_attributes?.length || !this._state || !this._hass) {
+  // Header chips (attribute / template)
+  private _computeHeaderChipDisplays(): HeaderChipDisplay[] {
+    if (!this._config) {
       return [];
     }
 
-    return this._config.header_attributes.slice(0, 3).map(attribute => this._formatHeaderAttribute(attribute));
+    const chips = this._getHeaderChips();
+    if (!chips.length) {
+      return [];
+    }
+
+    return chips.map((chip, index) => {
+      if (chip.type === "template") {
+        const templateValue = this._templateChipValues[index];
+        const display = templateValue?.display ?? MISSING_ATTRIBUTE_TEXT;
+        const missing = templateValue?.missing ?? true;
+        const tooltip = chip.template ? `Template: ${chip.template}` : "Template";
+        return {
+          label: "Template",
+          display,
+          missing,
+          tooltip,
+          type: chip.type,
+        };
+      }
+
+      const formatted = this._formatHeaderAttribute(chip.attribute);
+      const label = chip.attribute || this._hass?.localize?.("ui.common.none") || "None";
+      const tooltipTarget = chip.attribute || label;
+      const tooltip = `${tooltipTarget}: ${formatted.display}`;
+      return {
+        label,
+        display: formatted.display,
+        missing: formatted.missing,
+        tooltip,
+        type: chip.type,
+      };
+    });
   }
 
   // Format a single header attribute

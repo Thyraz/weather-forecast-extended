@@ -17,6 +17,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
   header_temperature_entity?: string;
+  header_chips?: HeaderChip[];
   header_attributes?: string[];
   show_header?: boolean;
   hourly_forecast?: boolean;
@@ -37,3 +38,15 @@ export interface SunCoordinates {
 export type SunEventType = "sunrise" | "sunset";
 
 export type SunTimesByDay = Record<string, Partial<Record<SunEventType, number>>>;
+
+export type HeaderChip = AttributeHeaderChip | TemplateHeaderChip;
+
+export interface AttributeHeaderChip {
+  type: "attribute";
+  attribute: string;
+}
+
+export interface TemplateHeaderChip {
+  type: "template";
+  template: string;
+}
