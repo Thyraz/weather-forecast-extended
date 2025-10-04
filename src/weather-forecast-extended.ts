@@ -89,7 +89,8 @@ export class WeatherForecastExtended extends LitElement {
     const normalizedHeaderChips = this._normalizeHeaderChips(config);
     const normalizedHeaderAttributes = normalizedHeaderChips
       .filter(isAttributeHeaderChip)
-      .map(chip => chip.attribute);
+      .map(chip => chip.attribute)
+      .filter(attribute => typeof attribute === "string" && attribute.trim().length > 0);
 
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
@@ -201,12 +202,14 @@ export class WeatherForecastExtended extends LitElement {
     chips.forEach((chip, index) => {
       if (chip.type !== "template") {
         this._clearTemplateChipValue(index);
+        nextSubscriptions[index] = undefined;
         return;
       }
 
       const template = chip.template.trim();
       if (!template) {
-        nextValues[index] = { display: MISSING_ATTRIBUTE_TEXT, missing: true };
+        this._clearTemplateChipValue(index);
+        nextSubscriptions[index] = undefined;
         return;
       }
 
@@ -739,33 +742,47 @@ export class WeatherForecastExtended extends LitElement {
       return [];
     }
 
-    return chips.map((chip, index) => {
+    const displays: HeaderChipDisplay[] = [];
+
+    chips.forEach((chip, index) => {
       if (chip.type === "template") {
+        const templateString = chip.template?.trim() ?? "";
+        if (!templateString) {
+          return;
+        }
+
         const templateValue = this._templateChipValues[index];
         const display = templateValue?.display ?? MISSING_ATTRIBUTE_TEXT;
         const missing = templateValue?.missing ?? true;
-        const tooltip = chip.template ? `Template: ${chip.template}` : "Template";
-        return {
+        const tooltip = `Template: ${templateString}`;
+        displays.push({
           label: "Template",
           display,
           missing,
           tooltip,
           type: chip.type,
-        };
+        });
+        return;
       }
 
-      const formatted = this._formatHeaderAttribute(chip.attribute);
-      const label = chip.attribute || this._hass?.localize?.("ui.common.none") || "None";
-      const tooltipTarget = chip.attribute || label;
-      const tooltip = `${tooltipTarget}: ${formatted.display}`;
-      return {
+      const attribute = chip.attribute?.trim() ?? "";
+      if (!attribute) {
+        return;
+      }
+
+      const formatted = this._formatHeaderAttribute(attribute);
+      const label = attribute;
+      const tooltip = `${attribute}: ${formatted.display}`;
+      displays.push({
         label,
         display: formatted.display,
         missing: formatted.missing,
         tooltip,
         type: chip.type,
-      };
+      });
     });
+
+    return displays;
   }
 
   // Format a single header attribute
