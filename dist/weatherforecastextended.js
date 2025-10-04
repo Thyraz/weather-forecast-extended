@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.e3cba610.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.439b4612.js").then(()=>parcelRequire("bwZCh"));
 
 });
 
@@ -3112,7 +3112,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
     // Called by HA
     setConfig(config) {
         const normalizedHeaderChips = this._normalizeHeaderChips(config);
-        const normalizedHeaderAttributes = normalizedHeaderChips.filter($e6159c9afb48cae5$var$isAttributeHeaderChip).map((chip)=>chip.attribute);
+        const normalizedHeaderAttributes = normalizedHeaderChips.filter($e6159c9afb48cae5$var$isAttributeHeaderChip).map((chip)=>chip.attribute).filter((attribute)=>typeof attribute === "string" && attribute.trim().length > 0);
         const defaults = {
             type: "custom:weather-forecast-extended-card",
             ...config,
@@ -3197,14 +3197,13 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         chips.forEach((chip, index)=>{
             if (chip.type !== "template") {
                 this._clearTemplateChipValue(index);
+                nextSubscriptions[index] = undefined;
                 return;
             }
             const template = chip.template.trim();
             if (!template) {
-                nextValues[index] = {
-                    display: $e6159c9afb48cae5$var$MISSING_ATTRIBUTE_TEXT,
-                    missing: true
-                };
+                this._clearTemplateChipValue(index);
+                nextSubscriptions[index] = undefined;
                 return;
             }
             if (previousValues[index]) nextValues[index] = previousValues[index];
@@ -3579,32 +3578,38 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!this._config) return [];
         const chips = this._getHeaderChips();
         if (!chips.length) return [];
-        return chips.map((chip, index)=>{
+        const displays = [];
+        chips.forEach((chip, index)=>{
             if (chip.type === "template") {
+                const templateString = chip.template?.trim() ?? "";
+                if (!templateString) return;
                 const templateValue = this._templateChipValues[index];
                 const display = templateValue?.display ?? $e6159c9afb48cae5$var$MISSING_ATTRIBUTE_TEXT;
                 const missing = templateValue?.missing ?? true;
-                const tooltip = chip.template ? `Template: ${chip.template}` : "Template";
-                return {
+                const tooltip = `Template: ${templateString}`;
+                displays.push({
                     label: "Template",
                     display: display,
                     missing: missing,
                     tooltip: tooltip,
                     type: chip.type
-                };
+                });
+                return;
             }
-            const formatted = this._formatHeaderAttribute(chip.attribute);
-            const label = chip.attribute || this._hass?.localize?.("ui.common.none") || "None";
-            const tooltipTarget = chip.attribute || label;
-            const tooltip = `${tooltipTarget}: ${formatted.display}`;
-            return {
+            const attribute = chip.attribute?.trim() ?? "";
+            if (!attribute) return;
+            const formatted = this._formatHeaderAttribute(attribute);
+            const label = attribute;
+            const tooltip = `${attribute}: ${formatted.display}`;
+            displays.push({
                 label: label,
                 display: formatted.display,
                 missing: formatted.missing,
                 tooltip: tooltip,
                 type: chip.type
-            };
+            });
         });
+        return displays;
     }
     // Format a single header attribute
     _formatHeaderAttribute(attribute) {

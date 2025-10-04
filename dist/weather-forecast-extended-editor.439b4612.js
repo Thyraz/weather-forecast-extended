@@ -272,7 +272,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const configUpdate = {
             ...mergedFormValue,
             header_chips: headerChips,
-            header_attributes: headerChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute)
+            header_attributes: headerChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute).filter((attribute)=>typeof attribute === "string" && attribute.trim().length > 0)
         };
         $a37b5b928a2fc5d8$var$CHIP_FORM_FIELD_NAMES.forEach((name)=>{
             delete configUpdate[name];
@@ -538,7 +538,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         };
         const normalizedChips = this._normalizeHeaderChips(updated);
         updated.header_chips = normalizedChips;
-        updated.header_attributes = normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute);
+        updated.header_attributes = normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute).filter((attribute)=>typeof attribute === "string" && attribute.trim().length > 0);
         this._config = updated;
         $a37b5b928a2fc5d8$var$fireEvent(this, "config-changed", {
             config: updated
@@ -602,4 +602,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.e3cba610.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.439b4612.js.map
