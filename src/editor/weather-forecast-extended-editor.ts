@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { HeaderChip, WeatherForecastExtendedConfig } from "../types";
@@ -64,25 +64,39 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   };
 
   static styles = css`
-    .sun-section,
-    .location-section {
-      margin-top: 16px;
+    .editor-section {
+      margin-top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 16px;
     }
 
-    .chips-section {
+    .editor-section:first-of-type {
       margin-top: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
     }
 
-    .chips-section h4 {
+    .section-title {
       margin: 0;
       font-size: 16px;
       font-weight: 600;
+    }
+
+    .section-subtitle {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .editor-subsection {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chips-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .chips-hint {
@@ -91,36 +105,18 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       color: var(--secondary-text-color);
     }
 
-    .sun-section h4,
-    .location-section h4 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .sun-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .location-description {
       font-size: 14px;
-    }
-
-    .sun-option input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-    }
-
-    .sun-option span {
-      flex: 1;
+      color: var(--secondary-text-color);
     }
 
     .sun-coordinates {
       display: flex;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .sun-field {
+    .coordinate-field {
       display: flex;
       flex: 1 1 120px;
       flex-direction: column;
@@ -128,7 +124,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       font-size: 14px;
     }
 
-    .sun-field input {
+    .coordinate-field input {
       font: inherit;
       padding: 6px 8px;
       border-radius: 4px;
@@ -137,8 +133,19 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       color: var(--primary-text-color);
     }
 
-    .sun-field input:disabled {
+    .coordinate-field input:disabled {
       opacity: 0.6;
+    }
+
+    .forecast-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .forecast-switch span {
+      font-size: 14px;
     }
   `;
 
@@ -165,76 +172,106 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       return html``;
     }
 
-    const { base: baseSchema, chips: chipSchema } = this._buildSchemas();
+    const { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipSchema } =
+      this._buildSchemas();
     const formData = this._createFormData();
 
     return html`
       <ha-form
         .hass=${this.hass}
         .data=${formData}
-        .schema=${baseSchema}
+        .schema=${generalSchema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._handleValueChanged}
       ></ha-form>
-      <div class="chips-section">
-        <h4>Header chips</h4>
-        <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+      <div class="editor-section">
+        <h4 class="section-title">Layout</h4>
         <ha-form
           .hass=${this.hass}
           .data=${formData}
-          .schema=${chipSchema}
+          .schema=${layoutSchema}
           .computeLabel=${this._computeLabel}
           @value-changed=${this._handleValueChanged}
         ></ha-form>
       </div>
-      <div class="location-section">
-        <h4>Location</h4>
-        <span>Needed for sunrise/sunset markers and day/night backgrounds</span>
-        <label class="sun-option">
-          <input
-            type="checkbox"
-            name="sun_use_home_coordinates"
-            .checked=${this._config.sun_use_home_coordinates ?? true}
-            @change=${this._handleSunToggleChange}
-          />
-          <span>Use Home Assistant location</span>
-        </label>
-        <div class="sun-coordinates">
-          <label class="sun-field">
-            <span>Latitude</span>
-            <input
-              type="text"
-              name="sun_latitude"
-              placeholder="e.g. 48.137"
-              .value=${String(this._config.sun_latitude ?? "")}
-              ?disabled=${this._config.sun_use_home_coordinates ?? true}
-              @input=${this._handleSunInputChange}
-            />
-          </label>
-          <label class="sun-field">
-            <span>Longitude</span>
-            <input
-              type="text"
-              name="sun_longitude"
-              placeholder="e.g. 11.575"
-              .value=${String(this._config.sun_longitude ?? "")}
-              ?disabled=${this._config.sun_use_home_coordinates ?? true}
-              @input=${this._handleSunInputChange}
-            />
-          </label>
+      ${this._config.show_header !== false
+        ? html`
+            <div class="editor-section">
+              <h4 class="section-title">Header options</h4>
+              <ha-form
+                .hass=${this.hass}
+                .data=${formData}
+                .schema=${headerSchema}
+                .computeLabel=${this._computeLabel}
+                @value-changed=${this._handleValueChanged}
+              ></ha-form>
+              <div class="chips-section">
+                <h5 class="section-subtitle">Header chips</h5>
+                <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${chipSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              </div>
+            </div>
+          `
+        : nothing}
+      <div class="editor-section">
+        <h4 class="section-title">Forecast options</h4>
+        <div class="editor-subsection">
+          <div>
+            <h5 class="section-subtitle">Location</h5>
+            <p class="location-description">
+              Needed for sunrise/sunset markers and day/night backgrounds
+            </p>
+          </div>
+          <div class="forecast-switch">
+            <span>Use Home Assistant location</span>
+            <ha-switch
+              name="sun_use_home_coordinates"
+              .checked=${this._config.sun_use_home_coordinates ?? true}
+              @change=${this._handleSunToggleChange}
+            ></ha-switch>
+          </div>
+          <div class="sun-coordinates">
+            <label class="coordinate-field">
+              <span>Latitude</span>
+              <input
+                type="text"
+                name="sun_latitude"
+                placeholder="e.g. 48.137"
+                .value=${String(this._config.sun_latitude ?? "")}
+                ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                @input=${this._handleSunInputChange}
+              />
+            </label>
+            <label class="coordinate-field">
+              <span>Longitude</span>
+              <input
+                type="text"
+                name="sun_longitude"
+                placeholder="e.g. 11.575"
+                .value=${String(this._config.sun_longitude ?? "")}
+                ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                @input=${this._handleSunInputChange}
+              />
+            </label>
+          </div>
         </div>
-      </div>
-      <div class="sun-section">
-        <h4>Sunrise & Sunset</h4>
-        <label class="sun-option">
-          <input
-            type="checkbox"
-            name="show_sun_times"
-            .checked=${this._config.show_sun_times ?? false}
-            @change=${this._handleSunToggleChange}
-          />
-          <span>Show sunrise & sunset</span>
-        </label>
+        <div class="editor-subsection">
+          <h5 class="section-subtitle">Sunrise & Sunset</h5>
+          <div class="forecast-switch">
+            <span>Show sunrise & sunset</span>
+            <ha-switch
+              name="show_sun_times"
+              .checked=${this._config.show_sun_times ?? false}
+              @change=${this._handleSunToggleChange}
+            ></ha-switch>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -278,7 +315,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
     switch (schema.name) {
       case "entity":
-        return this.hass.localize("ui.panel.lovelace.editor.card.generic.entity");
+        return "Weather Entity";
       case "header_temperature_entity":
         return "Local header temperature sensor (optional)";
       case "show_header":
@@ -313,12 +350,17 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   };
 
   private _handleSunToggleChange(event: Event) {
-    const target = event.currentTarget as HTMLInputElement | null;
+    const target = event.currentTarget as (HTMLElement & { name?: string; checked?: boolean }) | null;
     if (!target) {
       return;
     }
-    const key = target.name as keyof WeatherForecastExtendedConfig;
-    this._updateConfig({ [key]: target.checked } as Partial<WeatherForecastExtendedConfig>);
+    const name = target.getAttribute("name") ?? target.name;
+    if (!name) {
+      return;
+    }
+    const key = name as keyof WeatherForecastExtendedConfig;
+    const isChecked = typeof target.checked === "boolean" ? target.checked : false;
+    this._updateConfig({ [key]: isChecked } as Partial<WeatherForecastExtendedConfig>);
   }
 
   private _handleSunInputChange(event: Event) {
@@ -413,8 +455,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     ];
   }
 
-  private _buildSchemas(): { base: HaFormSchema[]; chips: HaFormSchema[] } {
-    const baseSchema: HaFormSchema[] = [
+  private _buildSchemas(): {
+    general: HaFormSchema[];
+    layout: HaFormSchema[];
+    header: HaFormSchema[];
+    chips: HaFormSchema[];
+  } {
+    const generalSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
       {
         name: "header_temperature_entity",
@@ -424,7 +471,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     ];
 
     const toggleNames: ToggleName[] = ["show_header", "hourly_forecast", "daily_forecast"];
-    const toggleSchemas: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
+    const layoutSchema: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
 
     const config = this._config;
     if (config) {
@@ -434,12 +481,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
       toggleNames.forEach((name, index) => {
         const isEnabled = this._isSectionEnabled(name, config);
-        toggleSchemas[index].disabled = enabledCount <= 1 && isEnabled;
+        layoutSchema[index].disabled = enabledCount <= 1 && isEnabled;
       });
     }
 
-    baseSchema.push(...toggleSchemas);
-    baseSchema.push({
+    layoutSchema.push({
       name: "orientation",
       selector: {
         select: {
@@ -452,10 +498,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       optional: true,
     });
 
-    baseSchema.push({
-      name: "use_night_header_backgrounds",
-      selector: { boolean: {} },
-    });
+    const headerSchema: HaFormSchema[] = [
+      {
+        name: "use_night_header_backgrounds",
+        selector: { boolean: {} },
+      },
+    ];
 
     const attributeOptions = this._buildAttributeOptions();
     const chipsSchema: HaFormSchema[] = [];
@@ -494,7 +542,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       }
     });
 
-    return { base: baseSchema, chips: chipsSchema };
+    return { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipsSchema };
   }
 
   private _isSectionEnabled(name: ToggleName, config: WeatherForecastExtendedConfig): boolean {
