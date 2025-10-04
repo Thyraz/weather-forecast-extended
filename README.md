@@ -14,6 +14,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 - Daily and hourly forecast sections that can be shown together or independently.
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
+- Configurable header chips that can display entity attributes or value-templates in the header.
 - Support for 12 or 24 hour time formats and localized date labels using the Home Assistant user settings.
 - UI card editor
 
@@ -63,8 +64,27 @@ use_night_header_backgrounds: true
 | `sun_latitude` | number \| string | Home Assistant latitude | Latitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `sun_longitude` | number \| string | Home Assistant longitude | Longitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
+| `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
+
+### Header chips
+Header chips allow yout to display additional information, such as precipitation probability, feels-like temperature, or custom strings using value-templates. The editor lets you pick between **Attribute** and **Template** mode for each slot.
+
+```yaml
+type: custom:weather-forecast-extended-card
+entity: weather.home
+header_chips:
+  - type: attribute
+    attribute: humidity
+  - type: template
+    template: "{{ 'Temp: ' ~ state_attr('weather.home', 'temperature') | round(0) }}°"
+  - type: attribute
+    attribute: pressure
+```
+
+- `attribute` chips expose an attribute from the configured weather entity. The editor provides a dropdown populated with the entity's attributes.
+- `template` chips are rendered by Home Assistant's template engine and can reference any entity.
 
 ## Interactions and layout
 - Drag or flick the daily and hourly lists.
