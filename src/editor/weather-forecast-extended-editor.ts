@@ -298,7 +298,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       header_chips: headerChips,
       header_attributes: headerChips
         .filter(chip => chip.type === "attribute")
-        .map(chip => chip.attribute),
+        .map(chip => chip.attribute)
+        .filter(attribute => typeof attribute === "string" && attribute.trim().length > 0),
     };
 
     CHIP_FORM_FIELD_NAMES.forEach(name => {
@@ -618,7 +619,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     updated.header_chips = normalizedChips;
     updated.header_attributes = normalizedChips
       .filter(chip => chip.type === "attribute")
-      .map(chip => chip.attribute);
+      .map(chip => chip.attribute)
+      .filter(attribute => typeof attribute === "string" && attribute.trim().length > 0);
 
     this._config = updated;
     fireEvent(this, "config-changed", { config: updated });
