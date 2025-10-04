@@ -7,13 +7,13 @@ import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
 import type { HomeAssistant } from "custom-card-helpers";
 import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
-import type { HeaderChip } from "./types";
+import type { AttributeHeaderChip, HeaderChip, TemplateHeaderChip } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { DEFAULT_WEATHER_IMAGE, WeatherImages } from "./weather-images";
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
-import type { HassEntity, UnsubscribeFunc } from "home-assistant-js-websocket";
+import type { HassEntity } from "home-assistant-js-websocket";
 import SunCalc from "suncalc";
 
 const MISSING_ATTRIBUTE_TEXT = "missing";
@@ -35,6 +35,24 @@ type RenderTemplateEventMessage = {
   error?: string;
   level?: string;
 };
+
+type HassConnection = HomeAssistant["connection"];
+type HassUnsubscribeFunc = ReturnType<HassConnection["subscribeMessage"]> extends Promise<infer T>
+  ? T
+  : never;
+type HassFormatEntityState = (stateObj: HassEntity) => string | undefined;
+type HassFormatEntityAttributeValue = (stateObj: HassEntity, attribute: string) => unknown;
+
+type ExtendedHomeAssistant = HomeAssistant & {
+  formatEntityState?: HassFormatEntityState;
+  formatEntityAttributeValue?: HassFormatEntityAttributeValue;
+};
+
+const isAttributeHeaderChip = (chip: HeaderChip): chip is AttributeHeaderChip =>
+  chip.type === "attribute";
+
+const isTemplateHeaderChip = (chip: HeaderChip): chip is TemplateHeaderChip =>
+  chip.type === "template";
 
 export class WeatherForecastExtended extends LitElement {
   // internal reactive states
@@ -59,8 +77,8 @@ export class WeatherForecastExtended extends LitElement {
   private _hourlyMaxTemp?: number;
   private _dailyMinTemp?: number;
   private _dailyMaxTemp?: number;
-  private _hass;
-  private _templateSubscriptions: Array<Promise<UnsubscribeFunc> | undefined> = [];
+  private _hass?: ExtendedHomeAssistant;
+  private _templateSubscriptions: Array<Promise<HassUnsubscribeFunc> | undefined> = [];
   private _momentumCleanup: Partial<Record<ForecastType, () => void>> = {};
   private _momentumElement: Partial<Record<ForecastType, HTMLElement>> = {};
   private _sunCoordinateCacheKey?: string;
@@ -70,7 +88,7 @@ export class WeatherForecastExtended extends LitElement {
   setConfig(config: WeatherForecastExtendedConfig) {
     const normalizedHeaderChips = this._normalizeHeaderChips(config);
     const normalizedHeaderAttributes = normalizedHeaderChips
-      .filter(chip => chip.type === "attribute")
+      .filter(isAttributeHeaderChip)
       .map(chip => chip.attribute);
 
     const defaults: WeatherForecastExtendedConfig = {
@@ -177,7 +195,7 @@ export class WeatherForecastExtended extends LitElement {
 
     this._teardownTemplateSubscriptions();
 
-    const nextSubscriptions: Array<Promise<UnsubscribeFunc> | undefined> = [];
+    const nextSubscriptions: Array<Promise<HassUnsubscribeFunc> | undefined> = [];
     const nextValues: Record<number, { display: string; missing: boolean }> = {};
 
     chips.forEach((chip, index) => {
@@ -205,7 +223,7 @@ export class WeatherForecastExtended extends LitElement {
     this._templateChipValues = { ...nextValues };
   }
 
-  private _subscribeTemplate(index: number, template: string): Promise<UnsubscribeFunc> | undefined {
+  private _subscribeTemplate(index: number, template: string): Promise<HassUnsubscribeFunc> | undefined {
     const connection = this._hass?.connection;
     if (!connection) {
       this._setTemplateChipValue(index, MISSING_ATTRIBUTE_TEXT, true);
@@ -619,7 +637,7 @@ export class WeatherForecastExtended extends LitElement {
                   : nothing}
                 <div class="header-main">
                   <div class="temp">${this._computeHeaderTemperature()}</div>
-                  <div class="condition">${this._hass.formatEntityState(this._state) || this._state.state}</div>
+                  <div class="condition">${this._hass?.formatEntityState?.(this._state) || this._state.state}</div>
                 </div>
               </div>
             </div>
@@ -687,12 +705,18 @@ export class WeatherForecastExtended extends LitElement {
 
     const sensorState = this._headerTemperatureState;
     if (sensorState && !this._isStateUnavailable(sensorState.state)) {
-      const formattedSensor = this._hass.formatEntityState(sensorState);
-      return formattedSensor || sensorState.state;
+      const formattedSensor = this._hass?.formatEntityState?.(sensorState);
+      if (formattedSensor && typeof formattedSensor === "string") {
+        return formattedSensor;
+      }
+      return sensorState.state;
     }
 
-    const formattedWeather = this._hass.formatEntityAttributeValue(this._state, "temperature");
-    return formattedWeather || this._state.state || "";
+    const formattedWeather = this._hass?.formatEntityAttributeValue?.(this._state, "temperature");
+    if (formattedWeather && typeof formattedWeather === "string") {
+      return formattedWeather;
+    }
+    return this._state.state || "";
   }
 
   private _isStateUnavailable(state?: string): boolean {
@@ -763,7 +787,7 @@ export class WeatherForecastExtended extends LitElement {
     }
 
     // Try to format the attribute value using Home Assistant's built-in formatter
-    const formattedValue = this._hass.formatEntityAttributeValue(this._state, attribute);
+      const formattedValue = this._hass?.formatEntityAttributeValue?.(this._state, attribute);
     const resolvedValue = formattedValue !== undefined && formattedValue !== null && formattedValue !== ""
       ? formattedValue
       : rawValue;
