@@ -35,14 +35,17 @@ ha-card {
   justify-content: flex-start;
   padding-block: var(--wfe-header-padding-block, 16px);
   padding-inline: var(--wfe-header-padding-inline, 16px);
-  gap: 16px;
+  gap: 0;
   width: 100%;
   box-sizing: border-box;
   flex: 1 1 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .weather .header-main {
   margin-left: auto;
+  padding-left: var(--wfe-header-columns-gap, 16px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -50,6 +53,8 @@ ha-card {
   gap: var(--wfe-header-main-gap, 10px);
   align-self: stretch;
   min-height: 0;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .weather .header-attributes {
@@ -57,22 +62,25 @@ ha-card {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--wfe-header-attribute-gap, 8px);
-  max-width: 60%;
   align-self: stretch;
   min-height: 0;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .weather .attribute-chip {
   font-size: var(--ha-font-size-m);
   line-height: calc(6px + var(--ha-font-size-m));
   background-color: rgba(0, 0, 0, 0.35);
-  width: fit-content;
   padding: 4px 12px;
   border-radius: 12px;
   color: inherit;
-  white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .weather .attribute-chip.missing {
@@ -84,9 +92,14 @@ ha-card {
   font-size: var(--ha-font-size-xl);
   line-height: calc(10px + var(--ha-font-size-xl));
   background-color: rgba(0, 0, 0, 0.3);
-  width: fit-content;
   padding: 4px 15px;
   border-radius: 100px;
+  max-width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .weather .temp {
@@ -94,9 +107,22 @@ ha-card {
   line-height: calc(10px + var(--ha-font-size-5xl));
   font-weight: bolder;
   background-color: rgba(0, 0, 0, 0.3);
-  width: fit-content;
   padding: 2px 17px;
   border-radius: 100px;
+  max-width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.weather .header-pill-text {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .forecast-container {

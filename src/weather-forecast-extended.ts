@@ -631,7 +631,7 @@ export class WeatherForecastExtended extends LitElement {
                             class=${classMap(chipClassMap)}
                             title=${chipTitle}
                           >
-                            ${chip.display}
+                            <span class="header-pill-text">${chip.display}</span>
                           </div>
                         `;
                       })}
@@ -639,8 +639,14 @@ export class WeatherForecastExtended extends LitElement {
                   `
                   : nothing}
                 <div class="header-main">
-                  <div class="temp">${this._computeHeaderTemperature()}</div>
-                  <div class="condition">${this._hass?.formatEntityState?.(this._state) || this._state.state}</div>
+                  <div class="temp">
+                    <span class="header-pill-text">${this._computeHeaderTemperature()}</span>
+                  </div>
+                  <div class="condition">
+                    <span class="header-pill-text">
+                      ${this._hass?.formatEntityState?.(this._state) || this._state.state}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
