@@ -564,7 +564,7 @@ export class WeatherForecastExtended extends LitElement {
     const showForecastDivider = dailyEnabled && hourlyEnabled;
     const dailyForecast = this._forecastDailyEvent?.forecast ?? [];
     const hourlyForecast = this._forecastHourlyEvent?.forecast ?? [];
-    const sunCoordinates = this._resolveSunCoordinates();
+    const sunCoordinates = this._getLocationCoordinates();
     const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
     const orientation = this._config.orientation ?? "vertical";
     const containerClassMap = {
@@ -891,14 +891,6 @@ export class WeatherForecastExtended extends LitElement {
     this._sunCoordinateCacheKey = key;
     this._sunCoordinateCache = coords;
     return coords;
-  }
-
-  private _resolveSunCoordinates(): SunCoordinates | undefined {
-    if (!this._config?.show_sun_times) {
-      return undefined;
-    }
-
-    return this._getLocationCoordinates();
   }
 
   private _parseCoordinate(value: number | string | undefined, min: number, max: number): number | undefined {

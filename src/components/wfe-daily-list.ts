@@ -53,7 +53,7 @@ export class WFEDailyList extends LitElement {
         <div class="translate-container">
           <div class="icon-container">
             <div class="forecast-image-icon">
-              ${getWeatherStateIcon(item.condition!, this, !(item.is_daytime || item.is_daytime === undefined))}
+              ${getWeatherStateIcon(item.condition!, this, false)}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>

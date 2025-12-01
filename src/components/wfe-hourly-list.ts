@@ -156,7 +156,7 @@ export class WFEHourlyList extends LitElement {
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
             <div class="forecast-image-icon">
-              ${getWeatherStateIcon(item.condition!, this, !(item.is_daytime || item.is_daytime === undefined))}
+              ${getWeatherStateIcon(item.condition!, this, this._shouldUseNightIcon(item, date))}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>
@@ -235,7 +235,7 @@ export class WFEHourlyList extends LitElement {
   }
 
   private _calculateSunTimes() {
-    if (!this.showSunTimes || !this.sunCoordinates || !this.forecast?.length) {
+    if (!this.sunCoordinates || !this.forecast?.length) {
       this._sunTimesByDay = {};
       return;
     }
@@ -287,6 +287,36 @@ export class WFEHourlyList extends LitElement {
     }
 
     this._sunTimesByDay = sunTimes;
+  }
+
+  private _shouldUseNightIcon(item: ForecastAttribute, date: Date): boolean {
+    if (item.is_daytime === false) {
+      return true;
+    }
+    if (item.is_daytime === true) {
+      return false;
+    }
+
+    const derived = this._isNightFromSunTimes(date);
+    return derived ?? false;
+  }
+
+  private _isNightFromSunTimes(date: Date): boolean | undefined {
+    const times = this._sunTimesByDay?.[this._formatDayKey(date)];
+    if (!times || times.sunrise === undefined || times.sunset === undefined) {
+      return undefined;
+    }
+
+    const timestamp = date.getTime();
+    if (!Number.isFinite(timestamp)) {
+      return undefined;
+    }
+
+    if (times.sunrise <= times.sunset) {
+      return timestamp < times.sunrise || timestamp >= times.sunset;
+    }
+
+    return !(timestamp >= times.sunrise && timestamp < times.sunset);
   }
 
   private _getSunEventForHour(date: Date, index: number): { type: SunEventType; timestamp: number } | undefined {
