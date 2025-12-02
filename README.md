@@ -22,7 +22,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 ### HACS (recommended)
 1. In Home Assistant, open *HACS > Frontend* and click the three-dot menu in the top right.
 2. Choose *Custom repositories*, add `https://github.com/Thyraz/weather-forecast-extended`, and set the category to *Dashboard*.
-3. Search for "Weather Forecast Extended" in HACS, install the latest release, and let HACS add the resource to your dashboard automatically.
+3. Search for "Weather Card Extended" in HACS, install the latest release, and let HACS add the resource to your dashboard automatically.
 4. Reload the browser or clear the Lovelace cache if the new card type is not immediately available.
 
 ## Usage
