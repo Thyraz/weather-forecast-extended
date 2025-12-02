@@ -215,19 +215,20 @@ ha-card {
 }
 
 .forecast {
+  --forecast-inline-padding: 16px;
   /* Allow this row to expand when parent is taller */
   flex: 1 1 auto;
   height: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-left: 16px;
-  scroll-padding-right: 16px;
+  scroll-padding-left: var(--forecast-inline-padding);
+  scroll-padding-right: var(--forecast-inline-padding);
   overflow-x: auto;
   overflow-y: clip; /* no vertical scrolling in case of a few px overflow */
   display: flex;
   align-items: stretch; /* stretch items so they can use additional height */
   justify-content: space-around;
   gap: var(--dynamic-gap, 20px); /* fallback */
-  padding: 8px 16px 0px;
+  padding: 8px var(--forecast-inline-padding) 0px;
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -343,10 +344,12 @@ ha-card {
 }
 
 .forecast.hourly .day-marker {
+  --day-marker-translate-x: calc((var(--dynamic-gap, 20px) + var(--icon-container-width) - var(--day-marker-width)) / 2);
   flex: 0 0 auto;
   align-self: start;
   position: sticky;
-  left: -8px;
+  left: calc((((var(--day-marker-width) - var(--icon-container-width)) / 2) * -1) - var(--day-marker-translate-x));
+  transform: translateX(var(--day-marker-translate-x));
   display: inline-flex;
   align-items: center;
   justify-content: center;
