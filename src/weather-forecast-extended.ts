@@ -91,6 +91,8 @@ export class WeatherForecastExtended extends LitElement {
       .filter(isAttributeHeaderChip)
       .map(chip => chip.attribute)
       .filter(attribute => typeof attribute === "string" && attribute.trim().length > 0);
+    const normalizedDailyMinGap = this._normalizeMinGapValue(config.daily_min_gap);
+    const normalizedHourlyMinGap = this._normalizeMinGapValue(config.hourly_min_gap);
 
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
@@ -104,6 +106,8 @@ export class WeatherForecastExtended extends LitElement {
       use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
       header_chips: normalizedHeaderChips,
       header_attributes: normalizedHeaderAttributes,
+      daily_min_gap: normalizedDailyMinGap,
+      hourly_min_gap: normalizedHourlyMinGap,
     };
 
     this._config = defaults;
@@ -170,6 +174,18 @@ export class WeatherForecastExtended extends LitElement {
       : [];
 
     return attributeEntries.map(attribute => ({ type: "attribute", attribute }));
+  }
+
+  private _normalizeMinGapValue(value?: number | string): number | undefined {
+    if (value === null || typeof value === "undefined") {
+      return undefined;
+    }
+    const numericValue = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return undefined;
+    }
+    const clamped = Math.max(10, numericValue);
+    return Math.round(clamped);
   }
 
   private _getHeaderChips(): HeaderChip[] {
@@ -580,9 +596,16 @@ export class WeatherForecastExtended extends LitElement {
 
     const hasContent = showHeader || dailyEnabled || hourlyEnabled;
 
-    const dailyStyle = this._dailyGap !== undefined
-      ? styleMap({ "--dynamic-gap": `${this._dailyGap}px` })
-      : nothing;
+    const dailyStyle = (() => {
+      const styles: Record<string, string> = {};
+      if (this._dailyGap !== undefined) {
+        styles["--dynamic-gap"] = `${this._dailyGap}px`;
+      }
+      if (this._config?.daily_min_gap !== undefined) {
+        styles["--min-gap"] = `${this._config.daily_min_gap}px`;
+      }
+      return Object.keys(styles).length ? styleMap(styles) : nothing;
+    })();
 
     const hourlyStyle = (() => {
       const styles: Record<string, string> = {};
@@ -592,6 +615,9 @@ export class WeatherForecastExtended extends LitElement {
       if (this._hourlyMinTemp !== undefined && this._hourlyMaxTemp !== undefined) {
         styles["--min-temp"] = `${this._hourlyMinTemp}`;
         styles["--max-temp"] = `${this._hourlyMaxTemp}`;
+      }
+      if (this._config?.hourly_min_gap !== undefined) {
+        styles["--min-gap"] = `${this._config.hourly_min_gap}px`;
       }
       return Object.keys(styles).length ? styleMap(styles) : nothing;
     })();

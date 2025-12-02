@@ -262,6 +262,38 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           </div>
         </div>
         <div class="editor-subsection">
+          <h5 class="section-subtitle">Forecast spacing</h5>
+          <p class="location-description">
+            Minimum distance between forecast items in pixels (10px or greater)
+          </p>
+          <div class="sun-coordinates">
+            <label class="coordinate-field">
+              <span>Daily min gap (px)</span>
+              <input
+                type="number"
+                name="daily_min_gap"
+                min="10"
+                step="1"
+                placeholder="Default 30"
+                .value=${String(this._config.daily_min_gap ?? "")}
+                @input=${this._handleSunInputChange}
+              />
+            </label>
+            <label class="coordinate-field">
+              <span>Hourly min gap (px)</span>
+              <input
+                type="number"
+                name="hourly_min_gap"
+                min="10"
+                step="1"
+                placeholder="Default 16"
+                .value=${String(this._config.hourly_min_gap ?? "")}
+                @input=${this._handleSunInputChange}
+              />
+            </label>
+          </div>
+        </div>
+        <div class="editor-subsection">
           <h5 class="section-subtitle">Sunrise & Sunset</h5>
           <div class="forecast-switch">
             <span>Show sunrise & sunset</span>

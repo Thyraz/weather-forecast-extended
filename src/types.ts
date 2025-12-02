@@ -28,6 +28,8 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   sun_latitude?: number | string;
   sun_longitude?: number | string;
   use_night_header_backgrounds?: boolean;
+  daily_min_gap?: number;
+  hourly_min_gap?: number;
 }
 
 export interface SunCoordinates {

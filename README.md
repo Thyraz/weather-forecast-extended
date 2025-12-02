@@ -41,6 +41,8 @@ header_temperature_entity: sensor.weather_station_temperature
 show_header: true
 hourly_forecast: true
 daily_forecast: true
+daily_min_gap: 30
+hourly_min_gap: 16
 orientation: vertical
 show_sun_times: true
 sun_use_home_coordinates: false
@@ -58,6 +60,8 @@ use_night_header_backgrounds: true
 | `show_header` | boolean | `true` | Toggles hero header containing artwork, current temperature, and condition text. |
 | `hourly_forecast` | boolean | `true` | Shows the hourly forecast. Requires the selected weather entity to provide hourly data. |
 | `daily_forecast` | boolean | `true` | Shows the daily forecast. |
+| `daily_min_gap` | number | `30` | Minimum gap in pixels between daily forecast items. Must be `≥ 10`. |
+| `hourly_min_gap` | number | `16` | Minimum gap in pixels between hourly forecast items. Must be `≥ 10`. |
 | `orientation` | `vertical` \| `horizontal` | `vertical` | Stacks sections vertically (default) or places daily and hourly lists side by side. |
 | `show_sun_times` | boolean | `false` | Adds sunrise and sunset markers to the hourly forecast. Requires valid coordinates. |
 | `sun_use_home_coordinates` | boolean | `true` | Uses Home Assistant's home location for sun calculations when `show_sun_times` is enabled. Set to `false` to provide manual coordinates. |
