@@ -1782,7 +1782,8 @@ const $a670ed82a1e76f75$var$getWeatherStateSVG = (state, nightTime)=>(0, $l56HR.
   ${state === "partlycloudy" && nightTime ? (0, $l56HR.svg)`
           <path
             class="moon"
-            d="m14.981 4.2112c0 1.9244-1.56 3.4844-3.484 3.4844-1.9244 0-3.4844-1.56-3.4844-3.4844s1.56-3.484 3.4844-3.484c1.924 0 3.484 1.5596 3.484 3.484"
+            transform="scale(0.65 0.65) translate(11 -3)"
+            d="m 13.502891,11.382935 c -1.011285,1.859223 -2.976664,3.121381 -5.2405751,3.121381 -3.289929,0 -5.953329,-2.663833 -5.953329,-5.9537625 0,-2.263911 1.261724,-4.228856 3.120948,-5.240575 -0.452782,0.842738 -0.712753,1.806363 -0.712753,2.832381 0,3.289928 2.663833,5.9533275 5.9533291,5.9533275 1.026017,0 1.989641,-0.259969 2.83238,-0.712752"
           />
         ` : state === "partlycloudy" ? (0, $l56HR.svg)`
           <path
@@ -1790,16 +1791,27 @@ const $a670ed82a1e76f75$var$getWeatherStateSVG = (state, nightTime)=>(0, $l56HR.
             d="m14.981 4.2112c0 1.9244-1.56 3.4844-3.484 3.4844-1.9244 0-3.4844-1.56-3.4844-3.4844s1.56-3.484 3.4844-3.484c1.924 0 3.484 1.5596 3.484 3.484"
           />
         ` : ""}
-  ${$a670ed82a1e76f75$var$cloudyStates.has(state) ? (0, $l56HR.svg)`
-          <path
-            class="cloud-back"
-            d="m3.8863 5.035c-0.54892 0.16898-1.04 0.46637-1.4372 0.8636-0.63077 0.63041-1.0206 1.4933-1.0206 2.455 0 1.9251 1.5589 3.4682 3.4837 3.4682h6.9688c1.9251 0 3.484-1.5981 3.484-3.5232 0-1.9251-1.5589-3.5232-3.484-3.5232h-1.0834c-0.25294-1.6916-1.6986-2.9083-3.4463-2.9083-1.7995 0-3.2805 1.4153-3.465 3.1679"
-          />
-          <path
-            class="cloud-front"
-            d="m4.1996 7.6995c-0.33902 0.10407-0.64276 0.28787-0.88794 0.5334-0.39017 0.38982-0.63147 0.92322-0.63147 1.5176 0 1.1896 0.96414 2.1431 2.1537 2.1431h4.3071c1.1896 0 2.153-0.98742 2.153-2.1777 0-1.1896-0.96344-2.1777-2.153-2.1777h-0.66992c-0.15593-1.0449-1.0499-1.7974-2.1297-1.7974-1.112 0-2.0274 0.87524-2.1417 1.9586"
-          />
-        ` : ""}
+  ${$a670ed82a1e76f75$var$cloudyStates.has(state) ? state === "partlycloudy" && nightTime ? (0, $l56HR.svg)`
+            <g transform="translate(-1 1) scale(1 1)">
+              <path
+                class="cloud-back"
+                d="m3.8863 5.035c-0.54892 0.16898-1.04 0.46637-1.4372 0.8636-0.63077 0.63041-1.0206 1.4933-1.0206 2.455 0 1.9251 1.5589 3.4682 3.4837 3.4682h6.9688c1.9251 0 3.484-1.5981 3.484-3.5232 0-1.9251-1.5589-3.5232-3.484-3.5232h-1.0834c-0.25294-1.6916-1.6986-2.9083-3.4463-2.9083-1.7995 0-3.2805 1.4153-3.465 3.1679"
+              />
+              <path
+                class="cloud-front"
+                d="m4.1996 7.6995c-0.33902 0.10407-0.64276 0.28787-0.88794 0.5334-0.39017 0.38982-0.63147 0.92322-0.63147 1.5176 0 1.1896 0.96414 2.1431 2.1537 2.1431h4.3071c1.1896 0 2.153-0.98742 2.153-2.1777 0-1.1896-0.96344-2.1777-2.153-2.1777h-0.66992c-0.15593-1.0449-1.0499-1.7974-2.1297-1.7974-1.112 0-2.0274 0.87524-2.1417 1.9586"
+              />
+            </g>
+          ` : (0, $l56HR.svg)`
+            <path
+              class="cloud-back"
+              d="m3.8863 5.035c-0.54892 0.16898-1.04 0.46637-1.4372 0.8636-0.63077 0.63041-1.0206 1.4933-1.0206 2.455 0 1.9251 1.5589 3.4682 3.4837 3.4682h6.9688c1.9251 0 3.484-1.5981 3.484-3.5232 0-1.9251-1.5589-3.5232-3.484-3.5232h-1.0834c-0.25294-1.6916-1.6986-2.9083-3.4463-2.9083-1.7995 0-3.2805 1.4153-3.465 3.1679"
+            />
+            <path
+              class="cloud-front"
+              d="m4.1996 7.6995c-0.33902 0.10407-0.64276 0.28787-0.88794 0.5334-0.39017 0.38982-0.63147 0.92322-0.63147 1.5176 0 1.1896 0.96414 2.1431 2.1537 2.1431h4.3071c1.1896 0 2.153-0.98742 2.153-2.1777 0-1.1896-0.96344-2.1777-2.153-2.1777h-0.66992c-0.15593-1.0449-1.0499-1.7974-2.1297-1.7974-1.112 0-2.0274 0.87524-2.1417 1.9586"
+            />
+          ` : ""}
   ${$a670ed82a1e76f75$var$rainStates.has(state) ? (0, $l56HR.svg)`
           <path
             class="rain"
@@ -2262,7 +2274,7 @@ let $e0faea6f638c1177$export$dc909bdc6ed8e8f6 = class WFEDailyList extends (0, $
         <div class="translate-container">
           <div class="icon-container">
             <div class="forecast-image-icon">
-              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
+              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, false)}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>
@@ -2696,7 +2708,7 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
             <div class="forecast-image-icon">
-              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, !(item.is_daytime || item.is_daytime === undefined))}
+              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, this._shouldUseNightIcon(item, date))}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>
@@ -2742,7 +2754,7 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
         return Math.min(unconstrained, maxScale);
     }
     _calculateSunTimes() {
-        if (!this.showSunTimes || !this.sunCoordinates || !this.forecast?.length) {
+        if (!this.sunCoordinates || !this.forecast?.length) {
             this._sunTimesByDay = {};
             return;
         }
@@ -2777,6 +2789,20 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
             if (sunset !== undefined) sunTimes[key].sunset = sunset;
         }
         this._sunTimesByDay = sunTimes;
+    }
+    _shouldUseNightIcon(item, date) {
+        if (item.is_daytime === false) return true;
+        if (item.is_daytime === true) return false;
+        const derived = this._isNightFromSunTimes(date);
+        return derived ?? false;
+    }
+    _isNightFromSunTimes(date) {
+        const times = this._sunTimesByDay?.[this._formatDayKey(date)];
+        if (!times || times.sunrise === undefined || times.sunset === undefined) return undefined;
+        const timestamp = date.getTime();
+        if (!Number.isFinite(timestamp)) return undefined;
+        if (times.sunrise <= times.sunset) return timestamp < times.sunrise || timestamp >= times.sunset;
+        return !(timestamp >= times.sunrise && timestamp < times.sunset);
     }
     _getSunEventForHour(date, index) {
         if (!this.showSunTimes || !this._sunTimesByDay) return undefined;
@@ -3444,7 +3470,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const showForecastDivider = dailyEnabled && hourlyEnabled;
         const dailyForecast = this._forecastDailyEvent?.forecast ?? [];
         const hourlyForecast = this._forecastHourlyEvent?.forecast ?? [];
-        const sunCoordinates = this._resolveSunCoordinates();
+        const sunCoordinates = this._getLocationCoordinates();
         const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
         const orientation = this._config.orientation ?? "vertical";
         const containerClassMap = {
@@ -3714,10 +3740,6 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         this._sunCoordinateCacheKey = key;
         this._sunCoordinateCache = coords;
         return coords;
-    }
-    _resolveSunCoordinates() {
-        if (!this._config?.show_sun_times) return undefined;
-        return this._getLocationCoordinates();
     }
     _parseCoordinate(value, min, max) {
         if (value === undefined || value === null) return undefined;
