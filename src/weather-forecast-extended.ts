@@ -1145,19 +1145,7 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   private _handleHeaderTap(actionConfig?: ActionConfig, entity?: string) {
-    if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
-      return;
-    }
-
-    handleAction(
-      this,
-      this._hass,
-      {
-        entity: entity || this._entity,
-        tap_action: actionConfig,
-      },
-      "tap",
-    );
+    this._executeTapAction(actionConfig, entity);
   }
 
   private _handleHeaderKeydown(event: KeyboardEvent, actionConfig?: ActionConfig, entity?: string) {
@@ -1170,19 +1158,7 @@ export class WeatherForecastExtended extends LitElement {
   }
 
   private _handleHeaderChipTap(actionConfig?: ActionConfig) {
-    if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
-      return;
-    }
-
-    handleAction(
-      this,
-      this._hass,
-      {
-        entity: this._entity,
-        tap_action: actionConfig,
-      },
-      "tap",
-    );
+    this._executeTapAction(actionConfig);
   }
 
   private _handleHeaderChipKeydown(event: KeyboardEvent, actionConfig?: ActionConfig) {
@@ -1191,5 +1167,32 @@ export class WeatherForecastExtended extends LitElement {
     }
     event.preventDefault();
     this._handleHeaderChipTap(actionConfig);
+  }
+
+  private _executeTapAction(actionConfig?: ActionConfig, entityOverride?: string) {
+    if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
+      return;
+    }
+
+    const performAction = (actionConfig as any).perform_action as string | undefined;
+    if (actionConfig.action === "perform-action" && performAction) {
+      const [domain, service] = performAction.split(".", 2);
+      if (domain && service) {
+        const data = (actionConfig as any).data ?? (actionConfig as any).service_data;
+        const target = (actionConfig as any).target;
+        this._hass.callService(domain, service, data, target);
+        return;
+      }
+    }
+
+    handleAction(
+      this,
+      this._hass,
+      {
+        entity: entityOverride || this._entity,
+        tap_action: actionConfig,
+      },
+      "tap",
+    );
   }
 }
