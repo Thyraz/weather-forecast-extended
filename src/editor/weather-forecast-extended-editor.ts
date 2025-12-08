@@ -37,6 +37,7 @@ type HaFormSelector =
   | { entity: { domain?: string; device_class?: string | string[] } }
   | { boolean: {} }
   | { text: {} }
+  | { ui_action: { actions?: Array<"tap" | "hold" | "double_tap"> } }
   | { select: { options: Array<{ value: string; label: string }>; custom_value?: boolean } };
 
 type HaFormSchema = {
@@ -205,6 +206,30 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
                 .computeLabel=${this._computeLabel}
                 @value-changed=${this._handleValueChanged}
               ></ha-form>
+              <div class="editor-subsection">
+                <h5 class="section-subtitle">Header tap actions</h5>
+                <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ ui_action: {} }}
+                  .value=${this._config.header_tap_action_temperature}
+                  .label=${"Temperature tap action"}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event: CustomEvent) =>
+                    this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+                ></ha-selector>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ ui_action: {} }}
+                  .value=${this._config.header_tap_action_condition}
+                  .label=${"Condition tap action"}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event: CustomEvent) =>
+                    this._handleHeaderActionChange(event, "header_tap_action_condition")}
+                ></ha-selector>
+              </div>
               <div class="chips-section">
                 <h5 class="section-subtitle">Header chips</h5>
                 <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
@@ -405,6 +430,18 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     const value = target.value.trim();
     const update: Partial<WeatherForecastExtendedConfig> = {};
     (update as any)[key] = value === "" ? undefined : value;
+    this._updateConfig(update);
+  }
+
+  private _handleHeaderActionChange(
+    event: CustomEvent<{ value?: unknown }>,
+    field: "header_tap_action_temperature" | "header_tap_action_condition",
+  ) {
+    event.stopPropagation();
+    const value = event.detail?.value;
+    const update: Partial<WeatherForecastExtendedConfig> = {
+      [field]: value || undefined,
+    };
     this._updateConfig(update);
   }
 

@@ -5,7 +5,8 @@ import { styleMap } from "lit/directives/style-map.js";
 import { state } from "lit/decorators";
 import type { ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
-import type { HomeAssistant } from "custom-card-helpers";
+import { handleAction, hasAction } from "custom-card-helpers";
+import type { ActionConfig, HomeAssistant } from "custom-card-helpers";
 import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
 import type { AttributeHeaderChip, HeaderChip, TemplateHeaderChip } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
@@ -583,6 +584,12 @@ export class WeatherForecastExtended extends LitElement {
     const sunCoordinates = this._getLocationCoordinates();
     const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
     const orientation = this._config.orientation ?? "vertical";
+    const temperatureTapAction = this._config.header_tap_action_temperature;
+    const conditionTapAction = this._config.header_tap_action_condition;
+    const hasTemperatureTapAction = hasAction(temperatureTapAction);
+    const hasConditionTapAction = hasAction(conditionTapAction);
+    const headerTemperature = this._computeHeaderTemperature();
+    const headerCondition = this._hass?.formatEntityState?.(this._state) || this._state.state;
     const containerClassMap = {
       "forecast-container": true,
       "orientation-horizontal": orientation === "horizontal",
@@ -665,12 +672,34 @@ export class WeatherForecastExtended extends LitElement {
                   `
                   : nothing}
                 <div class="header-main">
-                  <div class="temp">
-                    <span class="header-pill-text">${this._computeHeaderTemperature()}</span>
+                  <div
+                    class=${classMap({
+                      temp: true,
+                      "has-action": hasTemperatureTapAction,
+                    })}
+                    role=${hasTemperatureTapAction ? "button" : nothing}
+                    tabindex=${hasTemperatureTapAction ? 0 : nothing}
+                    @click=${hasTemperatureTapAction ? () => this._handleHeaderTap(temperatureTapAction) : undefined}
+                    @keydown=${hasTemperatureTapAction
+                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, temperatureTapAction)
+                      : undefined}
+                  >
+                    <span class="header-pill-text">${headerTemperature}</span>
                   </div>
-                  <div class="condition">
+                  <div
+                    class=${classMap({
+                      condition: true,
+                      "has-action": hasConditionTapAction,
+                    })}
+                    role=${hasConditionTapAction ? "button" : nothing}
+                    tabindex=${hasConditionTapAction ? 0 : nothing}
+                    @click=${hasConditionTapAction ? () => this._handleHeaderTap(conditionTapAction) : undefined}
+                    @keydown=${hasConditionTapAction
+                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, conditionTapAction)
+                      : undefined}
+                  >
                     <span class="header-pill-text">
-                      ${this._hass?.formatEntityState?.(this._state) || this._state.state}
+                      ${headerCondition}
                     </span>
                   </div>
                 </div>
@@ -1095,5 +1124,30 @@ export class WeatherForecastExtended extends LitElement {
     const offset = itemRect.left - containerRect.left + hourlyContainer.scrollLeft - 16; // account for padding
 
     hourlyContainer.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
+  }
+
+  private _handleHeaderTap(actionConfig?: ActionConfig) {
+    if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
+      return;
+    }
+
+    handleAction(
+      this,
+      this._hass,
+      {
+        entity: this._entity,
+        tap_action: actionConfig,
+      },
+      "tap",
+    );
+  }
+
+  private _handleHeaderKeydown(event: KeyboardEvent, actionConfig?: ActionConfig) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    this._handleHeaderTap(actionConfig);
   }
 }

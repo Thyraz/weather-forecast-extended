@@ -1,6 +1,6 @@
 // Collection of types from HA frontend
 
-import type { LovelaceCardConfig } from "custom-card-helpers";
+import type { ActionConfig, LovelaceCardConfig } from "custom-card-helpers";
 
 // From frontend/src/panels/lovelace/types.ts
 export interface LovelaceGridOptions {
@@ -30,6 +30,8 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   use_night_header_backgrounds?: boolean;
   daily_min_gap?: number;
   hourly_min_gap?: number;
+  header_tap_action_temperature?: ActionConfig;
+  header_tap_action_condition?: ActionConfig;
 }
 
 export interface SunCoordinates {

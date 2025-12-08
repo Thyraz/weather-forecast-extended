@@ -102,6 +102,17 @@ ha-card {
   overflow: hidden;
 }
 
+.weather .temp.has-action,
+.weather .condition.has-action {
+  cursor: pointer;
+}
+
+.weather .temp.has-action:focus-visible,
+.weather .condition.has-action:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
+}
+
 .weather .temp {
   font-size: var(--ha-font-size-5xl);
   line-height: calc(10px + var(--ha-font-size-5xl));
