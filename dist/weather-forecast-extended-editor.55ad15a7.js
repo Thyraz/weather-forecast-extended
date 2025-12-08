@@ -29,8 +29,10 @@ const $a37b5b928a2fc5d8$var$HEADER_CHIP_INDEXES = [
 const $a37b5b928a2fc5d8$var$chipTypeFieldName = (index)=>`header_chip_${index + 1}_type`;
 const $a37b5b928a2fc5d8$var$chipAttributeFieldName = (index)=>`header_chip_${index + 1}_attribute`;
 const $a37b5b928a2fc5d8$var$chipTemplateFieldName = (index)=>`header_chip_${index + 1}_template`;
+const $a37b5b928a2fc5d8$var$chipIconFieldName = (index)=>`header_chip_${index + 1}_icon`;
+const $a37b5b928a2fc5d8$var$chipActionFieldName = (index)=>`header_chip_${index + 1}_tap_action`;
 const $a37b5b928a2fc5d8$var$CHIP_FORM_FIELD_NAMES = $a37b5b928a2fc5d8$var$HEADER_CHIP_INDEXES.reduce((names, index)=>{
-    names.push($a37b5b928a2fc5d8$var$chipTypeFieldName(index), $a37b5b928a2fc5d8$var$chipAttributeFieldName(index), $a37b5b928a2fc5d8$var$chipTemplateFieldName(index));
+    names.push($a37b5b928a2fc5d8$var$chipTypeFieldName(index), $a37b5b928a2fc5d8$var$chipAttributeFieldName(index), $a37b5b928a2fc5d8$var$chipTemplateFieldName(index), $a37b5b928a2fc5d8$var$chipIconFieldName(index), $a37b5b928a2fc5d8$var$chipActionFieldName(index));
     return names;
 }, []);
 const $a37b5b928a2fc5d8$var$CHIP_TYPE_OPTIONS = [
@@ -184,6 +186,32 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 .computeLabel=${this._computeLabel}
                 @value-changed=${this._handleValueChanged}
               ></ha-form>
+              <div class="editor-subsection">
+                <h5 class="section-subtitle">Header tap actions</h5>
+                <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{
+            ui_action: {}
+        }}
+                  .value=${this._config.header_tap_action_temperature}
+                  .label=${"Temperature tap action"}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+                ></ha-selector>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{
+            ui_action: {}
+        }}
+                  .value=${this._config.header_tap_action_condition}
+                  .label=${"Condition tap action"}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_condition")}
+                ></ha-selector>
+              </div>
               <div class="chips-section">
                 <h5 class="section-subtitle">Header chips</h5>
                 <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
@@ -331,6 +359,14 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         update[key] = value === "" ? undefined : value;
         this._updateConfig(update);
     }
+    _handleHeaderActionChange(event, field) {
+        event.stopPropagation();
+        const value = event.detail?.value;
+        const update = {
+            [field]: value || undefined
+        };
+        this._updateConfig(update);
+    }
     _createFormData() {
         if (!this._config) return {};
         const formData = {
@@ -341,9 +377,13 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             const typeField = $a37b5b928a2fc5d8$var$chipTypeFieldName(index);
             const attributeField = $a37b5b928a2fc5d8$var$chipAttributeFieldName(index);
             const templateField = $a37b5b928a2fc5d8$var$chipTemplateFieldName(index);
+            const iconField = $a37b5b928a2fc5d8$var$chipIconFieldName(index);
+            const actionField = $a37b5b928a2fc5d8$var$chipActionFieldName(index);
             const configuredChip = headerChips[index];
             const type = this._chipTypes[index] ?? configuredChip?.type ?? "attribute";
             formData[typeField] = type;
+            formData[actionField] = configuredChip?.tap_action;
+            formData[iconField] = configuredChip?.icon ?? "";
             if (type === "template") {
                 formData[templateField] = configuredChip?.type === "template" ? configuredChip.template : "";
                 formData[attributeField] = "";
@@ -360,22 +400,33 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             const typeField = $a37b5b928a2fc5d8$var$chipTypeFieldName(index);
             const attributeField = $a37b5b928a2fc5d8$var$chipAttributeFieldName(index);
             const templateField = $a37b5b928a2fc5d8$var$chipTemplateFieldName(index);
+            const actionField = $a37b5b928a2fc5d8$var$chipActionFieldName(index);
+            const iconField = $a37b5b928a2fc5d8$var$chipIconFieldName(index);
             const type = formValue[typeField] ?? "attribute";
+            const tapAction = formValue[actionField];
+            const iconRaw = formValue[iconField];
+            const iconValue = typeof iconRaw === "string" ? iconRaw.trim() : "";
             if (type === "template") {
                 const templateRaw = formValue[templateField];
                 const templateValue = typeof templateRaw === "string" ? templateRaw.trim() : "";
-                chips.push({
+                const chip = {
                     type: "template",
                     template: templateValue
-                });
+                };
+                if (tapAction) chip.tap_action = tapAction;
+                if (iconValue) chip.icon = iconValue;
+                chips.push(chip);
                 return;
             }
             const attributeRaw = formValue[attributeField];
             const attributeValue = typeof attributeRaw === "string" ? attributeRaw.trim() : "";
-            chips.push({
+            const chip = {
                 type: "attribute",
                 attribute: attributeValue
-            });
+            };
+            if (tapAction) chip.tap_action = tapAction;
+            if (iconValue) chip.icon = iconValue;
+            chips.push(chip);
         });
         return chips;
     }
@@ -510,6 +561,20 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 optional: true,
                 disabled: !this._config?.entity
             });
+            chipsSchema.push({
+                name: $a37b5b928a2fc5d8$var$chipIconFieldName(index),
+                selector: {
+                    icon: {}
+                },
+                optional: true
+            });
+            chipsSchema.push({
+                name: $a37b5b928a2fc5d8$var$chipActionFieldName(index),
+                selector: {
+                    ui_action: {}
+                },
+                optional: true
+            });
         });
         return {
             general: generalSchema,
@@ -529,17 +594,25 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             if (normalized.length >= limit || !chip || typeof chip !== "object") continue;
             if (chip.type === "attribute") {
                 const attribute = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
+                const tap_action = chip.tap_action;
+                const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
                 normalized.push({
                     type: "attribute",
-                    attribute: attribute
+                    attribute: attribute,
+                    tap_action: tap_action,
+                    icon: icon
                 });
                 continue;
             }
             if (chip.type === "template") {
                 const template = typeof chip.template === "string" ? chip.template.trim() : "";
+                const tap_action = chip.tap_action;
+                const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
                 normalized.push({
                     type: "template",
-                    template: template
+                    template: template,
+                    tap_action: tap_action,
+                    icon: icon
                 });
             }
         }
@@ -609,6 +682,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                         if (schema.name.endsWith("_type")) return `Header chip ${labelIndex}: mode`;
                         if (schema.name.endsWith("_attribute")) return `Header chip ${labelIndex}: attribute`;
                         if (schema.name.endsWith("_template")) return `Header chip ${labelIndex}: template`;
+                        if (schema.name.endsWith("_icon")) return `Header chip ${labelIndex}: icon`;
+                        if (schema.name.endsWith("_tap_action")) return `Header chip ${labelIndex}: tap action`;
                         return `Header chip ${labelIndex}`;
                     }
                     return schema.name;
@@ -634,4 +709,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.985b6212.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.55ad15a7.js.map

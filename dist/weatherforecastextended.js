@@ -1102,8 +1102,8 @@ const $f58f44579a4747ac$export$b3890eb0ae9dca99 = (t, i, s)=>{
 
 parcelRequire.register("eGUNk", function(module, exports) {
 $parcel$export(module.exports, "css", () => (parcelRequire("j8KxL")).css);
-$parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "unsafeCSS", () => (parcelRequire("j8KxL")).unsafeCSS);
+$parcel$export(module.exports, "ReactiveElement", () => (parcelRequire("2emM7")).ReactiveElement);
 $parcel$export(module.exports, "html", () => (parcelRequire("l56HR")).html);
 $parcel$export(module.exports, "noChange", () => (parcelRequire("l56HR")).noChange);
 $parcel$export(module.exports, "nothing", () => (parcelRequire("l56HR")).nothing);
@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.985b6212.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.55ad15a7.js").then(()=>parcelRequire("bwZCh"));
 
 });
 
@@ -1970,10 +1970,826 @@ const $a670ed82a1e76f75$export$49fb620566936d3e = (attributes, feature)=>// esli
     (attributes.supported_features & feature) !== 0;
 
 
+var $8944235bd8be49ac$exports = {};
+
+$parcel$export($8944235bd8be49ac$exports, "selectUnit", () => $8944235bd8be49ac$export$b8f7189986dd5395);
+var $8944235bd8be49ac$var$__assign = undefined && undefined.__assign || function() {
+    $8944235bd8be49ac$var$__assign = Object.assign || function(t) {
+        for(var s, i = 1, n = arguments.length; i < n; i++){
+            s = arguments[i];
+            for(var p in s)if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return $8944235bd8be49ac$var$__assign.apply(this, arguments);
+};
+var $8944235bd8be49ac$var$MS_PER_SECOND = 1e3;
+var $8944235bd8be49ac$var$SECS_PER_MIN = 60;
+var $8944235bd8be49ac$var$SECS_PER_HOUR = $8944235bd8be49ac$var$SECS_PER_MIN * 60;
+var $8944235bd8be49ac$var$SECS_PER_DAY = $8944235bd8be49ac$var$SECS_PER_HOUR * 24;
+var $8944235bd8be49ac$var$SECS_PER_WEEK = $8944235bd8be49ac$var$SECS_PER_DAY * 7;
+function $8944235bd8be49ac$export$b8f7189986dd5395(from, to, thresholds) {
+    if (to === void 0) to = Date.now();
+    if (thresholds === void 0) thresholds = {};
+    var resolvedThresholds = $8944235bd8be49ac$var$__assign($8944235bd8be49ac$var$__assign({}, $8944235bd8be49ac$export$f4fd60e41371f80d), thresholds || {});
+    var secs = (+from - +to) / $8944235bd8be49ac$var$MS_PER_SECOND;
+    if (Math.abs(secs) < resolvedThresholds.second) return {
+        value: Math.round(secs),
+        unit: "second"
+    };
+    var mins = secs / $8944235bd8be49ac$var$SECS_PER_MIN;
+    if (Math.abs(mins) < resolvedThresholds.minute) return {
+        value: Math.round(mins),
+        unit: "minute"
+    };
+    var hours = secs / $8944235bd8be49ac$var$SECS_PER_HOUR;
+    if (Math.abs(hours) < resolvedThresholds.hour) return {
+        value: Math.round(hours),
+        unit: "hour"
+    };
+    var days = secs / $8944235bd8be49ac$var$SECS_PER_DAY;
+    if (Math.abs(days) < resolvedThresholds.day) return {
+        value: Math.round(days),
+        unit: "day"
+    };
+    var fromDate = new Date(from);
+    var toDate = new Date(to);
+    var years = fromDate.getFullYear() - toDate.getFullYear();
+    if (Math.round(Math.abs(years)) > 0) return {
+        value: Math.round(years),
+        unit: "year"
+    };
+    var months = years * 12 + fromDate.getMonth() - toDate.getMonth();
+    if (Math.round(Math.abs(months)) > 0) return {
+        value: Math.round(months),
+        unit: "month"
+    };
+    var weeks = secs / $8944235bd8be49ac$var$SECS_PER_WEEK;
+    return {
+        value: Math.round(weeks),
+        unit: "week"
+    };
+}
+var $8944235bd8be49ac$export$f4fd60e41371f80d = {
+    second: 45,
+    minute: 45,
+    hour: 22,
+    day: 5
+};
+
+
+var $ee1328194d522913$export$27bce688931fdfcc, $ee1328194d522913$export$7fd1ce15b01d50ca, $ee1328194d522913$export$1a0dc7c974e8444d = function(e, t) {
+    return $ee1328194d522913$var$i(t).format(e);
+}, $ee1328194d522913$var$i = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        weekday: "long",
+        month: "long",
+        day: "numeric"
+    });
+}, $ee1328194d522913$export$3ae94a2503e890a1 = function(e, t) {
+    return $ee1328194d522913$var$o(t).format(e);
+}, $ee1328194d522913$var$o = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+}, $ee1328194d522913$export$fbb9ef859002af37 = function(e, t) {
+    return $ee1328194d522913$var$c(t).format(e);
+}, $ee1328194d522913$var$c = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric"
+    });
+}, $ee1328194d522913$export$7813392c1f00426f = function(e, t) {
+    return $ee1328194d522913$var$s(t).format(e);
+}, $ee1328194d522913$var$s = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        day: "numeric",
+        month: "short"
+    });
+}, $ee1328194d522913$export$295e1e57d6713bf4 = function(e, t) {
+    return $ee1328194d522913$var$d(t).format(e);
+}, $ee1328194d522913$var$d = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        month: "long",
+        year: "numeric"
+    });
+}, $ee1328194d522913$export$cbc7ca92d37b9650 = function(e, t) {
+    return $ee1328194d522913$var$g(t).format(e);
+}, $ee1328194d522913$var$g = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        month: "long"
+    });
+}, $ee1328194d522913$export$5a252a405018366 = function(e, t) {
+    return $ee1328194d522913$var$h(t).format(e);
+}, $ee1328194d522913$var$h = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric"
+    });
+};
+!function(e) {
+    e.language = "language", e.system = "system", e.comma_decimal = "comma_decimal", e.decimal_comma = "decimal_comma", e.space_comma = "space_comma", e.none = "none";
+}($ee1328194d522913$export$27bce688931fdfcc || ($ee1328194d522913$export$27bce688931fdfcc = {})), function(e) {
+    e.language = "language", e.system = "system", e.am_pm = "12", e.twenty_four = "24";
+}($ee1328194d522913$export$7fd1ce15b01d50ca || ($ee1328194d522913$export$7fd1ce15b01d50ca = {}));
+var $ee1328194d522913$var$b = function(e) {
+    if (e.time_format === $ee1328194d522913$export$7fd1ce15b01d50ca.language || e.time_format === $ee1328194d522913$export$7fd1ce15b01d50ca.system) {
+        var t = e.time_format === $ee1328194d522913$export$7fd1ce15b01d50ca.language ? e.language : void 0, n = (new Date).toLocaleString(t);
+        return n.includes("AM") || n.includes("PM");
+    }
+    return e.time_format === $ee1328194d522913$export$7fd1ce15b01d50ca.am_pm;
+}, $ee1328194d522913$export$8b492ed8828f789c = function(e, t) {
+    return $ee1328194d522913$var$_(t).format(e);
+}, $ee1328194d522913$var$_ = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: $ee1328194d522913$var$b(e) ? "numeric" : "2-digit",
+        minute: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$c2c7ff0067c06a13 = function(e, t) {
+    return $ee1328194d522913$var$w(t).format(e);
+}, $ee1328194d522913$var$w = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: $ee1328194d522913$var$b(e) ? "numeric" : "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$c8a72f22956ccab0 = function(e, t) {
+    return $ee1328194d522913$var$x(t).format(e);
+}, $ee1328194d522913$var$x = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$3203edd9e5edd663 = function(e, t) {
+    return $ee1328194d522913$var$S(t).format(e);
+}, $ee1328194d522913$var$S = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$ec86e83f20e68cd8 = function(e, t) {
+    return $ee1328194d522913$var$T(t).format(e);
+}, $ee1328194d522913$var$T = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        hour: $ee1328194d522913$var$b(e) ? "numeric" : "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$ad627f6ad084f5a2 = function(e, t) {
+    return $ee1328194d522913$var$N(t).format(e);
+}, $ee1328194d522913$var$N = function(e) {
+    return new Intl.DateTimeFormat(e.language, {
+        hour: $ee1328194d522913$var$b(e) ? "numeric" : "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: $ee1328194d522913$var$b(e)
+    });
+}, $ee1328194d522913$export$caddcc104251c1d7 = function(t, r, n, i) {
+    void 0 === i && (i = !0);
+    var a = (0, $8944235bd8be49ac$exports.selectUnit)(t, n);
+    return i ? (function(e) {
+        return new Intl.RelativeTimeFormat(e.language, {
+            numeric: "auto"
+        });
+    })(r).format(a.value, a.unit) : Intl.NumberFormat(r.language, {
+        style: "unit",
+        unit: a.unit,
+        unitDisplay: "long"
+    }).format(Math.abs(a.value));
+};
+function $ee1328194d522913$export$50fe296bd2427aef(e) {
+    var t, r = 3600 * (t = e.attributes.remaining.split(":").map(Number))[0] + 60 * t[1] + t[2];
+    if ("active" === e.state) {
+        var n = (new Date).getTime(), i = new Date(e.last_changed).getTime();
+        r = Math.max(r - (n - i) / 1e3, 0);
+    }
+    return r;
+}
+function $ee1328194d522913$var$O() {
+    return ($ee1328194d522913$var$O = Object.assign || function(e) {
+        for(var t = 1; t < arguments.length; t++){
+            var r = arguments[t];
+            for(var n in r)Object.prototype.hasOwnProperty.call(r, n) && (e[n] = r[n]);
+        }
+        return e;
+    }).apply(this, arguments);
+}
+var $ee1328194d522913$export$2a5af2efac2f8dc = function(e, t, r, n) {
+    void 0 === n && (n = !1), e._themes || (e._themes = {});
+    var i = t.default_theme;
+    ("default" === r || r && t.themes[r]) && (i = r);
+    var a = $ee1328194d522913$var$O({}, e._themes);
+    if ("default" !== i) {
+        var o = t.themes[i];
+        Object.keys(o).forEach(function(t) {
+            var r = "--" + t;
+            e._themes[r] = "", a[r] = o[t];
+        });
+    }
+    if (e.updateStyles ? e.updateStyles(a) : window.ShadyCSS && window.ShadyCSS.styleSubtree(e, a), n) {
+        var u = document.querySelector("meta[name=theme-color]");
+        if (u) {
+            u.hasAttribute("default-content") || u.setAttribute("default-content", u.getAttribute("content"));
+            var c = a["--primary-color"] || u.getAttribute("default-content");
+            u.setAttribute("content", c);
+        }
+    }
+}, $ee1328194d522913$export$67835a66b9f6da52 = function(e) {
+    return "function" == typeof e.getCardSize ? e.getCardSize() : 4;
+};
+function $ee1328194d522913$export$2044bdc9670769ab(e) {
+    return e.substr(0, e.indexOf("."));
+}
+function $ee1328194d522913$export$4c7757901b2ff860(e) {
+    return e.substr(e.indexOf(".") + 1);
+}
+function $ee1328194d522913$export$5cacf63e4bbfecae(e) {
+    var t, r = (null == e || null == (t = e.locale) ? void 0 : t.language) || "en";
+    return e.translationMetadata.translations[r] && e.translationMetadata.translations[r].isRTL || !1;
+}
+function $ee1328194d522913$export$703829fe2802931b(e) {
+    return $ee1328194d522913$export$5cacf63e4bbfecae(e) ? "rtl" : "ltr";
+}
+function $ee1328194d522913$export$5b7b50e8043fabe(e) {
+    return $ee1328194d522913$export$2044bdc9670769ab(e.entity_id);
+}
+var $ee1328194d522913$export$88bfc1035e667f37 = function(e) {
+    return !!e.attributes.unit_of_measurement || !!e.attributes.state_class;
+}, $ee1328194d522913$export$5e25e39d6a8c0c11 = function(e) {
+    switch(e.number_format){
+        case $ee1328194d522913$export$27bce688931fdfcc.comma_decimal:
+            return [
+                "en-US",
+                "en"
+            ];
+        case $ee1328194d522913$export$27bce688931fdfcc.decimal_comma:
+            return [
+                "de",
+                "es",
+                "it"
+            ];
+        case $ee1328194d522913$export$27bce688931fdfcc.space_comma:
+            return [
+                "fr",
+                "sv",
+                "cs"
+            ];
+        case $ee1328194d522913$export$27bce688931fdfcc.system:
+            return;
+        default:
+            return e.language;
+    }
+}, $ee1328194d522913$export$2077e0241d6afd3c = function(e, t) {
+    return void 0 === t && (t = 2), Math.round(e * Math.pow(10, t)) / Math.pow(10, t);
+}, $ee1328194d522913$export$f5dd818bff069720 = function(e, r, n) {
+    var i = r ? $ee1328194d522913$export$5e25e39d6a8c0c11(r) : void 0;
+    if (Number.isNaN = Number.isNaN || function e(t) {
+        return "number" == typeof t && e(t);
+    }, (null == r ? void 0 : r.number_format) !== $ee1328194d522913$export$27bce688931fdfcc.none && !Number.isNaN(Number(e)) && Intl) try {
+        return new Intl.NumberFormat(i, $ee1328194d522913$var$V(e, n)).format(Number(e));
+    } catch (t) {
+        return console.error(t), new Intl.NumberFormat(void 0, $ee1328194d522913$var$V(e, n)).format(Number(e));
+    }
+    return "string" == typeof e ? e : $ee1328194d522913$export$2077e0241d6afd3c(e, null == n ? void 0 : n.maximumFractionDigits).toString() + ("currency" === (null == n ? void 0 : n.style) ? " " + n.currency : "");
+}, $ee1328194d522913$var$V = function(e, t) {
+    var r = $ee1328194d522913$var$O({
+        maximumFractionDigits: 2
+    }, t);
+    if ("string" != typeof e) return r;
+    if (!t || !t.minimumFractionDigits && !t.maximumFractionDigits) {
+        var n = e.indexOf(".") > -1 ? e.split(".")[1].length : 0;
+        r.minimumFractionDigits = n, r.maximumFractionDigits = n;
+    }
+    return r;
+}, $ee1328194d522913$export$278f9ea9192cff94 = function(e, t, r, n) {
+    var i = void 0 !== n ? n : t.state;
+    if ("unknown" === i || "unavailable" === i) return e("state.default." + i);
+    if ($ee1328194d522913$export$88bfc1035e667f37(t)) {
+        if ("monetary" === t.attributes.device_class) try {
+            return $ee1328194d522913$export$f5dd818bff069720(i, r, {
+                style: "currency",
+                currency: t.attributes.unit_of_measurement
+            });
+        } catch (e) {}
+        return $ee1328194d522913$export$f5dd818bff069720(i, r) + (t.attributes.unit_of_measurement ? " " + t.attributes.unit_of_measurement : "");
+    }
+    var o = $ee1328194d522913$export$5b7b50e8043fabe(t);
+    if ("input_datetime" === o) {
+        var u;
+        if (void 0 === n) return t.attributes.has_date && t.attributes.has_time ? (u = new Date(t.attributes.year, t.attributes.month - 1, t.attributes.day, t.attributes.hour, t.attributes.minute), $ee1328194d522913$export$8b492ed8828f789c(u, r)) : t.attributes.has_date ? (u = new Date(t.attributes.year, t.attributes.month - 1, t.attributes.day), $ee1328194d522913$export$3ae94a2503e890a1(u, r)) : t.attributes.has_time ? ((u = new Date).setHours(t.attributes.hour, t.attributes.minute), $ee1328194d522913$export$3203edd9e5edd663(u, r)) : t.state;
+        try {
+            var c = n.split(" ");
+            if (2 === c.length) return $ee1328194d522913$export$8b492ed8828f789c(new Date(c.join("T")), r);
+            if (1 === c.length) {
+                if (n.includes("-")) return $ee1328194d522913$export$3ae94a2503e890a1(new Date(n + "T00:00"), r);
+                if (n.includes(":")) {
+                    var m = new Date;
+                    return $ee1328194d522913$export$3203edd9e5edd663(new Date(m.toISOString().split("T")[0] + "T" + n), r);
+                }
+            }
+            return n;
+        } catch (e) {
+            return n;
+        }
+    }
+    return "humidifier" === o && "on" === i && t.attributes.humidity ? t.attributes.humidity + " %" : "counter" === o || "number" === o || "input_number" === o ? $ee1328194d522913$export$f5dd818bff069720(i, r) : t.attributes.device_class && e("component." + o + ".state." + t.attributes.device_class + "." + i) || e("component." + o + ".state._." + i) || i;
+}, $ee1328194d522913$export$25978a5d5a562f09 = "mdi:bookmark", $ee1328194d522913$export$f78a3169a0f9f31b = "lovelace", $ee1328194d522913$export$6df9924792233bc = [
+    "climate",
+    "cover",
+    "configurator",
+    "input_select",
+    "input_number",
+    "input_text",
+    "lock",
+    "media_player",
+    "scene",
+    "script",
+    "timer",
+    "vacuum",
+    "water_heater",
+    "weblink"
+], $ee1328194d522913$export$b9a2b37e93bb73f2 = [
+    "alarm_control_panel",
+    "automation",
+    "camera",
+    "climate",
+    "configurator",
+    "cover",
+    "fan",
+    "group",
+    "history_graph",
+    "input_datetime",
+    "light",
+    "lock",
+    "media_player",
+    "script",
+    "sun",
+    "updater",
+    "vacuum",
+    "water_heater",
+    "weather"
+], $ee1328194d522913$export$ca927753507128f6 = [
+    "input_number",
+    "input_select",
+    "input_text",
+    "scene",
+    "weblink"
+], $ee1328194d522913$export$60e836dfbaf943c5 = [
+    "camera",
+    "configurator",
+    "history_graph",
+    "scene"
+], $ee1328194d522913$export$23bace2b7923e5d1 = [
+    "closed",
+    "locked",
+    "off"
+], $ee1328194d522913$export$1b64f44bed0feb66 = new Set([
+    "fan",
+    "input_boolean",
+    "light",
+    "switch",
+    "group",
+    "automation"
+]), $ee1328194d522913$export$3ed39d80c7b24b62 = "\xb0C", $ee1328194d522913$export$5c7f540eb0eef6a6 = "\xb0F", $ee1328194d522913$export$2c7beb20637e0bd1 = "group.default_view", $ee1328194d522913$export$43835e9acf248a15 = function(e, t, r, n) {
+    n = n || {}, r = null == r ? {} : r;
+    var i = new Event(t, {
+        bubbles: void 0 === n.bubbles || n.bubbles,
+        cancelable: Boolean(n.cancelable),
+        composed: void 0 === n.composed || n.composed
+    });
+    return i.detail = r, e.dispatchEvent(i), i;
+}, $ee1328194d522913$var$ie = new Set([
+    "call-service",
+    "divider",
+    "section",
+    "weblink",
+    "cast",
+    "select"
+]), $ee1328194d522913$var$ae = {
+    alert: "toggle",
+    automation: "toggle",
+    climate: "climate",
+    cover: "cover",
+    fan: "toggle",
+    group: "group",
+    input_boolean: "toggle",
+    input_number: "input-number",
+    input_select: "input-select",
+    input_text: "input-text",
+    light: "toggle",
+    lock: "lock",
+    media_player: "media-player",
+    remote: "toggle",
+    scene: "scene",
+    script: "script",
+    sensor: "sensor",
+    timer: "timer",
+    switch: "toggle",
+    vacuum: "toggle",
+    water_heater: "climate",
+    input_datetime: "input-datetime"
+}, $ee1328194d522913$export$5ad555b55cd85e0c = function(e, t) {
+    void 0 === t && (t = !1);
+    var r = function(e, t) {
+        return n("hui-error-card", {
+            type: "error",
+            error: e,
+            config: t
+        });
+    }, n = function(e, t) {
+        var n = window.document.createElement(e);
+        try {
+            if (!n.setConfig) return;
+            n.setConfig(t);
+        } catch (n) {
+            return console.error(e, n), r(n.message, t);
+        }
+        return n;
+    };
+    if (!e || "object" != typeof e || !t && !e.type) return r("No type defined", e);
+    var i = e.type;
+    if (i && i.startsWith("custom:")) i = i.substr(7);
+    else if (t) {
+        if ($ee1328194d522913$var$ie.has(i)) i = "hui-" + i + "-row";
+        else {
+            if (!e.entity) return r("Invalid config given.", e);
+            var a = e.entity.split(".", 1)[0];
+            i = "hui-" + ($ee1328194d522913$var$ae[a] || "text") + "-entity-row";
+        }
+    } else i = "hui-" + i + "-card";
+    if (customElements.get(i)) return n(i, e);
+    var o = r("Custom element doesn't exist: " + e.type + ".", e);
+    o.style.display = "None";
+    var u = setTimeout(function() {
+        o.style.display = "";
+    }, 2e3);
+    return customElements.whenDefined(e.type).then(function() {
+        clearTimeout(u), $ee1328194d522913$export$43835e9acf248a15(o, "ll-rebuild", {}, o);
+    }), o;
+}, $ee1328194d522913$export$61fc7d43ac8f84b0 = function(e, t, r) {
+    var n;
+    return void 0 === r && (r = !1), function() {
+        var i = [].slice.call(arguments), a = this, o = function() {
+            n = null, r || e.apply(a, i);
+        }, u = r && !n;
+        clearTimeout(n), n = setTimeout(o, t), u && e.apply(a, i);
+    };
+}, $ee1328194d522913$export$a76407ec79ca4ea3 = {
+    alert: "mdi:alert",
+    automation: "mdi:playlist-play",
+    calendar: "mdi:calendar",
+    camera: "mdi:video",
+    climate: "mdi:thermostat",
+    configurator: "mdi:settings",
+    conversation: "mdi:text-to-speech",
+    device_tracker: "mdi:account",
+    fan: "mdi:fan",
+    group: "mdi:google-circles-communities",
+    history_graph: "mdi:chart-line",
+    homeassistant: "mdi:home-assistant",
+    homekit: "mdi:home-automation",
+    image_processing: "mdi:image-filter-frames",
+    input_boolean: "mdi:drawing",
+    input_datetime: "mdi:calendar-clock",
+    input_number: "mdi:ray-vertex",
+    input_select: "mdi:format-list-bulleted",
+    input_text: "mdi:textbox",
+    light: "mdi:lightbulb",
+    mailbox: "mdi:mailbox",
+    notify: "mdi:comment-alert",
+    person: "mdi:account",
+    plant: "mdi:flower",
+    proximity: "mdi:apple-safari",
+    remote: "mdi:remote",
+    scene: "mdi:google-pages",
+    script: "mdi:file-document",
+    sensor: "mdi:eye",
+    simple_alarm: "mdi:bell",
+    sun: "mdi:white-balance-sunny",
+    switch: "mdi:flash",
+    timer: "mdi:timer",
+    updater: "mdi:cloud-upload",
+    vacuum: "mdi:robot-vacuum",
+    water_heater: "mdi:thermometer",
+    weblink: "mdi:open-in-new"
+};
+function $ee1328194d522913$export$13fcd5035aa1446(e, t) {
+    if (e in $ee1328194d522913$export$a76407ec79ca4ea3) return $ee1328194d522913$export$a76407ec79ca4ea3[e];
+    switch(e){
+        case "alarm_control_panel":
+            switch(t){
+                case "armed_home":
+                    return "mdi:bell-plus";
+                case "armed_night":
+                    return "mdi:bell-sleep";
+                case "disarmed":
+                    return "mdi:bell-outline";
+                case "triggered":
+                    return "mdi:bell-ring";
+                default:
+                    return "mdi:bell";
+            }
+        case "binary_sensor":
+            return t && "off" === t ? "mdi:radiobox-blank" : "mdi:checkbox-marked-circle";
+        case "cover":
+            return "closed" === t ? "mdi:window-closed" : "mdi:window-open";
+        case "lock":
+            return t && "unlocked" === t ? "mdi:lock-open" : "mdi:lock";
+        case "media_player":
+            return t && "off" !== t && "idle" !== t ? "mdi:cast-connected" : "mdi:cast";
+        case "zwave":
+            switch(t){
+                case "dead":
+                    return "mdi:emoticon-dead";
+                case "sleeping":
+                    return "mdi:sleep";
+                case "initializing":
+                    return "mdi:timer-sand";
+                default:
+                    return "mdi:z-wave";
+            }
+        default:
+            return console.warn("Unable to find icon for domain " + e + " (" + t + ")"), "mdi:bookmark";
+    }
+}
+var $ee1328194d522913$export$e2b36fa5c60547b2 = function(e, t) {
+    var r = t.value || t, n = t.attribute ? e.attributes[t.attribute] : e.state;
+    switch(t.operator || "=="){
+        case "==":
+            return n === r;
+        case "<=":
+            return n <= r;
+        case "<":
+            return n < r;
+        case ">=":
+            return n >= r;
+        case ">":
+            return n > r;
+        case "!=":
+            return n !== r;
+        case "regex":
+            return n.match(r);
+        default:
+            return !1;
+    }
+}, $ee1328194d522913$export$8bcf112cf396c716 = function(e) {
+    $ee1328194d522913$export$43835e9acf248a15(window, "haptic", e);
+}, $ee1328194d522913$export$ff7962acd6052c28 = function(e, t, r) {
+    void 0 === r && (r = !1), r ? history.replaceState(null, "", t) : history.pushState(null, "", t), $ee1328194d522913$export$43835e9acf248a15(window, "location-changed", {
+        replace: r
+    });
+}, $ee1328194d522913$export$3303cc16da6bc061 = function(e, t, r) {
+    void 0 === r && (r = !0);
+    var n, i = $ee1328194d522913$export$2044bdc9670769ab(t), a = "group" === i ? "homeassistant" : i;
+    switch(i){
+        case "lock":
+            n = r ? "unlock" : "lock";
+            break;
+        case "cover":
+            n = r ? "open_cover" : "close_cover";
+            break;
+        default:
+            n = r ? "turn_on" : "turn_off";
+    }
+    return e.callService(a, n, {
+        entity_id: t
+    });
+}, $ee1328194d522913$export$4f6896672dcf12b1 = function(e, t) {
+    var r = $ee1328194d522913$export$23bace2b7923e5d1.includes(e.states[t].state);
+    return $ee1328194d522913$export$3303cc16da6bc061(e, t, r);
+}, $ee1328194d522913$export$fe63bc0ae3396800 = function(e, t, r, n) {
+    if (n || (n = {
+        action: "more-info"
+    }), !n.confirmation || n.confirmation.exemptions && n.confirmation.exemptions.some(function(e) {
+        return e.user === t.user.id;
+    }) || ($ee1328194d522913$export$8bcf112cf396c716("warning"), confirm(n.confirmation.text || "Are you sure you want to " + n.action + "?"))) switch(n.action){
+        case "more-info":
+            (r.entity || r.camera_image) && $ee1328194d522913$export$43835e9acf248a15(e, "hass-more-info", {
+                entityId: r.entity ? r.entity : r.camera_image
+            });
+            break;
+        case "navigate":
+            n.navigation_path && $ee1328194d522913$export$ff7962acd6052c28(0, n.navigation_path);
+            break;
+        case "url":
+            n.url_path && window.open(n.url_path);
+            break;
+        case "toggle":
+            r.entity && ($ee1328194d522913$export$4f6896672dcf12b1(t, r.entity), $ee1328194d522913$export$8bcf112cf396c716("success"));
+            break;
+        case "call-service":
+            if (!n.service) return void $ee1328194d522913$export$8bcf112cf396c716("failure");
+            var i = n.service.split(".", 2);
+            t.callService(i[0], i[1], n.service_data, n.target), $ee1328194d522913$export$8bcf112cf396c716("success");
+            break;
+        case "fire-dom-event":
+            $ee1328194d522913$export$43835e9acf248a15(e, "ll-custom", n);
+    }
+}, $ee1328194d522913$export$6c6c3f4b7541eaf1 = function(e, t, r, n) {
+    var i;
+    "double_tap" === n && r.double_tap_action ? i = r.double_tap_action : "hold" === n && r.hold_action ? i = r.hold_action : "tap" === n && r.tap_action && (i = r.tap_action), $ee1328194d522913$export$fe63bc0ae3396800(e, t, r, i);
+}, $ee1328194d522913$export$b981489921ee18cd = function(e, t, r, n, i) {
+    var a;
+    if (i && r.double_tap_action ? a = r.double_tap_action : n && r.hold_action ? a = r.hold_action : !n && r.tap_action && (a = r.tap_action), a || (a = {
+        action: "more-info"
+    }), !a.confirmation || a.confirmation.exemptions && a.confirmation.exemptions.some(function(e) {
+        return e.user === t.user.id;
+    }) || confirm(a.confirmation.text || "Are you sure you want to " + a.action + "?")) switch(a.action){
+        case "more-info":
+            (a.entity || r.entity || r.camera_image) && ($ee1328194d522913$export$43835e9acf248a15(e, "hass-more-info", {
+                entityId: a.entity ? a.entity : r.entity ? r.entity : r.camera_image
+            }), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic));
+            break;
+        case "navigate":
+            a.navigation_path && ($ee1328194d522913$export$ff7962acd6052c28(0, a.navigation_path), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic));
+            break;
+        case "url":
+            a.url_path && window.open(a.url_path), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic);
+            break;
+        case "toggle":
+            r.entity && ($ee1328194d522913$export$4f6896672dcf12b1(t, r.entity), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic));
+            break;
+        case "call-service":
+            if (!a.service) return;
+            var o = a.service.split(".", 2), u = o[0], c = o[1], m = $ee1328194d522913$var$O({}, a.service_data);
+            "entity" === m.entity_id && (m.entity_id = r.entity), t.callService(u, c, m, a.target), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic);
+            break;
+        case "fire-dom-event":
+            $ee1328194d522913$export$43835e9acf248a15(e, "ll-custom", a), a.haptic && $ee1328194d522913$export$8bcf112cf396c716(a.haptic);
+    }
+};
+function $ee1328194d522913$export$e217e69099d082f5(e) {
+    return void 0 !== e && "none" !== e.action;
+}
+function $ee1328194d522913$export$695b4dbcc1028091(e, t, r) {
+    if (t.has("config") || r) return !0;
+    if (e.config.entity) {
+        var n = t.get("hass");
+        return !n || n.states[e.config.entity] !== e.hass.states[e.config.entity];
+    }
+    return !1;
+}
+function $ee1328194d522913$export$72d503079d05a3cf(e) {
+    return void 0 !== e && "none" !== e.action;
+}
+var $ee1328194d522913$export$8d080c28108db9dd = function(e, t, r) {
+    void 0 === r && (r = !0);
+    var n = {};
+    t.forEach(function(t) {
+        if ($ee1328194d522913$export$23bace2b7923e5d1.includes(e.states[t].state) === r) {
+            var i = $ee1328194d522913$export$2044bdc9670769ab(t), a = [
+                "cover",
+                "lock"
+            ].includes(i) ? i : "homeassistant";
+            a in n || (n[a] = []), n[a].push(t);
+        }
+    }), Object.keys(n).forEach(function(t) {
+        var i;
+        switch(t){
+            case "lock":
+                i = r ? "unlock" : "lock";
+                break;
+            case "cover":
+                i = r ? "open_cover" : "close_cover";
+                break;
+            default:
+                i = r ? "turn_on" : "turn_off";
+        }
+        e.callService(t, i, {
+            entity_id: n[t]
+        });
+    });
+}, $ee1328194d522913$export$b5e56594b0d6a61e = function() {
+    var e = document.querySelector("home-assistant");
+    if (e = (e = (e = (e = (e = (e = (e = (e = e && e.shadowRoot) && e.querySelector("home-assistant-main")) && e.shadowRoot) && e.querySelector("app-drawer-layout partial-panel-resolver")) && e.shadowRoot || e) && e.querySelector("ha-panel-lovelace")) && e.shadowRoot) && e.querySelector("hui-root")) {
+        var t = e.lovelace;
+        return t.current_view = e.___curView, t;
+    }
+    return null;
+}, $ee1328194d522913$var$xe = {
+    humidity: "mdi:water-percent",
+    illuminance: "mdi:brightness-5",
+    temperature: "mdi:thermometer",
+    pressure: "mdi:gauge",
+    power: "mdi:flash",
+    signal_strength: "mdi:wifi"
+}, $ee1328194d522913$var$De = {
+    binary_sensor: function(e, t) {
+        var r = "off" === e;
+        switch(null == t ? void 0 : t.attributes.device_class){
+            case "battery":
+                return r ? "mdi:battery" : "mdi:battery-outline";
+            case "battery_charging":
+                return r ? "mdi:battery" : "mdi:battery-charging";
+            case "cold":
+                return r ? "mdi:thermometer" : "mdi:snowflake";
+            case "connectivity":
+                return r ? "mdi:server-network-off" : "mdi:server-network";
+            case "door":
+                return r ? "mdi:door-closed" : "mdi:door-open";
+            case "garage_door":
+                return r ? "mdi:garage" : "mdi:garage-open";
+            case "power":
+                return r ? "mdi:power-plug-off" : "mdi:power-plug";
+            case "gas":
+            case "problem":
+            case "safety":
+            case "tamper":
+                return r ? "mdi:check-circle" : "mdi:alert-circle";
+            case "smoke":
+                return r ? "mdi:check-circle" : "mdi:smoke";
+            case "heat":
+                return r ? "mdi:thermometer" : "mdi:fire";
+            case "light":
+                return r ? "mdi:brightness-5" : "mdi:brightness-7";
+            case "lock":
+                return r ? "mdi:lock" : "mdi:lock-open";
+            case "moisture":
+                return r ? "mdi:water-off" : "mdi:water";
+            case "motion":
+                return r ? "mdi:walk" : "mdi:run";
+            case "occupancy":
+                return r ? "mdi:home-outline" : "mdi:home";
+            case "opening":
+                return r ? "mdi:square" : "mdi:square-outline";
+            case "plug":
+                return r ? "mdi:power-plug-off" : "mdi:power-plug";
+            case "presence":
+                return r ? "mdi:home-outline" : "mdi:home";
+            case "running":
+                return r ? "mdi:stop" : "mdi:play";
+            case "sound":
+                return r ? "mdi:music-note-off" : "mdi:music-note";
+            case "update":
+                return r ? "mdi:package" : "mdi:package-up";
+            case "vibration":
+                return r ? "mdi:crop-portrait" : "mdi:vibrate";
+            case "window":
+                return r ? "mdi:window-closed" : "mdi:window-open";
+            default:
+                return r ? "mdi:radiobox-blank" : "mdi:checkbox-marked-circle";
+        }
+    },
+    cover: function(e) {
+        var t = "closed" !== e.state;
+        switch(e.attributes.device_class){
+            case "garage":
+                return t ? "mdi:garage-open" : "mdi:garage";
+            case "door":
+                return t ? "mdi:door-open" : "mdi:door-closed";
+            case "shutter":
+                return t ? "mdi:window-shutter-open" : "mdi:window-shutter";
+            case "blind":
+                return t ? "mdi:blinds-open" : "mdi:blinds";
+            case "window":
+                return t ? "mdi:window-open" : "mdi:window-closed";
+            default:
+                return $ee1328194d522913$export$13fcd5035aa1446("cover", e.state);
+        }
+    },
+    sensor: function(e) {
+        var t = e.attributes.device_class;
+        if (t && t in $ee1328194d522913$var$xe) return $ee1328194d522913$var$xe[t];
+        if ("battery" === t) {
+            var r = Number(e.state);
+            if (isNaN(r)) return "mdi:battery-unknown";
+            var n = 10 * Math.round(r / 10);
+            return n >= 100 ? "mdi:battery" : n <= 0 ? "mdi:battery-alert" : "hass:battery-" + n;
+        }
+        var i = e.attributes.unit_of_measurement;
+        return "\xb0C" === i || "\xb0F" === i ? "mdi:thermometer" : $ee1328194d522913$export$13fcd5035aa1446("sensor");
+    },
+    input_datetime: function(e) {
+        return e.attributes.has_date ? e.attributes.has_time ? $ee1328194d522913$export$13fcd5035aa1446("input_datetime") : "mdi:calendar" : "mdi:clock";
+    }
+}, $ee1328194d522913$export$d138d1363acbec1f = function(e) {
+    if (!e) return "mdi:bookmark";
+    if (e.attributes.icon) return e.attributes.icon;
+    var t = $ee1328194d522913$export$2044bdc9670769ab(e.entity_id);
+    return t in $ee1328194d522913$var$De ? $ee1328194d522913$var$De[t](e) : $ee1328194d522913$export$13fcd5035aa1446(t, e.state);
+};
+
+
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  box-sizing: border-box;\n  flex-flow: row;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 12px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  box-sizing: border-box;\n  flex-flow: row;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 25px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip .chip-icon, .weather .template-chip .chip-icon {\n  --mdc-icon-size: 20px;\n  color: inherit;\n  margin-right: 6px;\n}\n\n.weather .attribute-chip.has-action, .weather .template-chip.has-action {\n  cursor: pointer;\n}\n\n.weather .attribute-chip.has-action:focus-visible, .weather .template-chip.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp.has-action, .weather .condition.has-action {\n  cursor: pointer;\n}\n\n.weather .temp.has-action:focus-visible, .weather .condition.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $j8KxL.css)`
@@ -2741,7 +3557,7 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
             ${item.precipitation.toFixed(1)}
           </div>` : (0, $l56HR.nothing)}
       ${hasPrecipitationProbability ? (0, $l56HR.html)`<div class="precipitationprobability ${(item.precipitation_probability ?? 0) > 30 ? "active" : ""}">
-            ${item.precipitation_probability}%
+            ${item.precipitation_probability >= 0 ? item.precipitation_probability + "%" : ""}
           </div>` : (0, $l56HR.nothing)}
     `;
     }
@@ -3182,17 +3998,25 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             if (normalized.length >= limit || !chip || typeof chip !== "object") continue;
             if (chip.type === "attribute") {
                 const attr = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
+                const tap_action = chip.tap_action;
+                const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
                 normalized.push({
                     type: "attribute",
-                    attribute: attr
+                    attribute: attr,
+                    tap_action: tap_action,
+                    icon: icon
                 });
                 continue;
             }
             if (chip.type === "template") {
                 const template = typeof chip.template === "string" ? chip.template.trim() : "";
+                const tap_action = chip.tap_action;
+                const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
                 normalized.push({
                     type: "template",
-                    template: template
+                    template: template,
+                    tap_action: tap_action,
+                    icon: icon
                 });
             }
         }
@@ -3484,6 +4308,13 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const sunCoordinates = this._getLocationCoordinates();
         const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
         const orientation = this._config.orientation ?? "vertical";
+        const temperatureTapAction = this._config.header_tap_action_temperature;
+        const conditionTapAction = this._config.header_tap_action_condition;
+        const temperatureActionEntity = this._config.header_temperature_entity || this._entity;
+        const hasTemperatureTapAction = (0, $ee1328194d522913$export$e217e69099d082f5)(temperatureTapAction);
+        const hasConditionTapAction = (0, $ee1328194d522913$export$e217e69099d082f5)(conditionTapAction);
+        const headerTemperature = this._computeHeaderTemperature();
+        const headerCondition = this._hass?.formatEntityState?.(this._state) || this._state.state;
         const containerClassMap = {
             "forecast-container": true,
             "orientation-horizontal": orientation === "horizontal",
@@ -3530,17 +4361,24 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                 ${headerChips.length ? (0, $l56HR.html)`
                     <div class="header-attributes">
                       ${headerChips.map((chip)=>{
+            const hasChipAction = (0, $ee1328194d522913$export$e217e69099d082f5)(chip.action);
             const chipClassMap = {
                 "attribute-chip": true,
                 missing: chip.missing,
-                "template-chip": chip.type === "template"
+                "template-chip": chip.type === "template",
+                "has-action": hasChipAction
             };
             const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
             return (0, $l56HR.html)`
                           <div
                             class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(chipClassMap)}
                             title=${chipTitle}
+                            role=${hasChipAction ? "button" : (0, $l56HR.nothing)}
+                            tabindex=${hasChipAction ? 0 : (0, $l56HR.nothing)}
+                            @click=${hasChipAction ? ()=>this._handleHeaderChipTap(chip.action) : undefined}
+                            @keydown=${hasChipAction ? (ev)=>this._handleHeaderChipKeydown(ev, chip.action) : undefined}
                           >
+                            ${chip.icon ? (0, $l56HR.html)`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>` : (0, $l56HR.nothing)}
                             <span class="header-pill-text">${chip.display}</span>
                           </div>
                         `;
@@ -3548,12 +4386,30 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                     </div>
                   ` : (0, $l56HR.nothing)}
                 <div class="header-main">
-                  <div class="temp">
-                    <span class="header-pill-text">${this._computeHeaderTemperature()}</span>
+                  <div
+                    class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+            temp: true,
+            "has-action": hasTemperatureTapAction
+        })}
+                    role=${hasTemperatureTapAction ? "button" : (0, $l56HR.nothing)}
+                    tabindex=${hasTemperatureTapAction ? 0 : (0, $l56HR.nothing)}
+                    @click=${hasTemperatureTapAction ? ()=>this._handleHeaderTap(temperatureTapAction, temperatureActionEntity) : undefined}
+                    @keydown=${hasTemperatureTapAction ? (ev)=>this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity) : undefined}
+                  >
+                    <span class="header-pill-text">${headerTemperature}</span>
                   </div>
-                  <div class="condition">
+                  <div
+                    class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+            condition: true,
+            "has-action": hasConditionTapAction
+        })}
+                    role=${hasConditionTapAction ? "button" : (0, $l56HR.nothing)}
+                    tabindex=${hasConditionTapAction ? 0 : (0, $l56HR.nothing)}
+                    @click=${hasConditionTapAction ? ()=>this._handleHeaderTap(conditionTapAction) : undefined}
+                    @keydown=${hasConditionTapAction ? (ev)=>this._handleHeaderKeydown(ev, conditionTapAction) : undefined}
+                  >
                     <span class="header-pill-text">
-                      ${this._hass?.formatEntityState?.(this._state) || this._state.state}
+                      ${headerCondition}
                     </span>
                   </div>
                 </div>
@@ -3627,6 +4483,8 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!chips.length) return [];
         const displays = [];
         chips.forEach((chip, index)=>{
+            const action = (0, $ee1328194d522913$export$e217e69099d082f5)(chip.tap_action) ? chip.tap_action : undefined;
+            const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
             if (chip.type === "template") {
                 const templateString = chip.template?.trim() ?? "";
                 if (!templateString) return;
@@ -3639,7 +4497,9 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                     display: display,
                     missing: missing,
                     tooltip: tooltip,
-                    type: chip.type
+                    type: chip.type,
+                    action: action,
+                    icon: icon
                 });
                 return;
             }
@@ -3653,7 +4513,9 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                 display: formatted.display,
                 missing: formatted.missing,
                 tooltip: tooltip,
-                type: chip.type
+                type: chip.type,
+                action: action,
+                icon: icon
             });
         });
         return displays;
@@ -3859,6 +4721,39 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             left: Math.max(0, offset),
             behavior: "smooth"
         });
+    }
+    _handleHeaderTap(actionConfig, entity) {
+        this._executeTapAction(actionConfig, entity);
+    }
+    _handleHeaderKeydown(event, actionConfig, entity) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        this._handleHeaderTap(actionConfig, entity);
+    }
+    _handleHeaderChipTap(actionConfig) {
+        this._executeTapAction(actionConfig);
+    }
+    _handleHeaderChipKeydown(event, actionConfig) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        this._handleHeaderChipTap(actionConfig);
+    }
+    _executeTapAction(actionConfig, entityOverride) {
+        if (!this._hass || !this._config || !actionConfig || !(0, $ee1328194d522913$export$e217e69099d082f5)(actionConfig)) return;
+        const performAction = actionConfig.perform_action;
+        if (actionConfig.action === "perform-action" && performAction) {
+            const [domain, service] = performAction.split(".", 2);
+            if (domain && service) {
+                const data = actionConfig.data ?? actionConfig.service_data;
+                const target = actionConfig.target;
+                this._hass.callService(domain, service, data, target);
+                return;
+            }
+        }
+        (0, $ee1328194d522913$export$6c6c3f4b7541eaf1)(this, this._hass, {
+            entity: entityOverride || this._entity,
+            tap_action: actionConfig
+        }, "tap");
     }
     constructor(...args){
         super(...args);
