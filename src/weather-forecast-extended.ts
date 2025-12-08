@@ -586,6 +586,7 @@ export class WeatherForecastExtended extends LitElement {
     const orientation = this._config.orientation ?? "vertical";
     const temperatureTapAction = this._config.header_tap_action_temperature;
     const conditionTapAction = this._config.header_tap_action_condition;
+    const temperatureActionEntity = this._config.header_temperature_entity || this._entity;
     const hasTemperatureTapAction = hasAction(temperatureTapAction);
     const hasConditionTapAction = hasAction(conditionTapAction);
     const headerTemperature = this._computeHeaderTemperature();
@@ -679,9 +680,11 @@ export class WeatherForecastExtended extends LitElement {
                     })}
                     role=${hasTemperatureTapAction ? "button" : nothing}
                     tabindex=${hasTemperatureTapAction ? 0 : nothing}
-                    @click=${hasTemperatureTapAction ? () => this._handleHeaderTap(temperatureTapAction) : undefined}
+                    @click=${hasTemperatureTapAction
+                      ? () => this._handleHeaderTap(temperatureTapAction, temperatureActionEntity)
+                      : undefined}
                     @keydown=${hasTemperatureTapAction
-                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, temperatureTapAction)
+                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity)
                       : undefined}
                   >
                     <span class="header-pill-text">${headerTemperature}</span>
@@ -1126,7 +1129,7 @@ export class WeatherForecastExtended extends LitElement {
     hourlyContainer.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
   }
 
-  private _handleHeaderTap(actionConfig?: ActionConfig) {
+  private _handleHeaderTap(actionConfig?: ActionConfig, entity?: string) {
     if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
       return;
     }
@@ -1135,19 +1138,19 @@ export class WeatherForecastExtended extends LitElement {
       this,
       this._hass,
       {
-        entity: this._entity,
+        entity: entity || this._entity,
         tap_action: actionConfig,
       },
       "tap",
     );
   }
 
-  private _handleHeaderKeydown(event: KeyboardEvent, actionConfig?: ActionConfig) {
+  private _handleHeaderKeydown(event: KeyboardEvent, actionConfig?: ActionConfig, entity?: string) {
     if (event.key !== "Enter" && event.key !== " ") {
       return;
     }
 
     event.preventDefault();
-    this._handleHeaderTap(actionConfig);
+    this._handleHeaderTap(actionConfig, entity);
   }
 }
