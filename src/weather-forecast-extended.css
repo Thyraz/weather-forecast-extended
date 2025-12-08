@@ -83,6 +83,17 @@ ha-card {
   overflow: hidden;
 }
 
+.weather .attribute-chip.has-action,
+.weather .template-chip.has-action {
+  cursor: pointer;
+}
+
+.weather .attribute-chip.has-action:focus-visible,
+.weather .template-chip.has-action:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
+}
+
 .weather .attribute-chip.missing {
   opacity: 0.8;
   font-style: italic;

@@ -28,6 +28,7 @@ type HeaderChipDisplay = {
   missing: boolean;
   tooltip: string;
   type: HeaderChip["type"];
+  action?: ActionConfig;
 };
 
 type RenderTemplateEventMessage = {
@@ -152,13 +153,15 @@ export class WeatherForecastExtended extends LitElement {
 
         if (chip.type === "attribute") {
           const attr = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
-          normalized.push({ type: "attribute", attribute: attr });
+          const tap_action = chip.tap_action;
+          normalized.push({ type: "attribute", attribute: attr, tap_action });
           continue;
         }
 
         if (chip.type === "template") {
           const template = typeof chip.template === "string" ? chip.template.trim() : "";
-          normalized.push({ type: "template", template });
+          const tap_action = chip.tap_action;
+          normalized.push({ type: "template", template, tap_action });
         }
       }
     }
@@ -654,16 +657,24 @@ export class WeatherForecastExtended extends LitElement {
                   ? html`
                     <div class="header-attributes">
                       ${headerChips.map(chip => {
+                        const hasChipAction = hasAction(chip.action);
                         const chipClassMap = {
                           "attribute-chip": true,
                           missing: chip.missing,
                           "template-chip": chip.type === "template",
+                          "has-action": hasChipAction,
                         };
                         const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
                         return html`
                           <div
                             class=${classMap(chipClassMap)}
                             title=${chipTitle}
+                            role=${hasChipAction ? "button" : nothing}
+                            tabindex=${hasChipAction ? 0 : nothing}
+                            @click=${hasChipAction ? () => this._handleHeaderChipTap(chip.action) : undefined}
+                            @keydown=${hasChipAction
+                              ? (ev: KeyboardEvent) => this._handleHeaderChipKeydown(ev, chip.action)
+                              : undefined}
                           >
                             <span class="header-pill-text">${chip.display}</span>
                           </div>
@@ -809,6 +820,8 @@ export class WeatherForecastExtended extends LitElement {
     const displays: HeaderChipDisplay[] = [];
 
     chips.forEach((chip, index) => {
+      const action = hasAction(chip.tap_action) ? chip.tap_action : undefined;
+
       if (chip.type === "template") {
         const templateString = chip.template?.trim() ?? "";
         if (!templateString) {
@@ -825,6 +838,7 @@ export class WeatherForecastExtended extends LitElement {
           missing,
           tooltip,
           type: chip.type,
+          action,
         });
         return;
       }
@@ -843,6 +857,7 @@ export class WeatherForecastExtended extends LitElement {
         missing: formatted.missing,
         tooltip,
         type: chip.type,
+        action,
       });
     });
 
@@ -1152,5 +1167,29 @@ export class WeatherForecastExtended extends LitElement {
 
     event.preventDefault();
     this._handleHeaderTap(actionConfig, entity);
+  }
+
+  private _handleHeaderChipTap(actionConfig?: ActionConfig) {
+    if (!this._hass || !this._config || !actionConfig || !hasAction(actionConfig)) {
+      return;
+    }
+
+    handleAction(
+      this,
+      this._hass,
+      {
+        entity: this._entity,
+        tap_action: actionConfig,
+      },
+      "tap",
+    );
+  }
+
+  private _handleHeaderChipKeydown(event: KeyboardEvent, actionConfig?: ActionConfig) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    this._handleHeaderChipTap(actionConfig);
   }
 }

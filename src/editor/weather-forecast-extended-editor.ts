@@ -8,9 +8,10 @@ const HEADER_CHIP_INDEXES = [0, 1, 2] as const;
 type HeaderChipFieldName =
   | `header_chip_${1 | 2 | 3}_type`
   | `header_chip_${1 | 2 | 3}_attribute`
-  | `header_chip_${1 | 2 | 3}_template`;
+  | `header_chip_${1 | 2 | 3}_template`
+  | `header_chip_${1 | 2 | 3}_tap_action`;
 
-type EditorFormData = WeatherForecastExtendedConfig & Partial<Record<HeaderChipFieldName, string>>;
+type EditorFormData = WeatherForecastExtendedConfig & Partial<Record<HeaderChipFieldName, any>>;
 
 const chipTypeFieldName = (index: number): HeaderChipFieldName =>
   `header_chip_${index + 1}_type` as HeaderChipFieldName;
@@ -18,12 +19,15 @@ const chipAttributeFieldName = (index: number): HeaderChipFieldName =>
   `header_chip_${index + 1}_attribute` as HeaderChipFieldName;
 const chipTemplateFieldName = (index: number): HeaderChipFieldName =>
   `header_chip_${index + 1}_template` as HeaderChipFieldName;
+const chipActionFieldName = (index: number): HeaderChipFieldName =>
+  `header_chip_${index + 1}_tap_action` as HeaderChipFieldName;
 
 const CHIP_FORM_FIELD_NAMES = HEADER_CHIP_INDEXES.reduce<HeaderChipFieldName[]>((names, index) => {
   names.push(
     chipTypeFieldName(index),
     chipAttributeFieldName(index),
     chipTemplateFieldName(index),
+    chipActionFieldName(index),
   );
   return names;
 }, []);
@@ -401,6 +405,9 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           if (schema.name.endsWith("_template")) {
             return `Header chip ${labelIndex}: template`;
           }
+          if (schema.name.endsWith("_tap_action")) {
+            return `Header chip ${labelIndex}: tap action`;
+          }
           return `Header chip ${labelIndex}`;
         }
         return schema.name;
@@ -460,10 +467,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const typeField = chipTypeFieldName(index);
       const attributeField = chipAttributeFieldName(index);
       const templateField = chipTemplateFieldName(index);
+      const actionField = chipActionFieldName(index);
       const configuredChip = headerChips[index];
       const type = this._chipTypes[index] ?? configuredChip?.type ?? "attribute";
 
       formData[typeField] = type;
+      formData[actionField] = configuredChip?.tap_action;
 
       if (type === "template") {
         formData[templateField] = configuredChip?.type === "template" ? configuredChip.template : "";
@@ -484,19 +493,29 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const typeField = chipTypeFieldName(index);
       const attributeField = chipAttributeFieldName(index);
       const templateField = chipTemplateFieldName(index);
+      const actionField = chipActionFieldName(index);
 
       const type = (formValue[typeField] as "attribute" | "template" | undefined) ?? "attribute";
+      const tapAction = formValue[actionField];
 
       if (type === "template") {
         const templateRaw = formValue[templateField];
         const templateValue = typeof templateRaw === "string" ? templateRaw.trim() : "";
-        chips.push({ type: "template", template: templateValue });
+        const chip: HeaderChip = { type: "template", template: templateValue };
+        if (tapAction) {
+          (chip as any).tap_action = tapAction;
+        }
+        chips.push(chip);
         return;
       }
 
       const attributeRaw = formValue[attributeField];
       const attributeValue = typeof attributeRaw === "string" ? attributeRaw.trim() : "";
-      chips.push({ type: "attribute", attribute: attributeValue });
+      const chip: HeaderChip = { type: "attribute", attribute: attributeValue };
+      if (tapAction) {
+        (chip as any).tap_action = tapAction;
+      }
+      chips.push(chip);
     });
 
     return chips;
@@ -610,6 +629,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           disabled: !this._config?.entity,
         });
       }
+
+      chipsSchema.push({
+        name: chipActionFieldName(index),
+        selector: { ui_action: {} },
+        optional: true,
+      });
     });
 
     return { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipsSchema };
@@ -632,13 +657,15 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
         if (chip.type === "attribute") {
           const attribute = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
-          normalized.push({ type: "attribute", attribute });
+          const tap_action = chip.tap_action;
+          normalized.push({ type: "attribute", attribute, tap_action });
           continue;
         }
 
         if (chip.type === "template") {
           const template = typeof chip.template === "string" ? chip.template.trim() : "";
-          normalized.push({ type: "template", template });
+          const tap_action = chip.tap_action;
+          normalized.push({ type: "template", template, tap_action });
         }
       }
     }
