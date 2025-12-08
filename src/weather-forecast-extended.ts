@@ -375,7 +375,7 @@ export class WeatherForecastExtended extends LitElement {
     } else {
       let computed = 0;
       if (showHeader) {
-        computed += 3;
+        computed += 2;
       }
       if (showDaily) {
         computed += 3;
@@ -389,16 +389,26 @@ export class WeatherForecastExtended extends LitElement {
       if (!showHeader && showDaily && showHourly) {
         computed += 1;
       }
+      if (showHeader && (showDaily || showHourly) && !(showDaily && showHourly)) {
+        computed += 1;
+      }
+      if (showHeader && showDaily && showHourly) {
+        computed += 1;
+      }
 
-      if (!showHeader && (showDaily || showHourly)) {
+      if (!showHeader && showHourly) {
+        computed = Math.max(computed, 3);
+      }
+
+      if (!showHeader && showDaily) {
         computed = Math.max(computed, 4);
       }
 
       if (!showHeader && !showDaily && !showHourly) {
-        computed = 3;
+        computed = 2;
       }
 
-      rows = Math.max(computed, 3);
+      rows = Math.max(computed, 2);
     }
 
     const minRows = rows;
@@ -1183,8 +1193,9 @@ export class WeatherForecastExtended extends LitElement {
       return;
     }
 
+    const actionType = (actionConfig as any).action as string | undefined;
     const performAction = (actionConfig as any).perform_action as string | undefined;
-    if (actionConfig.action === "perform-action" && performAction) {
+    if (actionType === "perform-action" && performAction) {
       const [domain, service] = performAction.split(".", 2);
       if (domain && service) {
         const data = (actionConfig as any).data ?? (actionConfig as any).service_data;
