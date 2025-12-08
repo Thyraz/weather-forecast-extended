@@ -29,6 +29,7 @@ type HeaderChipDisplay = {
   tooltip: string;
   type: HeaderChip["type"];
   action?: ActionConfig;
+  icon?: string;
 };
 
 type RenderTemplateEventMessage = {
@@ -154,14 +155,16 @@ export class WeatherForecastExtended extends LitElement {
         if (chip.type === "attribute") {
           const attr = typeof chip.attribute === "string" ? chip.attribute.trim() : "";
           const tap_action = chip.tap_action;
-          normalized.push({ type: "attribute", attribute: attr, tap_action });
+          const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
+          normalized.push({ type: "attribute", attribute: attr, tap_action, icon });
           continue;
         }
 
         if (chip.type === "template") {
           const template = typeof chip.template === "string" ? chip.template.trim() : "";
           const tap_action = chip.tap_action;
-          normalized.push({ type: "template", template, tap_action });
+          const icon = typeof chip.icon === "string" ? chip.icon.trim() : undefined;
+          normalized.push({ type: "template", template, tap_action, icon });
         }
       }
     }
@@ -676,6 +679,9 @@ export class WeatherForecastExtended extends LitElement {
                               ? (ev: KeyboardEvent) => this._handleHeaderChipKeydown(ev, chip.action)
                               : undefined}
                           >
+                            ${chip.icon
+                              ? html`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>`
+                              : nothing}
                             <span class="header-pill-text">${chip.display}</span>
                           </div>
                         `;
@@ -821,6 +827,7 @@ export class WeatherForecastExtended extends LitElement {
 
     chips.forEach((chip, index) => {
       const action = hasAction(chip.tap_action) ? chip.tap_action : undefined;
+      const icon = typeof (chip as any).icon === "string" ? (chip as any).icon.trim() : undefined;
 
       if (chip.type === "template") {
         const templateString = chip.template?.trim() ?? "";
@@ -839,6 +846,7 @@ export class WeatherForecastExtended extends LitElement {
           tooltip,
           type: chip.type,
           action,
+          icon,
         });
         return;
       }
@@ -858,6 +866,7 @@ export class WeatherForecastExtended extends LitElement {
         tooltip,
         type: chip.type,
         action,
+        icon,
       });
     });
 

@@ -48,11 +48,13 @@ export type HeaderChip = AttributeHeaderChip | TemplateHeaderChip;
 export interface AttributeHeaderChip {
   type: "attribute";
   attribute: string;
+  icon?: string;
   tap_action?: ActionConfig;
 }
 
 export interface TemplateHeaderChip {
   type: "template";
   template: string;
+  icon?: string;
   tap_action?: ActionConfig;
 }

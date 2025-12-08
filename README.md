@@ -15,8 +15,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
 - Configurable header chips that can display entity attributes or value-templates in the header.
-- Optional tap actions on the header temperature and condition pills.
-- Optional tap actions on each header chip.
+- Optional tap actions and icons on the header pills / chips.
 - Support for 12 or 24 hour time formats and localized date labels using the Home Assistant user settings.
 - UI card editor
 
@@ -72,7 +71,7 @@ use_night_header_backgrounds: true
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
 | `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. |
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
-| `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `tap_action`. |
+| `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `icon` and `tap_action`. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
 
@@ -85,6 +84,7 @@ entity: weather.home
 header_chips:
   - type: attribute
     attribute: humidity
+    icon: mdi:water-percent
     tap_action:
       action: more-info
   - type: template
@@ -98,7 +98,7 @@ header_chips:
 
 - `attribute` chips expose an attribute from the configured weather entity. The editor provides a dropdown populated with the entity's attributes.
 - `template` chips are rendered by Home Assistant's template engine and can reference any entity.
-- Each chip accepts an optional `tap_action` (tap only).
+- Each chip accepts optional `icon` and `tap_action` (tap only).
 
 ### Header tap actions
 Attach tap-only Lovelace actions to the temperature and condition pills in the header. Configure them in the card editor under **Header options** or in YAML:

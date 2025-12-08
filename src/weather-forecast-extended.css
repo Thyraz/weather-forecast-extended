@@ -73,7 +73,7 @@ ha-card {
   line-height: calc(6px + var(--ha-font-size-m));
   background-color: rgba(0, 0, 0, 0.35);
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 25px;
   color: inherit;
   max-width: 100%;
   min-width: 0;
@@ -81,6 +81,13 @@ ha-card {
   align-items: center;
   align-self: flex-start;
   overflow: hidden;
+}
+
+.weather .attribute-chip .chip-icon,
+.weather .template-chip .chip-icon {
+  margin-right: 6px;
+  --mdc-icon-size: 20px;
+  color: inherit;
 }
 
 .weather .attribute-chip.has-action,
