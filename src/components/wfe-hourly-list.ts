@@ -210,7 +210,7 @@ export class WFEHourlyList extends LitElement {
         : nothing}
       ${hasPrecipitationProbability
         ? html`<div class="precipitationprobability ${((item.precipitation_probability ?? 0) as number) > 30 ? 'active' : ''}">
-            ${item.precipitation_probability}%
+            ${item.precipitation_probability >= 0 ? item.precipitation_probability + "%": ""}
           </div>`
         : nothing}
     `;
