@@ -156,7 +156,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
     }
     render() {
         if (!this.hass || !this._config) return (0, $j0ZcV.html)``;
-        const { general: generalSchema , layout: layoutSchema , header: headerSchema , chips: chipSchema  } = this._buildSchemas();
+        const { general: generalSchema , layout: layoutSchema , header: headerSchema , chips: chipSchema , hourly: hourlySchema , daily: dailySchema  } = this._buildSchemas();
         const formData = this._createFormData();
         return (0, $j0ZcV.html)`
       <ha-form
@@ -298,6 +298,26 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
               />
             </label>
           </div>
+        </div>
+        <div class="editor-subsection">
+          <h5 class="section-subtitle">Hourly forecast options</h5>
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${hourlySchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
+        </div>
+        <div class="editor-subsection">
+          <h5 class="section-subtitle">Daily forecast options</h5>
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${dailySchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
         </div>
         <div class="editor-subsection">
           <h5 class="section-subtitle">Sunrise & Sunset</h5>
@@ -463,6 +483,98 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 }))
         ];
     }
+    _buildHourlyExtraAttributeOptions() {
+        const disallowed = new Set([
+            "datetime",
+            "condition",
+            "precipitation_probability",
+            "precipitation",
+            "temperature",
+            "templow"
+        ]);
+        const fallback = [
+            "humidity",
+            "pressure",
+            "wind_speed",
+            "wind_gust_speed",
+            "wind_bearing",
+            "cloud_coverage",
+            "dew_point",
+            "uv_index"
+        ];
+        if (!this.hass || !this._config?.entity) return [
+            {
+                value: "",
+                label: "None"
+            },
+            ...fallback.map((value)=>({
+                    value: value,
+                    label: value
+                }))
+        ];
+        const entityState = this.hass.states[this._config.entity];
+        const forecast = (entityState?.attributes)?.forecast;
+        const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
+        const keys = firstEntry && typeof firstEntry === "object" ? Object.keys(firstEntry).filter((key)=>!disallowed.has(key)) : [];
+        const options = keys.length ? keys : fallback;
+        const uniqueOptions = Array.from(new Set(options));
+        return [
+            {
+                value: "",
+                label: "None"
+            },
+            ...uniqueOptions.map((value)=>({
+                    value: value,
+                    label: value
+                }))
+        ];
+    }
+    _buildDailyExtraAttributeOptions() {
+        const disallowed = new Set([
+            "datetime",
+            "condition",
+            "precipitation_probability",
+            "precipitation",
+            "temperature",
+            "templow"
+        ]);
+        const fallback = [
+            "humidity",
+            "pressure",
+            "wind_speed",
+            "wind_gust_speed",
+            "wind_bearing",
+            "cloud_coverage",
+            "dew_point",
+            "uv_index"
+        ];
+        if (!this.hass || !this._config?.entity) return [
+            {
+                value: "",
+                label: "None"
+            },
+            ...fallback.map((value)=>({
+                    value: value,
+                    label: value
+                }))
+        ];
+        const entityState = this.hass.states[this._config.entity];
+        const forecast = (entityState?.attributes)?.forecast;
+        const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
+        const keys = firstEntry && typeof firstEntry === "object" ? Object.keys(firstEntry).filter((key)=>!disallowed.has(key)) : [];
+        const options = keys.length ? keys : fallback;
+        const uniqueOptions = Array.from(new Set(options));
+        return [
+            {
+                value: "",
+                label: "None"
+            },
+            ...uniqueOptions.map((value)=>({
+                    value: value,
+                    label: value
+                }))
+        ];
+    }
     _buildSchemas() {
         const generalSchema = [
             {
@@ -530,6 +642,44 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             }
         ];
         const attributeOptions = this._buildAttributeOptions();
+        const hourlySchema = [
+            {
+                name: "hourly_extra_attribute",
+                selector: {
+                    select: {
+                        options: this._buildHourlyExtraAttributeOptions(),
+                        custom_value: true
+                    }
+                },
+                optional: true
+            },
+            {
+                name: "hourly_extra_attribute_unit",
+                selector: {
+                    text: {}
+                },
+                optional: true
+            }
+        ];
+        const dailySchema = [
+            {
+                name: "daily_extra_attribute",
+                selector: {
+                    select: {
+                        options: this._buildDailyExtraAttributeOptions(),
+                        custom_value: true
+                    }
+                },
+                optional: true
+            },
+            {
+                name: "daily_extra_attribute_unit",
+                selector: {
+                    text: {}
+                },
+                optional: true
+            }
+        ];
         const chipsSchema = [];
         $a37b5b928a2fc5d8$var$HEADER_CHIP_INDEXES.forEach((index)=>{
             const typeField = $a37b5b928a2fc5d8$var$chipTypeFieldName(index);
@@ -580,7 +730,9 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             general: generalSchema,
             layout: layoutSchema,
             header: headerSchema,
-            chips: chipsSchema
+            chips: chipsSchema,
+            hourly: hourlySchema,
+            daily: dailySchema
         };
     }
     _isSectionEnabled(name, config) {
@@ -673,6 +825,14 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
                 case "use_night_header_backgrounds":
                     return "Use separate header backgrounds for nightly conditions";
+                case "hourly_extra_attribute":
+                    return "Hourly extra attribute (third line)";
+                case "hourly_extra_attribute_unit":
+                    return "Unit for hourly extra attribute";
+                case "daily_extra_attribute":
+                    return "Daily extra attribute (third line)";
+                case "daily_extra_attribute_unit":
+                    return "Unit for daily extra attribute";
                 default:
                     if (typeof schema.name === "string" && schema.name.startsWith("header_chip_")) {
                         const parts = schema.name.split("_");
@@ -709,4 +869,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.55ad15a7.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.838dbde5.js.map
