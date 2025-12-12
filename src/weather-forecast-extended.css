@@ -444,6 +444,15 @@ ha-card {
   min-height: 20px;
 }
 
+.forecast .hourly-extra {
+  opacity: 0.6;
+  color: var(--primary-text-color);
+  min-height: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .forecast .precipitation {
   --precipitation-fill: 0%;
   --wfe-precipitation-indicator-color: var(--state-climate-cool-color);

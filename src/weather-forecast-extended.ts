@@ -111,6 +111,8 @@ export class WeatherForecastExtended extends LitElement {
       header_attributes: normalizedHeaderAttributes,
       daily_min_gap: normalizedDailyMinGap,
       hourly_min_gap: normalizedHourlyMinGap,
+      hourly_extra_attribute: config.hourly_extra_attribute,
+      hourly_extra_attribute_unit: config.hourly_extra_attribute_unit,
     };
 
     this._config = defaults;
@@ -777,6 +779,8 @@ export class WeatherForecastExtended extends LitElement {
                         .forecast=${hourlyForecast}
                         .showSunTimes=${showSunTimes}
                         .sunCoordinates=${sunCoordinates}
+                        .extraAttribute=${this._config.hourly_extra_attribute}
+                        .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
                       ></wfe-hourly-list>
                     </div>
                   </div>

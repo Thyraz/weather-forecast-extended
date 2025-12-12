@@ -32,6 +32,8 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   hourly_min_gap?: number;
   header_tap_action_temperature?: ActionConfig;
   header_tap_action_condition?: ActionConfig;
+  hourly_extra_attribute?: string;
+  hourly_extra_attribute_unit?: string;
 }
 
 export interface SunCoordinates {

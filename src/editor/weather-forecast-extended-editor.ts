@@ -182,8 +182,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       return html``;
     }
 
-    const { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipSchema } =
-      this._buildSchemas();
+    const {
+      general: generalSchema,
+      layout: layoutSchema,
+      header: headerSchema,
+      chips: chipSchema,
+      hourly: hourlySchema,
+    } = this._buildSchemas();
     const formData = this._createFormData();
 
     return html`
@@ -328,6 +333,16 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           </div>
         </div>
         <div class="editor-subsection">
+          <h5 class="section-subtitle">Hourly forecast options</h5>
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${hourlySchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
+        </div>
+        <div class="editor-subsection">
           <h5 class="section-subtitle">Sunrise & Sunset</h5>
           <div class="forecast-switch">
             <span>Show sunrise & sunset</span>
@@ -395,6 +410,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
       case "use_night_header_backgrounds":
         return "Use separate header backgrounds for nightly conditions";
+      case "hourly_extra_attribute":
+        return "Hourly extra attribute (third line)";
+      case "hourly_extra_attribute_unit":
+        return "Unit for hourly extra attribute";
       default:
         if (typeof schema.name === "string" && schema.name.startsWith("header_chip_")) {
           const parts = schema.name.split("_");
@@ -563,11 +582,42 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     ];
   }
 
+  private _buildHourlyExtraAttributeOptions(): Array<{ value: string; label: string }> {
+    const disallowed = new Set([
+      "datetime",
+      "condition",
+      "precipitation_probability",
+      "precipitation",
+      "temperature",
+    ]);
+
+    const fallback = ["humidity", "pressure", "wind_speed", "wind_gust_speed", "wind_bearing", "cloud_coverage", "dew_point", "uv_index"];
+
+    if (!this.hass || !this._config?.entity) {
+      return [{ value: "", label: "None" }, ...fallback.map(value => ({ value, label: value }))];
+    }
+
+    const entityState = this.hass.states[this._config.entity];
+    const forecast = (entityState?.attributes as any)?.forecast;
+    const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
+
+    const keys = firstEntry && typeof firstEntry === "object"
+      ? Object.keys(firstEntry).filter(key => !disallowed.has(key))
+      : [];
+
+    const options = keys.length ? keys : fallback;
+
+    const uniqueOptions = Array.from(new Set(options));
+
+    return [{ value: "", label: "None" }, ...uniqueOptions.map(value => ({ value, label: value }))];
+  }
+
   private _buildSchemas(): {
     general: HaFormSchema[];
     layout: HaFormSchema[];
     header: HaFormSchema[];
     chips: HaFormSchema[];
+    hourly: HaFormSchema[];
   } {
     const generalSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
@@ -614,6 +664,23 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     ];
 
     const attributeOptions = this._buildAttributeOptions();
+    const hourlySchema: HaFormSchema[] = [
+      {
+        name: "hourly_extra_attribute",
+        selector: {
+          select: {
+            options: this._buildHourlyExtraAttributeOptions(),
+            custom_value: true,
+          },
+        },
+        optional: true,
+      },
+      {
+        name: "hourly_extra_attribute_unit",
+        selector: { text: {} },
+        optional: true,
+      },
+    ];
     const chipsSchema: HaFormSchema[] = [];
 
     HEADER_CHIP_INDEXES.forEach(index => {
@@ -662,7 +729,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       });
     });
 
-    return { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipsSchema };
+    return { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipsSchema, hourly: hourlySchema };
   }
 
   private _isSectionEnabled(name: ToggleName, config: WeatherForecastExtendedConfig): boolean {

@@ -39,7 +39,12 @@ export interface ForecastAttribute {
   condition?: string;
   is_daytime?: boolean;
   pressure?: number;
-  wind_speed?: string;
+  wind_speed?: string | number;
+  wind_gust_speed?: number;
+  wind_bearing?: number | string;
+  cloud_coverage?: number;
+  dew_point?: number;
+  uv_index?: number;
 }
 
 interface WeatherEntityAttributes extends HassEntityAttributeBase {
