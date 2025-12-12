@@ -15,6 +15,8 @@ export class WFEDailyList extends LitElement {
   @property({ attribute: false }) forecast: ForecastAttribute[] = [];
   @property({ attribute: false }) min?: number;
   @property({ attribute: false }) max?: number;
+  @property({ attribute: false }) extraAttribute?: string;
+  @property({ attribute: false }) extraAttributeUnit?: string;
 
   protected createRenderRoot() {
     // Render in light DOM so parent CSS applies
@@ -61,6 +63,7 @@ export class WFEDailyList extends LitElement {
           <div class="templow">${this._hasValidValue(item.templow) ? html`${Math.round(item.templow!)}°` : "—"}</div>
         </div>
         ${this._renderPrecipitationInfo(item, precipitationScale)}
+        ${this._renderExtraAttribute(item)}
       </div>
     `;
   }
@@ -136,6 +139,42 @@ export class WFEDailyList extends LitElement {
           </div>`
         : nothing}
     `;
+  }
+
+  private _renderExtraAttribute(item: ForecastAttribute): TemplateResult | typeof nothing {
+    const key = this.extraAttribute?.trim();
+    if (!key) {
+      return nothing;
+    }
+
+    const rawValue = (item as any)?.[key];
+    if (rawValue === undefined || rawValue === null) {
+      return nothing;
+    }
+
+    let display: string;
+    if (typeof rawValue === "number") {
+      display = rawValue.toLocaleString(this.hass?.locale?.language, {
+        maximumFractionDigits: 1,
+      });
+    } else if (typeof rawValue === "string") {
+      const trimmed = rawValue.trim();
+      if (!trimmed.length) {
+        return nothing;
+      }
+      display = trimmed;
+    } else {
+      try {
+        display = JSON.stringify(rawValue);
+      } catch (_err) {
+        return nothing;
+      }
+    }
+
+    const unitRaw = typeof this.extraAttributeUnit === "string" ? this.extraAttributeUnit : "";
+    const unit = unitRaw.trim().length ? unitRaw : "";
+
+    return html`<div class="daily-extra">${display}${unit}</div>`;
   }
 
   private _computePrecipitationScale(minScale: number, maxScale: number): number | undefined {

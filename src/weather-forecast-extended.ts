@@ -113,6 +113,8 @@ export class WeatherForecastExtended extends LitElement {
       hourly_min_gap: normalizedHourlyMinGap,
       hourly_extra_attribute: config.hourly_extra_attribute,
       hourly_extra_attribute_unit: config.hourly_extra_attribute_unit,
+      daily_extra_attribute: config.daily_extra_attribute,
+      daily_extra_attribute_unit: config.daily_extra_attribute_unit,
     };
 
     this._config = defaults;
@@ -756,6 +758,8 @@ export class WeatherForecastExtended extends LitElement {
                         .forecast=${dailyForecast}
                         .min=${this._dailyMinTemp}
                         .max=${this._dailyMaxTemp}
+                        .extraAttribute=${this._config.daily_extra_attribute}
+                        .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
                         @wfe-daily-selected=${this._handleDailySelected}
                       ></wfe-daily-list>
                     </div>

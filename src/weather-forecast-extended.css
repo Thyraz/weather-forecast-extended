@@ -498,6 +498,15 @@ ha-card {
   opacity: 1.0;
 }
 
+.forecast .daily-extra {
+  opacity: 0.6;
+  color: var(--primary-text-color);
+  min-height: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .forecast.daily .forecast-item {
   display: grid;
   grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;

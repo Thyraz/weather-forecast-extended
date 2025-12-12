@@ -34,6 +34,8 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   header_tap_action_condition?: ActionConfig;
   hourly_extra_attribute?: string;
   hourly_extra_attribute_unit?: string;
+  daily_extra_attribute?: string;
+  daily_extra_attribute_unit?: string;
 }
 
 export interface SunCoordinates {
