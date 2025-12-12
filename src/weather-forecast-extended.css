@@ -509,7 +509,7 @@ ha-card {
 
 .forecast.daily .forecast-item {
   display: grid;
-  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content;
+  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;
   align-content: start;
 }
 
@@ -517,7 +517,8 @@ ha-card {
 .forecast.daily .forecast-item > .date,
 .forecast.daily .forecast-item > .day-of-month,
 .forecast.daily .forecast-item > .precipitation,
-.forecast.daily .forecast-item > .precipitationprobability {
+.forecast.daily .forecast-item > .precipitationprobability,
+.forecast.daily .forecast-item > .daily-extra {
   min-height: auto;
 }
 
@@ -526,6 +527,7 @@ ha-card {
 .forecast.daily .forecast-item > .translate-container { grid-row: 3; }
 .forecast.daily .forecast-item > .precipitation,
 .forecast.daily .forecast-item > .precipitationprobability { grid-row: 4; }
+.forecast.daily .forecast-item > .daily-extra { grid-row: 5; justify-self: center; text-align: center; width: var(--icon-size); }
 
 .forecast.daily .precipitationprobability {
   display: none;
