@@ -71,6 +71,10 @@ use_night_header_backgrounds: true
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
 | `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. |
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
+| `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. Pick any forecast attribute. |
+| `hourly_extra_attribute_unit` | string | none | Optional unit suffix displayed after the hourly extra attribute (e.g., `%` for `cloud_coverage`). |
+| `daily_extra_attribute` | string | none | Optional third text line under the daily precipitation rows. Pick any forecast attribute. |
+| `daily_extra_attribute_unit` | string | none | Optional unit suffix displayed after the daily extra attribute. |
 | `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `icon` and `tap_action`. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
@@ -111,6 +115,18 @@ header_tap_action_temperature:
   navigation_path: /lovelace/weather
 header_tap_action_condition:
   action: more-info
+```
+
+### Hourly extra attribute
+Add a third text row beneath precipitation and probability in the hourly forecast. Choose any forecast attribute except the built-ins already shown (datetime, condition, precipitation, precipitation_probability, temperature).
+
+```yaml
+type: custom:weather-forecast-extended-card
+entity: weather.home
+hourly_extra_attribute: wind_gust_speed
+hourly_extra_attribute_unit: " km/h"
+daily_extra_attribute: pressure
+daily_extra_attribute_unit: " hPa"
 ```
 
 ## Interactions and layout
