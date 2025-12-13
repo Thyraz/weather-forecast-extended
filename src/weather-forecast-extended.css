@@ -566,6 +566,10 @@ ha-card {
   transform: translateY(calc(var(--max-translation) - (var(--percentual-translation) * 2*var(--max-translation))));
 }
 
+.forecast.hourly .forecast-item.no-ampm > .translate-container {
+  margin-top: 4px;
+}
+
 .forecast.daily .forecast-item .icon-container { flex: 0 0 auto; }
 .forecast.daily .temperature-bar { flex: 1 1 auto; }
 
