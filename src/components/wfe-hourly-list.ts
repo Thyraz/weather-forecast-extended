@@ -150,7 +150,7 @@ export class WFEHourlyList extends LitElement {
     const amPmLabel = showAmPm ? formatDayPeriod(amPmDate, this.hass.locale as any, this.hass.config as any) : undefined;
 
     return html`
-      <div class="forecast-item">
+      <div class="forecast-item ${showAmPm ? "" : "no-ampm"}">
         <div class="${dateClasses.join(" ")}">${dateLabel}</div>
         ${showAmPm
           ? html`<div class="ampm">${amPmLabel ?? ""}</div>`
