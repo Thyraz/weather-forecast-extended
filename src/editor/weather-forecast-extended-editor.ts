@@ -97,6 +97,16 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       font-weight: 600;
     }
 
+    .group-card {
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      border-radius: 12px;
+      padding: 16px;
+      background: var(--ha-card-background, #fff);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     .editor-subsection {
       display: flex;
       flex-direction: column;
@@ -202,166 +212,172 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ></ha-form>
       <div class="editor-section">
         <h4 class="section-title">Layout</h4>
-        <ha-form
-          .hass=${this.hass}
-          .data=${formData}
-          .schema=${layoutSchema}
-          .computeLabel=${this._computeLabel}
-          @value-changed=${this._handleValueChanged}
-        ></ha-form>
+        <div class="group-card">
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${layoutSchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
+        </div>
       </div>
       ${this._config.show_header !== false
         ? html`
             <div class="editor-section">
               <h4 class="section-title">Header options</h4>
-              <ha-form
-                .hass=${this.hass}
-                .data=${formData}
-                .schema=${headerSchema}
-                .computeLabel=${this._computeLabel}
-                @value-changed=${this._handleValueChanged}
-              ></ha-form>
-              <div class="editor-subsection">
-                <h5 class="section-subtitle">Header tap actions</h5>
-                <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
-                <ha-selector
-                  .hass=${this.hass}
-                  .selector=${{ ui_action: {} }}
-                  .value=${this._config.header_tap_action_temperature}
-                  .label=${"Temperature tap action"}
-                  .required=${false}
-                  .disabled=${this._config.show_header === false}
-                  @value-changed=${(event: CustomEvent) =>
-                    this._handleHeaderActionChange(event, "header_tap_action_temperature")}
-                ></ha-selector>
-                <ha-selector
-                  .hass=${this.hass}
-                  .selector=${{ ui_action: {} }}
-                  .value=${this._config.header_tap_action_condition}
-                  .label=${"Condition tap action"}
-                  .required=${false}
-                  .disabled=${this._config.show_header === false}
-                  @value-changed=${(event: CustomEvent) =>
-                    this._handleHeaderActionChange(event, "header_tap_action_condition")}
-                ></ha-selector>
-              </div>
-              <div class="chips-section">
-                <h5 class="section-subtitle">Header chips</h5>
-                <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+              <div class="group-card">
                 <ha-form
                   .hass=${this.hass}
                   .data=${formData}
-                  .schema=${chipSchema}
+                  .schema=${headerSchema}
                   .computeLabel=${this._computeLabel}
                   @value-changed=${this._handleValueChanged}
                 ></ha-form>
+                <div class="editor-subsection">
+                  <h5 class="section-subtitle">Tap actions</h5>
+                  <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ ui_action: {} }}
+                    .value=${this._config.header_tap_action_temperature}
+                    .label=${"Temperature tap action"}
+                    .required=${false}
+                    .disabled=${this._config.show_header === false}
+                    @value-changed=${(event: CustomEvent) =>
+                      this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+                  ></ha-selector>
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ ui_action: {} }}
+                    .value=${this._config.header_tap_action_condition}
+                    .label=${"Condition tap action"}
+                    .required=${false}
+                    .disabled=${this._config.show_header === false}
+                    @value-changed=${(event: CustomEvent) =>
+                      this._handleHeaderActionChange(event, "header_tap_action_condition")}
+                  ></ha-selector>
+                </div>
+                <div class="chips-section">
+                  <h5 class="section-subtitle">Chips</h5>
+                  <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+                  <ha-form
+                    .hass=${this.hass}
+                    .data=${formData}
+                    .schema=${chipSchema}
+                    .computeLabel=${this._computeLabel}
+                    @value-changed=${this._handleValueChanged}
+                  ></ha-form>
+                </div>
               </div>
             </div>
           `
         : nothing}
       <div class="editor-section">
         <h4 class="section-title">Forecast options</h4>
-        <div class="editor-subsection">
-          <div>
-            <h5 class="section-subtitle">Location</h5>
+        <div class="group-card">
+          <div class="editor-subsection">
+            <div>
+              <h5 class="section-subtitle">Location</h5>
+              <p class="location-description">
+                Needed for sunrise/sunset markers and day/night backgrounds
+              </p>
+            </div>
+            <div class="forecast-switch">
+              <span>Use Home Assistant location</span>
+              <ha-switch
+                name="sun_use_home_coordinates"
+                .checked=${this._config.sun_use_home_coordinates ?? true}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Latitude</span>
+                <input
+                  type="text"
+                  name="sun_latitude"
+                  placeholder="e.g. 48.137"
+                  .value=${String(this._config.sun_latitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+              <label class="coordinate-field">
+                <span>Longitude</span>
+                <input
+                  type="text"
+                  name="sun_longitude"
+                  placeholder="e.g. 11.575"
+                  .value=${String(this._config.sun_longitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+            </div>
+          </div>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Forecast spacing</h5>
             <p class="location-description">
-              Needed for sunrise/sunset markers and day/night backgrounds
+              Minimum distance between forecast items in pixels (10px or greater)
             </p>
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Daily min gap (px)</span>
+                <input
+                  type="number"
+                  name="daily_min_gap"
+                  min="10"
+                  step="1"
+                  placeholder="Default 30"
+                  .value=${String(this._config.daily_min_gap ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+              <label class="coordinate-field">
+                <span>Hourly min gap (px)</span>
+                <input
+                  type="number"
+                  name="hourly_min_gap"
+                  min="10"
+                  step="1"
+                  placeholder="Default 16"
+                  .value=${String(this._config.hourly_min_gap ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+            </div>
           </div>
-          <div class="forecast-switch">
-            <span>Use Home Assistant location</span>
-            <ha-switch
-              name="sun_use_home_coordinates"
-              .checked=${this._config.sun_use_home_coordinates ?? true}
-              @change=${this._handleSunToggleChange}
-            ></ha-switch>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${hourlySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
           </div>
-          <div class="sun-coordinates">
-            <label class="coordinate-field">
-              <span>Latitude</span>
-              <input
-                type="text"
-                name="sun_latitude"
-                placeholder="e.g. 48.137"
-                .value=${String(this._config.sun_latitude ?? "")}
-                ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-            <label class="coordinate-field">
-              <span>Longitude</span>
-              <input
-                type="text"
-                name="sun_longitude"
-                placeholder="e.g. 11.575"
-                .value=${String(this._config.sun_longitude ?? "")}
-                ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Daily forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${dailySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
           </div>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Forecast spacing</h5>
-          <p class="location-description">
-            Minimum distance between forecast items in pixels (10px or greater)
-          </p>
-          <div class="sun-coordinates">
-            <label class="coordinate-field">
-              <span>Daily min gap (px)</span>
-              <input
-                type="number"
-                name="daily_min_gap"
-                min="10"
-                step="1"
-                placeholder="Default 30"
-                .value=${String(this._config.daily_min_gap ?? "")}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-            <label class="coordinate-field">
-              <span>Hourly min gap (px)</span>
-              <input
-                type="number"
-                name="hourly_min_gap"
-                min="10"
-                step="1"
-                placeholder="Default 16"
-                .value=${String(this._config.hourly_min_gap ?? "")}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-          </div>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Hourly forecast options</h5>
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${hourlySchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Daily forecast options</h5>
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${dailySchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Sunrise & Sunset</h5>
-          <div class="forecast-switch">
-            <span>Show sunrise & sunset</span>
-            <ha-switch
-              name="show_sun_times"
-              .checked=${this._config.show_sun_times ?? false}
-              @change=${this._handleSunToggleChange}
-            ></ha-switch>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Sunrise & Sunset</h5>
+            <div class="forecast-switch">
+              <span>Show sunrise & sunset</span>
+              <ha-switch
+                name="show_sun_times"
+                .checked=${this._config.show_sun_times ?? false}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
           </div>
         </div>
       </div>
