@@ -507,6 +507,16 @@ ha-card {
   white-space: nowrap;
 }
 
+.forecast.daily .daily-extra.precipitationprobability {
+  color: var(--state-climate-cool-color);
+  opacity: 0.3;
+  display: block !important;
+}
+
+.forecast .daily-extra.precipitationprobability.active {
+  opacity: 1;
+}
+
 .forecast.daily .forecast-item {
   display: grid;
   grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;

@@ -71,10 +71,10 @@ use_night_header_backgrounds: true
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
 | `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. |
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
-| `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. Pick any forecast attribute. |
+| `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. |
 | `hourly_extra_attribute_unit` | string | none | Optional unit suffix displayed after the hourly extra attribute (e.g., `%` for `cloud_coverage`). |
-| `daily_extra_attribute` | string | none | Optional third text line under the daily precipitation rows. Pick any forecast attribute. |
-| `daily_extra_attribute_unit` | string | none | Optional unit suffix displayed after the daily extra attribute. |
+| `daily_extra_attribute` | string | none | Optional third text line under the daily precipitation rows. `precipitation_probability` shows colored as blue and with a % sign automatically. |
+| `daily_extra_attribute_unit` | string | none | Optional unit suffix displayed after the daily extra attribute. Disabled/ignored when `daily_extra_attribute` is `precipitation_probability`. |
 | `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `icon` and `tap_action`. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.

@@ -153,6 +153,18 @@ export class WFEDailyList extends LitElement {
     }
 
     let display: string;
+    if (key === "precipitation_probability") {
+      const valueNum = typeof rawValue === "number" ? rawValue : Number(rawValue);
+      if (!Number.isFinite(valueNum)) {
+        return nothing;
+      }
+      const classes = ["daily-extra", "precipitationprobability"];
+      if (valueNum > 30) {
+        classes.push("active");
+      }
+      return html`<div class="${classes.join(" ")}" style="display: block;">${valueNum}%</div>`;
+    }
+
     if (typeof rawValue === "number") {
       display = rawValue.toLocaleString(this.hass?.locale?.language, {
         maximumFractionDigits: 1,

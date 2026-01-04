@@ -617,7 +617,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     const disallowed = new Set([
       "datetime",
       "condition",
-      "precipitation_probability",
       "precipitation",
       "temperature",
       "templow",
@@ -654,7 +653,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       "templow",
     ]);
 
-    const fallback = ["humidity", "pressure", "wind_speed", "wind_gust_speed", "wind_bearing", "cloud_coverage", "dew_point", "uv_index"];
+    const fallback = ["humidity", "pressure", "wind_speed", "wind_gust_speed", "wind_bearing", "cloud_coverage", "dew_point", "uv_index", "precipitation_probability"];
 
     if (!this.hass || !this._config?.entity) {
       return [{ value: "", label: "None" }, ...fallback.map(value => ({ value, label: value }))];
@@ -662,13 +661,21 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
     const entityState = this.hass.states[this._config.entity];
     const forecast = (entityState?.attributes as any)?.forecast;
-    const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
+    const keysSet = new Set<string>();
 
-    const keys = firstEntry && typeof firstEntry === "object"
-      ? Object.keys(firstEntry).filter(key => !disallowed.has(key))
-      : [];
+    if (Array.isArray(forecast)) {
+      forecast.forEach(entry => {
+        if (entry && typeof entry === "object") {
+          Object.keys(entry).forEach(key => {
+            if (!disallowed.has(key)) {
+              keysSet.add(key);
+            }
+          });
+        }
+      });
+    }
 
-    const options = keys.length ? keys : fallback;
+    const options = keysSet.size ? Array.from(keysSet) : fallback;
 
     const uniqueOptions = Array.from(new Set(options));
 
@@ -760,6 +767,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         name: "daily_extra_attribute_unit",
         selector: { text: {} },
         optional: true,
+        disabled: this._config?.daily_extra_attribute === "precipitation_probability",
       },
     ];
     const chipsSchema: HaFormSchema[] = [];
