@@ -503,7 +503,6 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const disallowed = new Set([
             "datetime",
             "condition",
-            "precipitation_probability",
             "precipitation",
             "temperature",
             "templow"
@@ -562,7 +561,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             "wind_bearing",
             "cloud_coverage",
             "dew_point",
-            "uv_index"
+            "uv_index",
+            "precipitation_probability"
         ];
         if (!this.hass || !this._config?.entity) return [
             {
@@ -576,9 +576,13 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         ];
         const entityState = this.hass.states[this._config.entity];
         const forecast = (entityState?.attributes)?.forecast;
-        const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
-        const keys = firstEntry && typeof firstEntry === "object" ? Object.keys(firstEntry).filter((key)=>!disallowed.has(key)) : [];
-        const options = keys.length ? keys : fallback;
+        const keysSet = new Set();
+        if (Array.isArray(forecast)) forecast.forEach((entry)=>{
+            if (entry && typeof entry === "object") Object.keys(entry).forEach((key)=>{
+                if (!disallowed.has(key)) keysSet.add(key);
+            });
+        });
+        const options = keysSet.size ? Array.from(keysSet) : fallback;
         const uniqueOptions = Array.from(new Set(options));
         return [
             {
@@ -693,7 +697,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 selector: {
                     text: {}
                 },
-                optional: true
+                optional: true,
+                disabled: this._config?.daily_extra_attribute === "precipitation_probability"
             }
         ];
         const chipsSchema = [];
@@ -885,4 +890,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.2a5b27d3.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.46150f7f.js.map
