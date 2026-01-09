@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.46150f7f.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.365f33a2.js").then(()=>parcelRequire("bwZCh"));
 
 });
 

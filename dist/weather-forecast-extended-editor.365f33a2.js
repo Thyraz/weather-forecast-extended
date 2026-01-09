@@ -52,6 +52,11 @@ const $a37b5b928a2fc5d8$var$fireEvent = (node, type, detail)=>{
         composed: true
     }));
 };
+const $a37b5b928a2fc5d8$var$WeatherEntityFeature = {
+    FORECAST_DAILY: 1,
+    FORECAST_HOURLY: 2,
+    FORECAST_TWICE_DAILY: 4
+};
 let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEditor extends (0, $j0ZcV.LitElement) {
     static #_ = (()=>{
         this.styles = (0, $j0ZcV.css)`
@@ -76,6 +81,16 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       margin: 0;
       font-size: 15px;
       font-weight: 600;
+    }
+
+    .group-card {
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      border-radius: 12px;
+      padding: 16px;
+      background: var(--ha-card-background, #fff);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .editor-subsection {
@@ -153,9 +168,11 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             header_chips: normalizedChips,
             header_attributes: normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute)
         };
+        this._refreshForecastOptions();
     }
     render() {
         if (!this.hass || !this._config) return (0, $j0ZcV.html)``;
+        this._refreshForecastOptions();
         const { general: generalSchema , layout: layoutSchema , header: headerSchema , chips: chipSchema , hourly: hourlySchema , daily: dailySchema  } = this._buildSchemas();
         const formData = this._createFormData();
         return (0, $j0ZcV.html)`
@@ -168,166 +185,172 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       ></ha-form>
       <div class="editor-section">
         <h4 class="section-title">Layout</h4>
-        <ha-form
-          .hass=${this.hass}
-          .data=${formData}
-          .schema=${layoutSchema}
-          .computeLabel=${this._computeLabel}
-          @value-changed=${this._handleValueChanged}
-        ></ha-form>
+        <div class="group-card">
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${layoutSchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
+        </div>
       </div>
       ${this._config.show_header !== false ? (0, $j0ZcV.html)`
             <div class="editor-section">
               <h4 class="section-title">Header options</h4>
-              <ha-form
-                .hass=${this.hass}
-                .data=${formData}
-                .schema=${headerSchema}
-                .computeLabel=${this._computeLabel}
-                @value-changed=${this._handleValueChanged}
-              ></ha-form>
-              <div class="editor-subsection">
-                <h5 class="section-subtitle">Header tap actions</h5>
-                <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
-                <ha-selector
-                  .hass=${this.hass}
-                  .selector=${{
-            ui_action: {}
-        }}
-                  .value=${this._config.header_tap_action_temperature}
-                  .label=${"Temperature tap action"}
-                  .required=${false}
-                  .disabled=${this._config.show_header === false}
-                  @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_temperature")}
-                ></ha-selector>
-                <ha-selector
-                  .hass=${this.hass}
-                  .selector=${{
-            ui_action: {}
-        }}
-                  .value=${this._config.header_tap_action_condition}
-                  .label=${"Condition tap action"}
-                  .required=${false}
-                  .disabled=${this._config.show_header === false}
-                  @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_condition")}
-                ></ha-selector>
-              </div>
-              <div class="chips-section">
-                <h5 class="section-subtitle">Header chips</h5>
-                <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+              <div class="group-card">
                 <ha-form
                   .hass=${this.hass}
                   .data=${formData}
-                  .schema=${chipSchema}
+                  .schema=${headerSchema}
                   .computeLabel=${this._computeLabel}
                   @value-changed=${this._handleValueChanged}
                 ></ha-form>
+                <div class="editor-subsection">
+                  <h5 class="section-subtitle">Tap actions</h5>
+                  <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{
+            ui_action: {}
+        }}
+                    .value=${this._config.header_tap_action_temperature}
+                    .label=${"Temperature tap action"}
+                    .required=${false}
+                    .disabled=${this._config.show_header === false}
+                    @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+                  ></ha-selector>
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{
+            ui_action: {}
+        }}
+                    .value=${this._config.header_tap_action_condition}
+                    .label=${"Condition tap action"}
+                    .required=${false}
+                    .disabled=${this._config.show_header === false}
+                    @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_condition")}
+                  ></ha-selector>
+                </div>
+                <div class="chips-section">
+                  <h5 class="section-subtitle">Chips</h5>
+                  <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+                  <ha-form
+                    .hass=${this.hass}
+                    .data=${formData}
+                    .schema=${chipSchema}
+                    .computeLabel=${this._computeLabel}
+                    @value-changed=${this._handleValueChanged}
+                  ></ha-form>
+                </div>
               </div>
             </div>
           ` : (0, $j0ZcV.nothing)}
       <div class="editor-section">
         <h4 class="section-title">Forecast options</h4>
-        <div class="editor-subsection">
-          <div>
-            <h5 class="section-subtitle">Location</h5>
+        <div class="group-card">
+          <div class="editor-subsection">
+            <div>
+              <h5 class="section-subtitle">Location</h5>
+              <p class="location-description">
+                Needed for sunrise/sunset markers and day/night backgrounds
+              </p>
+            </div>
+            <div class="forecast-switch">
+              <span>Use Home Assistant location</span>
+              <ha-switch
+                name="sun_use_home_coordinates"
+                .checked=${this._config.sun_use_home_coordinates ?? true}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Latitude</span>
+                <input
+                  type="text"
+                  name="sun_latitude"
+                  placeholder="e.g. 48.137"
+                  .value=${String(this._config.sun_latitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+              <label class="coordinate-field">
+                <span>Longitude</span>
+                <input
+                  type="text"
+                  name="sun_longitude"
+                  placeholder="e.g. 11.575"
+                  .value=${String(this._config.sun_longitude ?? "")}
+                  ?disabled=${this._config.sun_use_home_coordinates ?? true}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+            </div>
+          </div>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Forecast spacing</h5>
             <p class="location-description">
-              Needed for sunrise/sunset markers and day/night backgrounds
+              Minimum distance between forecast items in pixels (10px or greater)
             </p>
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Daily min gap (px)</span>
+                <input
+                  type="number"
+                  name="daily_min_gap"
+                  min="10"
+                  step="1"
+                  placeholder="Default 30"
+                  .value=${String(this._config.daily_min_gap ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+              <label class="coordinate-field">
+                <span>Hourly min gap (px)</span>
+                <input
+                  type="number"
+                  name="hourly_min_gap"
+                  min="10"
+                  step="1"
+                  placeholder="Default 16"
+                  .value=${String(this._config.hourly_min_gap ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+              </label>
+            </div>
           </div>
-          <div class="forecast-switch">
-            <span>Use Home Assistant location</span>
-            <ha-switch
-              name="sun_use_home_coordinates"
-              .checked=${this._config.sun_use_home_coordinates ?? true}
-              @change=${this._handleSunToggleChange}
-            ></ha-switch>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${hourlySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
           </div>
-          <div class="sun-coordinates">
-            <label class="coordinate-field">
-              <span>Latitude</span>
-              <input
-                type="text"
-                name="sun_latitude"
-                placeholder="e.g. 48.137"
-                .value=${String(this._config.sun_latitude ?? "")}
-                ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-            <label class="coordinate-field">
-              <span>Longitude</span>
-              <input
-                type="text"
-                name="sun_longitude"
-                placeholder="e.g. 11.575"
-                .value=${String(this._config.sun_longitude ?? "")}
-                ?disabled=${this._config.sun_use_home_coordinates ?? true}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Daily forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${dailySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
           </div>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Forecast spacing</h5>
-          <p class="location-description">
-            Minimum distance between forecast items in pixels (10px or greater)
-          </p>
-          <div class="sun-coordinates">
-            <label class="coordinate-field">
-              <span>Daily min gap (px)</span>
-              <input
-                type="number"
-                name="daily_min_gap"
-                min="10"
-                step="1"
-                placeholder="Default 30"
-                .value=${String(this._config.daily_min_gap ?? "")}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-            <label class="coordinate-field">
-              <span>Hourly min gap (px)</span>
-              <input
-                type="number"
-                name="hourly_min_gap"
-                min="10"
-                step="1"
-                placeholder="Default 16"
-                .value=${String(this._config.hourly_min_gap ?? "")}
-                @input=${this._handleSunInputChange}
-              />
-            </label>
-          </div>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Hourly forecast options</h5>
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${hourlySchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Daily forecast options</h5>
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${dailySchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-        <div class="editor-subsection">
-          <h5 class="section-subtitle">Sunrise & Sunset</h5>
-          <div class="forecast-switch">
-            <span>Show sunrise & sunset</span>
-            <ha-switch
-              name="show_sun_times"
-              .checked=${this._config.show_sun_times ?? false}
-              @change=${this._handleSunToggleChange}
-            ></ha-switch>
+          <div class="editor-subsection">
+            <h5 class="section-subtitle">Sunrise & Sunset</h5>
+            <div class="forecast-switch">
+              <span>Show sunrise & sunset</span>
+              <ha-switch
+                name="show_sun_times"
+                .checked=${this._config.show_sun_times ?? false}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
           </div>
         </div>
       </div>
@@ -487,43 +510,17 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const disallowed = new Set([
             "datetime",
             "condition",
-            "precipitation_probability",
             "precipitation",
             "temperature",
             "templow"
         ]);
-        const fallback = [
-            "humidity",
-            "pressure",
-            "wind_speed",
-            "wind_gust_speed",
-            "wind_bearing",
-            "cloud_coverage",
-            "dew_point",
-            "uv_index"
-        ];
-        if (!this.hass || !this._config?.entity) return [
-            {
-                value: "",
-                label: "None"
-            },
-            ...fallback.map((value)=>({
-                    value: value,
-                    label: value
-                }))
-        ];
-        const entityState = this.hass.states[this._config.entity];
-        const forecast = (entityState?.attributes)?.forecast;
-        const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
-        const keys = firstEntry && typeof firstEntry === "object" ? Object.keys(firstEntry).filter((key)=>!disallowed.has(key)) : [];
-        const options = keys.length ? keys : fallback;
-        const uniqueOptions = Array.from(new Set(options));
+        const options = this._hourlyExtraOptions.length ? this._hourlyExtraOptions.filter((opt)=>!disallowed.has(opt)) : [];
         return [
             {
                 value: "",
                 label: "None"
             },
-            ...uniqueOptions.map((value)=>({
+            ...options.map((value)=>({
                     value: value,
                     label: value
                 }))
@@ -533,43 +530,17 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const disallowed = new Set([
             "datetime",
             "condition",
-            "precipitation_probability",
             "precipitation",
             "temperature",
             "templow"
         ]);
-        const fallback = [
-            "humidity",
-            "pressure",
-            "wind_speed",
-            "wind_gust_speed",
-            "wind_bearing",
-            "cloud_coverage",
-            "dew_point",
-            "uv_index"
-        ];
-        if (!this.hass || !this._config?.entity) return [
-            {
-                value: "",
-                label: "None"
-            },
-            ...fallback.map((value)=>({
-                    value: value,
-                    label: value
-                }))
-        ];
-        const entityState = this.hass.states[this._config.entity];
-        const forecast = (entityState?.attributes)?.forecast;
-        const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
-        const keys = firstEntry && typeof firstEntry === "object" ? Object.keys(firstEntry).filter((key)=>!disallowed.has(key)) : [];
-        const options = keys.length ? keys : fallback;
-        const uniqueOptions = Array.from(new Set(options));
+        const options = this._dailyExtraOptions.length ? this._dailyExtraOptions.filter((opt)=>!disallowed.has(opt)) : [];
         return [
             {
                 value: "",
                 label: "None"
             },
-            ...uniqueOptions.map((value)=>({
+            ...options.map((value)=>({
                     value: value,
                     label: value
                 }))
@@ -677,7 +648,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 selector: {
                     text: {}
                 },
-                optional: true
+                optional: true,
+                disabled: this._config?.daily_extra_attribute === "precipitation_probability"
             }
         ];
         const chipsSchema = [];
@@ -801,6 +773,131 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             config: updated
         });
     }
+    _refreshForecastOptions() {
+        try {
+            if (!this.hass || !this._config?.entity) {
+                this._teardownForecastOptionSubscriptions();
+                if (this._hourlyExtraOptions.length || this._dailyExtraOptions.length) {
+                    this._hourlyExtraOptions = [];
+                    this._dailyExtraOptions = [];
+                }
+                this._forecastOptionsEntity = undefined;
+                return;
+            }
+            const entityId = this._config.entity;
+            if (this._forecastOptionsEntity !== entityId) {
+                this._teardownForecastOptionSubscriptions();
+                this._hourlyExtraOptions = [];
+                this._dailyExtraOptions = [];
+                this._forecastOptionsEntity = entityId;
+            }
+            const stateObj = this.hass.states[entityId];
+            const supported = this._getSupportedForecastTypes(stateObj);
+            const needed = new Set();
+            if (supported.includes("hourly")) needed.add("hourly");
+            if (supported.includes("daily") || supported.includes("twice_daily")) needed.add("daily");
+            if (!needed.size) needed.add("daily");
+            [
+                "hourly",
+                "daily"
+            ].forEach((type)=>{
+                if (!needed.has(type)) this._teardownForecastOptionSubscriptions([
+                    type
+                ]);
+                else if (!this._forecastOptionSubscriptions[type]) try {
+                    this._forecastOptionSubscriptions[type] = this._subscribeForecast(entityId, type, (event)=>this._handleForecastOptionsEvent(type, event));
+                } catch (_err) {
+                // ignore subscription errors to avoid breaking the editor
+                }
+            });
+        } catch (_err) {
+            // Fall back to attribute-based detection to keep the editor alive
+            try {
+                if (this.hass && this._config?.entity) this._applyForecastOptionsFromAttributes(this.hass.states[this._config.entity]);
+            } catch (_e) {
+            // ignore
+            }
+        }
+    }
+    _handleForecastOptionsEvent(type, event) {
+        const entries = Array.isArray(event?.forecast) ? event.forecast : [];
+        if (!entries.length) return;
+        const disallowedHourly = new Set([
+            "datetime",
+            "condition",
+            "precipitation",
+            "temperature",
+            "templow"
+        ]);
+        const disallowedDaily = disallowedHourly;
+        const keys = new Set();
+        entries.forEach((entry)=>{
+            if (entry && typeof entry === "object") Object.keys(entry).forEach((key)=>{
+                const block = type === "hourly" ? disallowedHourly : disallowedDaily;
+                if (!block.has(key)) keys.add(key);
+            });
+        });
+        const next = Array.from(keys).sort((a, b)=>a.localeCompare(b));
+        if (type === "hourly") {
+            if (next.join("|") !== this._hourlyExtraOptions.join("|")) this._hourlyExtraOptions = next;
+        } else if (next.join("|") !== this._dailyExtraOptions.join("|")) this._dailyExtraOptions = next;
+    }
+    _applyForecastOptionsFromAttributes(stateObj) {
+        if (!stateObj?.attributes?.forecast) return;
+        const entries = Array.isArray(stateObj.attributes.forecast) ? stateObj.attributes.forecast : [];
+        if (!entries.length) return;
+        const disallowed = new Set([
+            "datetime",
+            "condition",
+            "precipitation",
+            "temperature",
+            "templow"
+        ]);
+        const keys = new Set();
+        entries.forEach((entry)=>{
+            if (entry && typeof entry === "object") Object.keys(entry).forEach((key)=>{
+                if (!disallowed.has(key)) keys.add(key);
+            });
+        });
+        const options = Array.from(keys).sort((a, b)=>a.localeCompare(b));
+        if (options.join("|") !== this._hourlyExtraOptions.join("|")) this._hourlyExtraOptions = options;
+        if (options.join("|") !== this._dailyExtraOptions.join("|")) this._dailyExtraOptions = options;
+    }
+    _getSupportedForecastTypes(stateObj) {
+        if (!stateObj?.attributes) return [];
+        const supported = [];
+        const features = stateObj.attributes.supported_features ?? 0;
+        if ((features & $a37b5b928a2fc5d8$var$WeatherEntityFeature.FORECAST_DAILY) !== 0) supported.push("daily");
+        if ((features & $a37b5b928a2fc5d8$var$WeatherEntityFeature.FORECAST_TWICE_DAILY) !== 0) supported.push("twice_daily");
+        if ((features & $a37b5b928a2fc5d8$var$WeatherEntityFeature.FORECAST_HOURLY) !== 0) supported.push("hourly");
+        return supported;
+    }
+    _subscribeForecast(entityId, forecastType, callback) {
+        if (!this.hass?.connection) {
+            this._applyForecastOptionsFromAttributes(this.hass.states[entityId]);
+            return undefined;
+        }
+        return this.hass.connection.subscribeMessage(callback, {
+            type: "weather/subscribe_forecast",
+            forecast_type: forecastType,
+            entity_id: entityId
+        }).catch(()=>undefined);
+    }
+    _teardownForecastOptionSubscriptions(types) {
+        const targets = types ?? [
+            "hourly",
+            "daily"
+        ];
+        targets.forEach((type)=>{
+            const sub = this._forecastOptionSubscriptions[type];
+            sub?.then((unsub)=>unsub?.()).catch(()=>undefined);
+            delete this._forecastOptionSubscriptions[type];
+        });
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this._teardownForecastOptionSubscriptions();
+    }
     constructor(...args){
         super(...args);
         this._chipTypes = {
@@ -808,6 +905,9 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             1: "attribute",
             2: "attribute"
         };
+        this._hourlyExtraOptions = [];
+        this._dailyExtraOptions = [];
+        this._forecastOptionSubscriptions = {};
         this._computeLabel = (schema)=>{
             if (!this.hass) return schema.name;
             switch(schema.name){
@@ -862,6 +962,12 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
 (0, $39J5i.__decorate)([
     (0, $1ZxoT.state)()
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_chipTypes", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_hourlyExtraOptions", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_dailyExtraOptions", void 0);
 $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
     (0, $1ZxoT.customElement)("weather-forecast-extended-editor")
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b);
@@ -869,4 +975,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.838dbde5.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.365f33a2.js.map
