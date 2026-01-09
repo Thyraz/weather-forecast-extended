@@ -2,6 +2,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { HeaderChip, WeatherForecastExtendedConfig } from "../types";
+import type { ForecastEvent } from "../weather";
 
 const HEADER_CHIP_INDEXES = [0, 1, 2] as const;
 
@@ -62,6 +63,13 @@ const fireEvent = (node: HTMLElement, type: string, detail?: unknown) => {
   node.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
 };
 
+type ModernForecastType = "hourly" | "daily" | "twice_daily";
+const WeatherEntityFeature = {
+  FORECAST_DAILY: 1,
+  FORECAST_HOURLY: 2,
+  FORECAST_TWICE_DAILY: 4,
+} as const;
+
 @customElement("weather-forecast-extended-editor")
 export class WeatherForecastExtendedEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -72,6 +80,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     1: "attribute",
     2: "attribute",
   };
+  @state() private _hourlyExtraOptions: string[] = [];
+  @state() private _dailyExtraOptions: string[] = [];
+
+  private _forecastOptionSubscriptions: Partial<Record<ModernForecastType, Promise<() => void> | undefined>> = {};
+  private _forecastOptionsEntity?: string;
 
   static styles = css`
     .editor-section {
@@ -185,12 +198,16 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         .filter(chip => chip.type === "attribute")
         .map(chip => chip.attribute),
     };
+
+    this._refreshForecastOptions();
   }
 
   protected render() {
     if (!this.hass || !this._config) {
       return html``;
     }
+
+    this._refreshForecastOptions();
 
     const {
       general: generalSchema,
@@ -622,64 +639,27 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       "templow",
     ]);
 
-    const fallback = ["humidity", "pressure", "wind_speed", "wind_gust_speed", "wind_bearing", "cloud_coverage", "dew_point", "uv_index"];
-
-    if (!this.hass || !this._config?.entity) {
-      return [{ value: "", label: "None" }, ...fallback.map(value => ({ value, label: value }))];
-    }
-
-    const entityState = this.hass.states[this._config.entity];
-    const forecast = (entityState?.attributes as any)?.forecast;
-    const firstEntry = Array.isArray(forecast) && forecast.length > 0 ? forecast[0] : undefined;
-
-    const keys = firstEntry && typeof firstEntry === "object"
-      ? Object.keys(firstEntry).filter(key => !disallowed.has(key))
+    const options = this._hourlyExtraOptions.length
+      ? this._hourlyExtraOptions.filter(opt => !disallowed.has(opt))
       : [];
 
-    const options = keys.length ? keys : fallback;
-
-    const uniqueOptions = Array.from(new Set(options));
-
-    return [{ value: "", label: "None" }, ...uniqueOptions.map(value => ({ value, label: value }))];
+    return [{ value: "", label: "None" }, ...options.map(value => ({ value, label: value }))];
   }
 
   private _buildDailyExtraAttributeOptions(): Array<{ value: string; label: string }> {
     const disallowed = new Set([
       "datetime",
       "condition",
-      "precipitation_probability",
       "precipitation",
       "temperature",
       "templow",
     ]);
 
-    const fallback = ["humidity", "pressure", "wind_speed", "wind_gust_speed", "wind_bearing", "cloud_coverage", "dew_point", "uv_index", "precipitation_probability"];
+    const options = this._dailyExtraOptions.length
+      ? this._dailyExtraOptions.filter(opt => !disallowed.has(opt))
+      : [];
 
-    if (!this.hass || !this._config?.entity) {
-      return [{ value: "", label: "None" }, ...fallback.map(value => ({ value, label: value }))];
-    }
-
-    const entityState = this.hass.states[this._config.entity];
-    const forecast = (entityState?.attributes as any)?.forecast;
-    const keysSet = new Set<string>();
-
-    if (Array.isArray(forecast)) {
-      forecast.forEach(entry => {
-        if (entry && typeof entry === "object") {
-          Object.keys(entry).forEach(key => {
-            if (!disallowed.has(key)) {
-              keysSet.add(key);
-            }
-          });
-        }
-      });
-    }
-
-    const options = keysSet.size ? Array.from(keysSet) : fallback;
-
-    const uniqueOptions = Array.from(new Set(options));
-
-    return [{ value: "", label: "None" }, ...uniqueOptions.map(value => ({ value, label: value }))];
+    return [{ value: "", label: "None" }, ...options.map(value => ({ value, label: value }))];
   }
 
   private _buildSchemas(): {
@@ -903,6 +883,181 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
     this._config = updated;
     fireEvent(this, "config-changed", { config: updated });
+  }
+
+  private _refreshForecastOptions() {
+    try {
+      if (!this.hass || !this._config?.entity) {
+        this._teardownForecastOptionSubscriptions();
+        if (this._hourlyExtraOptions.length || this._dailyExtraOptions.length) {
+          this._hourlyExtraOptions = [];
+          this._dailyExtraOptions = [];
+        }
+        this._forecastOptionsEntity = undefined;
+        return;
+      }
+
+      const entityId = this._config.entity;
+      if (this._forecastOptionsEntity !== entityId) {
+        this._teardownForecastOptionSubscriptions();
+        this._hourlyExtraOptions = [];
+        this._dailyExtraOptions = [];
+        this._forecastOptionsEntity = entityId;
+      }
+
+      const stateObj = this.hass.states[entityId];
+
+      const supported = this._getSupportedForecastTypes(stateObj as any);
+      const needed = new Set<ModernForecastType>();
+      if (supported.includes("hourly")) {
+        needed.add("hourly");
+      }
+      if (supported.includes("daily") || supported.includes("twice_daily")) {
+        needed.add("daily");
+      }
+      if (!needed.size) {
+        needed.add("daily");
+      }
+
+      (["hourly", "daily"] as ModernForecastType[]).forEach(type => {
+        if (!needed.has(type)) {
+          this._teardownForecastOptionSubscriptions([type]);
+        } else if (!this._forecastOptionSubscriptions[type]) {
+          try {
+            this._forecastOptionSubscriptions[type] = this._subscribeForecast(
+              entityId,
+              type,
+              event => this._handleForecastOptionsEvent(type, event),
+            );
+          } catch (_err) {
+            // ignore subscription errors to avoid breaking the editor
+          }
+        }
+      });
+    } catch (_err) {
+      // Fall back to attribute-based detection to keep the editor alive
+      try {
+        if (this.hass && this._config?.entity) {
+          this._applyForecastOptionsFromAttributes(this.hass.states[this._config.entity] as any);
+        }
+      } catch (_e) {
+        // ignore
+      }
+    }
+  }
+
+  private _handleForecastOptionsEvent(type: ModernForecastType, event: ForecastEvent) {
+    const entries = Array.isArray(event?.forecast) ? event.forecast : [];
+    if (!entries.length) {
+      return;
+    }
+
+    const disallowedHourly = new Set(["datetime", "condition", "precipitation", "temperature", "templow"]);
+    const disallowedDaily = disallowedHourly;
+    const keys = new Set<string>();
+
+    entries.forEach(entry => {
+      if (entry && typeof entry === "object") {
+        Object.keys(entry).forEach(key => {
+          const block = type === "hourly" ? disallowedHourly : disallowedDaily;
+          if (!block.has(key)) {
+            keys.add(key);
+          }
+        });
+      }
+    });
+
+    const next = Array.from(keys).sort((a, b) => a.localeCompare(b));
+    if (type === "hourly") {
+      if (next.join("|") !== this._hourlyExtraOptions.join("|")) {
+        this._hourlyExtraOptions = next;
+      }
+    } else {
+      if (next.join("|") !== this._dailyExtraOptions.join("|")) {
+        this._dailyExtraOptions = next;
+      }
+    }
+  }
+
+  private _applyForecastOptionsFromAttributes(stateObj: any) {
+    if (!stateObj?.attributes?.forecast) {
+      return;
+    }
+    const entries = Array.isArray(stateObj.attributes.forecast) ? stateObj.attributes.forecast : [];
+    if (!entries.length) {
+      return;
+    }
+
+    const disallowed = new Set(["datetime", "condition", "precipitation", "temperature", "templow"]);
+    const keys = new Set<string>();
+    entries.forEach(entry => {
+      if (entry && typeof entry === "object") {
+        Object.keys(entry).forEach(key => {
+          if (!disallowed.has(key)) {
+            keys.add(key);
+          }
+        });
+      }
+    });
+
+    const options = Array.from(keys).sort((a, b) => a.localeCompare(b));
+    if (options.join("|") !== this._hourlyExtraOptions.join("|")) {
+      this._hourlyExtraOptions = options;
+    }
+    if (options.join("|") !== this._dailyExtraOptions.join("|")) {
+      this._dailyExtraOptions = options;
+    }
+  }
+
+  private _getSupportedForecastTypes(stateObj: any): ModernForecastType[] {
+    if (!stateObj?.attributes) {
+      return [];
+    }
+    const supported: ModernForecastType[] = [];
+    const features = stateObj.attributes.supported_features ?? 0;
+    if ((features & WeatherEntityFeature.FORECAST_DAILY) !== 0) {
+      supported.push("daily");
+    }
+    if ((features & WeatherEntityFeature.FORECAST_TWICE_DAILY) !== 0) {
+      supported.push("twice_daily");
+    }
+    if ((features & WeatherEntityFeature.FORECAST_HOURLY) !== 0) {
+      supported.push("hourly");
+    }
+    return supported;
+  }
+
+  private _subscribeForecast(
+    entityId: string,
+    forecastType: ModernForecastType,
+    callback: (event: ForecastEvent) => void,
+  ): Promise<() => void> | undefined {
+    if (!this.hass?.connection) {
+      this._applyForecastOptionsFromAttributes(this.hass.states[entityId] as any);
+      return undefined;
+    }
+
+    return this.hass.connection
+      .subscribeMessage<ForecastEvent>(callback, {
+        type: "weather/subscribe_forecast",
+        forecast_type: forecastType,
+        entity_id: entityId,
+      })
+      .catch(() => undefined);
+  }
+
+  private _teardownForecastOptionSubscriptions(types?: ModernForecastType[]) {
+    const targets = types ?? (["hourly", "daily"] as ModernForecastType[]);
+    targets.forEach(type => {
+      const sub = this._forecastOptionSubscriptions[type];
+      sub?.then(unsub => unsub?.()).catch(() => undefined);
+      delete this._forecastOptionSubscriptions[type];
+    });
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._teardownForecastOptionSubscriptions();
   }
 }
 
