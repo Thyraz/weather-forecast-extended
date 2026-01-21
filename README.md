@@ -14,6 +14,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 - Daily and hourly forecast sections that can be shown together or independently.
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
+- Support to display daily / hourly solar forecast.
 - Configurable header chips that can display entity attributes or value-templates in the header.
 - Optional tap actions and icons on the header pills / chips.
 - Support for 12 or 24 hour time formats and localized date labels using the Home Assistant user settings.
@@ -73,9 +74,14 @@ use_night_header_backgrounds: true
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
 | `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. |
 | `hourly_extra_attribute_unit` | string | none | Optional unit suffix displayed after the hourly extra attribute (e.g., `%` for `cloud_coverage`). |
+| `hourly_extra_attribute_color` | string | none | Optional CSS color used for the hourly extra attribute text (e.g., `#30b3ff`). |
+| `hourly_extra_attribute_dim_below` | number | none | Optional numeric threshold. Values below are displayed with lowered opacity in the hourly extra attribute. |
 | `daily_extra_attribute` | string | none | Optional third text line under the daily precipitation rows. `precipitation_probability` shows colored as blue and with a % sign automatically. |
 | `daily_extra_attribute_unit` | string | none | Optional unit suffix displayed after the daily extra attribute. Disabled/ignored when `daily_extra_attribute` is `precipitation_probability`. |
+| `daily_extra_attribute_color` | string | none | Optional CSS color used for the daily extra attribute text (e.g., `#30b3ff`). |
+| `daily_extra_attribute_dim_below` | number | none | Optional numeric threshold. values below are displayed with lowered opacity in the daily extra attribute. |
 | `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `icon` and `tap_action`. |
+| `solar_forecast_entries` | array | all Energy solar forecasts | Optional list of config entry IDs to include when `solar_forecast` is selected as an extra attribute. Leave empty to include none, or omit to include all Energy dashboard selections. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
 
@@ -125,9 +131,14 @@ type: custom:weather-forecast-extended-card
 entity: weather.home
 hourly_extra_attribute: wind_gust_speed
 hourly_extra_attribute_unit: " km/h"
+hourly_extra_attribute_color: "#30b3ff"
+hourly_extra_attribute_dim_below: 5
 daily_extra_attribute: pressure
 daily_extra_attribute_unit: " hPa"
 ```
+
+### Solar forecast extra attribute
+If you have a solar forecast configured in the Energy dashboard, you can select `solar_forecast` as the extra attribute for the hourly and/or daily forecast. The card uses the Energy API and sums multiple entries when more than one is selected. Values are shown as kWh.
 
 ## Interactions and layout
 - Drag or flick the daily and hourly lists.

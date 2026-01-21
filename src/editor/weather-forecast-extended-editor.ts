@@ -42,13 +42,16 @@ const CHIP_TYPE_OPTIONS: Array<{ value: "attribute" | "template"; label: string 
   { value: "template", label: "Template" },
 ];
 
+const SOLAR_FORECAST_OPTION = "solar_forecast";
+const FORECAST_OPTIONS_CACHE = new Map<string, { hourly: string[]; daily: string[] }>();
+
 type HaFormSelector =
   | { entity: { domain?: string; device_class?: string | string[] } }
   | { boolean: {} }
   | { text: {} }
   | { icon: {} }
   | { ui_action: { actions?: Array<"tap" | "hold" | "double_tap"> } }
-  | { select: { options: Array<{ value: string; label: string }>; custom_value?: boolean } };
+  | { select: { options: Array<{ value: string; label: string }>; custom_value?: boolean; multiple?: boolean } };
 
 type HaFormSchema = {
   name: keyof WeatherForecastExtendedConfig | "entity" | HeaderChipFieldName;
@@ -58,6 +61,19 @@ type HaFormSchema = {
 };
 
 type ToggleName = "show_header" | "hourly_forecast" | "daily_forecast";
+
+type EnergyPreferences = {
+  energy_sources?: Array<{
+    type?: string;
+    config_entry_solar_forecast?: string[] | null;
+  }>;
+};
+
+type ConfigEntryFragment = {
+  entry_id: string;
+  title?: string;
+  domain?: string;
+};
 
 const fireEvent = (node: HTMLElement, type: string, detail?: unknown) => {
   node.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
@@ -82,9 +98,18 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   };
   @state() private _hourlyExtraOptions: string[] = [];
   @state() private _dailyExtraOptions: string[] = [];
+  @state() private _forecastOptionsLoading: Record<ModernForecastType, boolean> = {
+    hourly: false,
+    daily: false,
+    twice_daily: false,
+  };
+  @state() private _solarForecastOptions: Array<{ value: string; label: string }> = [];
+  @state() private _solarForecastEntryIds: string[] = [];
 
   private _forecastOptionSubscriptions: Partial<Record<ModernForecastType, Promise<() => void> | undefined>> = {};
   private _forecastOptionsEntity?: string;
+  private _solarForecastOptionsLoaded = false;
+  private _solarForecastOptionsPromise?: Promise<void>;
 
   static styles = css`
     .editor-section {
@@ -114,7 +139,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
       border-radius: 12px;
       padding: 16px;
-      background: var(--ha-card-background, #fff);
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -149,6 +173,40 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       gap: 12px;
     }
 
+    .color-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-input-row input[type="color"] {
+      padding: 0;
+      width: 40px;
+      height: 32px;
+      border: none;
+      background: none;
+    }
+
+    .color-input-row input[type="text"] {
+      flex: 1 1 120px;
+      min-width: 120px;
+    }
+
+    .clear-button {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+
+      cursor: pointer;
+      font: inherit;
+      color: var(--primary-text-color);
+    }
+
+    .clear-button:hover {
+      background: var(--secondary-background-color, #f5f5f5);
+    }
+
     .coordinate-field {
       display: flex;
       flex: 1 1 120px;
@@ -162,7 +220,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       padding: 6px 8px;
       border-radius: 4px;
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
-      background: var(--ha-card-background, #fff);
       color: var(--primary-text-color);
     }
 
@@ -200,6 +257,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     };
 
     this._refreshForecastOptions();
+    this._refreshSolarForecastOptions(true);
   }
 
   protected render() {
@@ -208,6 +266,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     }
 
     this._refreshForecastOptions();
+    this._ensureSolarForecastOptions();
 
     const {
       general: generalSchema,
@@ -334,6 +393,17 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             </div>
           </div>
           <div class="editor-subsection">
+            <h5 class="section-subtitle">Sunrise & Sunset</h5>
+            <div class="forecast-switch">
+              <span>Show sunrise & sunset</span>
+              <ha-switch
+                name="show_sun_times"
+                .checked=${this._config.show_sun_times ?? false}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
+          </div>
+          <div class="editor-subsection">
             <h5 class="section-subtitle">Forecast spacing</h5>
             <p class="location-description">
               Minimum distance between forecast items in pixels (10px or greater)
@@ -366,14 +436,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             </div>
           </div>
           <div class="editor-subsection">
-            <h5 class="section-subtitle">Hourly forecast options</h5>
-            <ha-form
+            <h5 class="section-subtitle">Solar forecast</h5>
+            <p class="location-description">
+              The forecast needs to be assigned to a solar panel configuration in the Energy dashboard settings. Otherwise it can't be used here.
+            </p>
+            <ha-selector
               .hass=${this.hass}
-              .data=${formData}
-              .schema=${hourlySchema}
-              .computeLabel=${this._computeLabel}
-              @value-changed=${this._handleValueChanged}
-            ></ha-form>
+              .selector=${{ select: { options: this._solarForecastOptions, multiple: true } }}
+              .value=${this._getSolarForecastSelection()}
+              .label=${"Energy solar forecasts"}
+              .required=${false}
+              .disabled=${!this._solarForecastEntryIds.length}
+              @value-changed=${this._handleSolarForecastSelectionChange}
+            ></ha-selector>
+            ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length
+              ? html`<p class="location-description">No Energy solar forecasts configured.</p>`
+              : nothing}
           </div>
           <div class="editor-subsection">
             <h5 class="section-subtitle">Daily forecast options</h5>
@@ -384,16 +462,97 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
               .computeLabel=${this._computeLabel}
               @value-changed=${this._handleValueChanged}
             ></ha-form>
+            ${this._forecastOptionsLoading.daily && !this._dailyExtraOptions.length
+              ? html`<p class="location-description">Loading available weather attributes...</p>`
+              : nothing}
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Extra attribute color</span>
+                <div class="color-input-row">
+                  <input
+                    type="color"
+                    name="daily_extra_attribute_color"
+                    .value=${this._getColorPickerValue(this._config.daily_extra_attribute_color)}
+                    @input=${this._handleColorPickerChange}
+                  />
+                  <input
+                    type="text"
+                    name="daily_extra_attribute_color"
+                    placeholder="#30b3ff"
+                    .value=${String(this._config.daily_extra_attribute_color ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                  <button
+                    class="clear-button"
+                    type="button"
+                    @click=${() => this._clearOptionalField("daily_extra_attribute_color")}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </label>
+              <label class="coordinate-field">
+                <span>Dim values smaller than:</span>
+                <input
+                  type="number"
+                  name="daily_extra_attribute_dim_below"
+                  step="0.1"
+                  placeholder="No threshold"
+                  .value=${String(this._config.daily_extra_attribute_dim_below ?? "")}
+                  @input=${this._handleOptionalNumberInputChange}
+                />
+              </label>
+            </div>
           </div>
           <div class="editor-subsection">
-            <h5 class="section-subtitle">Sunrise & Sunset</h5>
-            <div class="forecast-switch">
-              <span>Show sunrise & sunset</span>
-              <ha-switch
-                name="show_sun_times"
-                .checked=${this._config.show_sun_times ?? false}
-                @change=${this._handleSunToggleChange}
-              ></ha-switch>
+            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${hourlySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
+            ${this._forecastOptionsLoading.hourly && !this._hourlyExtraOptions.length
+              ? html`<p class="location-description">Loading available weather attributes...</p>`
+              : nothing}
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Extra attribute color</span>
+                <div class="color-input-row">
+                  <input
+                    type="color"
+                    name="hourly_extra_attribute_color"
+                    .value=${this._getColorPickerValue(this._config.hourly_extra_attribute_color)}
+                    @input=${this._handleColorPickerChange}
+                  />
+                  <input
+                    type="text"
+                    name="hourly_extra_attribute_color"
+                    placeholder="#30b3ff"
+                    .value=${String(this._config.hourly_extra_attribute_color ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                  <button
+                    class="clear-button"
+                    type="button"
+                    @click=${() => this._clearOptionalField("hourly_extra_attribute_color")}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </label>
+              <label class="coordinate-field">
+                <span>Dim values smaller than:</span>
+                <input
+                  type="number"
+                  name="hourly_extra_attribute_dim_below"
+                  step="0.1"
+                  placeholder="No threshold"
+                  .value=${String(this._config.hourly_extra_attribute_dim_below ?? "")}
+                  @input=${this._handleOptionalNumberInputChange}
+                />
+              </label>
             </div>
           </div>
         </div>
@@ -515,6 +674,55 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     this._updateConfig(update);
   }
 
+  private _handleOptionalNumberInputChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    const key = target.name as keyof WeatherForecastExtendedConfig;
+    const raw = target.value.trim();
+    const update: Partial<WeatherForecastExtendedConfig> = {};
+    if (raw === "") {
+      (update as any)[key] = undefined;
+    } else {
+      const numericValue = Number(raw);
+      (update as any)[key] = Number.isFinite(numericValue) ? numericValue : undefined;
+    }
+    this._updateConfig(update);
+  }
+
+  private _handleColorPickerChange(event: Event) {
+    const target = event.currentTarget as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    const key = target.name as keyof WeatherForecastExtendedConfig;
+    const value = target.value.trim();
+    const update: Partial<WeatherForecastExtendedConfig> = {};
+    (update as any)[key] = value === "" ? undefined : value;
+    this._updateConfig(update);
+  }
+
+  private _clearOptionalField(field: keyof WeatherForecastExtendedConfig) {
+    this._updateConfig({ [field]: undefined } as Partial<WeatherForecastExtendedConfig>);
+  }
+
+  private _getColorPickerValue(value?: string): string {
+    if (!value) {
+      return "#000000";
+    }
+    const trimmed = value.trim();
+    const hexMatch = /^#([0-9a-fA-F]{3}){1,2}$/.test(trimmed);
+    if (!hexMatch) {
+      return "#000000";
+    }
+    if (trimmed.length === 4) {
+      const [r, g, b] = trimmed.slice(1).split("");
+      return `#${r}${r}${g}${g}${b}${b}`;
+    }
+    return trimmed;
+  }
+
   private _handleHeaderActionChange(
     event: CustomEvent<{ value?: unknown }>,
     field: "header_tap_action_temperature" | "header_tap_action_condition",
@@ -525,6 +733,33 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       [field]: value || undefined,
     };
     this._updateConfig(update);
+  }
+
+  private _handleSolarForecastSelectionChange(event: CustomEvent<{ value?: unknown }>) {
+    event.stopPropagation();
+    const raw = event.detail?.value;
+    const selection = Array.isArray(raw) ? raw.filter(item => typeof item === "string") : [];
+    const available = this._solarForecastEntryIds;
+    const normalized = selection.filter(entryId => available.includes(entryId));
+    const update: Partial<WeatherForecastExtendedConfig> = {};
+
+    if (!normalized.length) {
+      update.solar_forecast_entries = [];
+    } else if (normalized.length === available.length) {
+      update.solar_forecast_entries = undefined;
+    } else {
+      update.solar_forecast_entries = normalized;
+    }
+
+    this._updateConfig(update);
+  }
+
+  private _getSolarForecastSelection(): string[] {
+    if (this._config?.solar_forecast_entries) {
+      return this._config.solar_forecast_entries;
+    }
+
+    return this._solarForecastEntryIds;
   }
 
   private _createFormData(): EditorFormData {
@@ -561,6 +796,77 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     });
 
     return formData;
+  }
+
+  private _ensureSolarForecastOptions() {
+    this._refreshSolarForecastOptions(false);
+  }
+
+  private _refreshSolarForecastOptions(force: boolean) {
+    if (!this.hass || this._solarForecastOptionsPromise) {
+      return;
+    }
+    if (!force && this._solarForecastOptionsLoaded) {
+      return;
+    }
+
+    this._solarForecastOptionsPromise = this._fetchSolarForecastOptions()
+      .finally(() => {
+        this._solarForecastOptionsPromise = undefined;
+      });
+  }
+
+  private async _fetchSolarForecastOptions() {
+    try {
+      const prefs = await this.hass.callWS<EnergyPreferences>({ type: "energy/get_prefs" });
+      const entryIds = this._extractSolarForecastEntries(prefs);
+      const entries = await this.hass.callWS<ConfigEntryFragment[]>({ type: "config_entries/get" });
+      const entryMap = new Map(entries.map(entry => [entry.entry_id, entry]));
+      const options = entryIds.map(entryId => {
+        const entry = entryMap.get(entryId);
+        const title = entry?.title?.trim();
+        const domain = entry?.domain?.trim();
+        const labelParts = [];
+        if (title) {
+          labelParts.push(title);
+        }
+        if (domain) {
+          labelParts.push(domain);
+        }
+        const label = labelParts.length ? labelParts.join(" - ") : entryId;
+        return { value: entryId, label };
+      });
+
+      this._solarForecastOptions = options;
+      this._solarForecastEntryIds = entryIds;
+    } catch (_err) {
+      this._solarForecastOptions = [];
+      this._solarForecastEntryIds = [];
+    }
+
+    this._solarForecastOptionsLoaded = true;
+  }
+
+  private _extractSolarForecastEntries(prefs?: EnergyPreferences): string[] {
+    const energySources = prefs?.energy_sources ?? [];
+    const entries = new Set<string>();
+
+    energySources.forEach(source => {
+      if (source?.type !== "solar") {
+        return;
+      }
+      const configured = source.config_entry_solar_forecast;
+      if (!Array.isArray(configured)) {
+        return;
+      }
+      configured.forEach(entryId => {
+        if (typeof entryId === "string" && entryId.trim().length) {
+          entries.add(entryId);
+        }
+      });
+    });
+
+    return Array.from(entries);
   }
 
   private _extractHeaderChips(formValue: EditorFormData): HeaderChip[] {
@@ -643,7 +949,15 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ? this._hourlyExtraOptions.filter(opt => !disallowed.has(opt))
       : [];
 
-    return [{ value: "", label: "None" }, ...options.map(value => ({ value, label: value }))];
+    const solarOption = this._solarForecastEntryIds.length
+      ? [{ value: SOLAR_FORECAST_OPTION, label: "Solar forecast" }]
+      : [];
+
+    return [
+      { value: "", label: "None" },
+      ...solarOption,
+      ...options.map(value => ({ value, label: value })),
+    ];
   }
 
   private _buildDailyExtraAttributeOptions(): Array<{ value: string; label: string }> {
@@ -659,7 +973,15 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ? this._dailyExtraOptions.filter(opt => !disallowed.has(opt))
       : [];
 
-    return [{ value: "", label: "None" }, ...options.map(value => ({ value, label: value }))];
+    const solarOption = this._solarForecastEntryIds.length
+      ? [{ value: SOLAR_FORECAST_OPTION, label: "Solar forecast" }]
+      : [];
+
+    return [
+      { value: "", label: "None" },
+      ...solarOption,
+      ...options.map(value => ({ value, label: value })),
+    ];
   }
 
   private _buildSchemas(): {
@@ -679,7 +1001,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       },
     ];
 
-    const toggleNames: ToggleName[] = ["show_header", "hourly_forecast", "daily_forecast"];
+    const toggleNames: ToggleName[] = ["show_header", "daily_forecast", "hourly_forecast"];
     const layoutSchema: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
 
     const config = this._config;
@@ -874,6 +1196,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       type: "custom:weather-forecast-extended-card",
     };
 
+    if ("solar_forecast_entries" in changes && changes.solar_forecast_entries === undefined) {
+      delete (updated as Partial<WeatherForecastExtendedConfig>).solar_forecast_entries;
+    }
+
     const normalizedChips = this._normalizeHeaderChips(updated);
     updated.header_chips = normalizedChips;
     updated.header_attributes = normalizedChips
@@ -893,6 +1219,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           this._hourlyExtraOptions = [];
           this._dailyExtraOptions = [];
         }
+        this._forecastOptionsLoading = { hourly: false, daily: false, twice_daily: false };
         this._forecastOptionsEntity = undefined;
         return;
       }
@@ -900,8 +1227,14 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const entityId = this._config.entity;
       if (this._forecastOptionsEntity !== entityId) {
         this._teardownForecastOptionSubscriptions();
-        this._hourlyExtraOptions = [];
-        this._dailyExtraOptions = [];
+        const cached = FORECAST_OPTIONS_CACHE.get(entityId);
+        if (cached) {
+          this._hourlyExtraOptions = cached.hourly;
+          this._dailyExtraOptions = cached.daily;
+          this._forecastOptionsLoading = { hourly: false, daily: false, twice_daily: false };
+        } else {
+          this._forecastOptionsLoading = { hourly: false, daily: false, twice_daily: false };
+        }
         this._forecastOptionsEntity = entityId;
       }
 
@@ -922,6 +1255,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       (["hourly", "daily"] as ModernForecastType[]).forEach(type => {
         if (!needed.has(type)) {
           this._teardownForecastOptionSubscriptions([type]);
+          this._forecastOptionsLoading = { ...this._forecastOptionsLoading, [type]: false };
         } else if (!this._forecastOptionSubscriptions[type]) {
           try {
             this._forecastOptionSubscriptions[type] = this._subscribeForecast(
@@ -929,9 +1263,16 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
               type,
               event => this._handleForecastOptionsEvent(type, event),
             );
+            const hasOptions = type === "hourly" ? this._hourlyExtraOptions.length : this._dailyExtraOptions.length;
+            if (!hasOptions) {
+              this._forecastOptionsLoading = { ...this._forecastOptionsLoading, [type]: true };
+            }
           } catch (_err) {
             // ignore subscription errors to avoid breaking the editor
           }
+        } else {
+          const hasOptions = type === "hourly" ? this._hourlyExtraOptions.length : this._dailyExtraOptions.length;
+          this._forecastOptionsLoading = { ...this._forecastOptionsLoading, [type]: !hasOptions };
         }
       });
     } catch (_err) {
@@ -972,11 +1313,15 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       if (next.join("|") !== this._hourlyExtraOptions.join("|")) {
         this._hourlyExtraOptions = next;
       }
+      this._forecastOptionsLoading = { ...this._forecastOptionsLoading, hourly: false };
     } else {
       if (next.join("|") !== this._dailyExtraOptions.join("|")) {
         this._dailyExtraOptions = next;
       }
+      this._forecastOptionsLoading = { ...this._forecastOptionsLoading, daily: false };
     }
+
+    this._cacheForecastOptions();
   }
 
   private _applyForecastOptionsFromAttributes(stateObj: any) {
@@ -1007,6 +1352,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     if (options.join("|") !== this._dailyExtraOptions.join("|")) {
       this._dailyExtraOptions = options;
     }
+    this._forecastOptionsLoading = { ...this._forecastOptionsLoading, hourly: false, daily: false };
+
+    this._cacheForecastOptions();
+  }
+
+  private _cacheForecastOptions() {
+    if (!this._forecastOptionsEntity) {
+      return;
+    }
+    if (!this._hourlyExtraOptions.length && !this._dailyExtraOptions.length) {
+      return;
+    }
+    FORECAST_OPTIONS_CACHE.set(this._forecastOptionsEntity, {
+      hourly: [...this._hourlyExtraOptions],
+      daily: [...this._dailyExtraOptions],
+    });
   }
 
   private _getSupportedForecastTypes(stateObj: any): ModernForecastType[] {
@@ -1052,6 +1413,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const sub = this._forecastOptionSubscriptions[type];
       sub?.then(unsub => unsub?.()).catch(() => undefined);
       delete this._forecastOptionSubscriptions[type];
+      this._forecastOptionsLoading = { ...this._forecastOptionsLoading, [type]: false };
     });
   }
 

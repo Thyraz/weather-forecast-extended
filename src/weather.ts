@@ -45,6 +45,7 @@ export interface ForecastAttribute {
   cloud_coverage?: number;
   dew_point?: number;
   uv_index?: number;
+  solar_forecast?: number;
 }
 
 interface WeatherEntityAttributes extends HassEntityAttributeBase {

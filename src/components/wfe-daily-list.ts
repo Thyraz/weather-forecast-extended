@@ -1,4 +1,5 @@
 import { LitElement, html, nothing, TemplateResult } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property } from "lit/decorators.js";
 import type { ForecastAttribute } from "../weather";
 import { formatDateDayTwoDigit, formatDateWeekdayShort, isNewDay } from "../date-time";
@@ -17,6 +18,8 @@ export class WFEDailyList extends LitElement {
   @property({ attribute: false }) max?: number;
   @property({ attribute: false }) extraAttribute?: string;
   @property({ attribute: false }) extraAttributeUnit?: string;
+  @property({ attribute: false }) extraAttributeColor?: string;
+  @property({ attribute: false }) extraAttributeDimBelow?: number;
 
   protected createRenderRoot() {
     // Render in light DOM so parent CSS applies
@@ -158,11 +161,20 @@ export class WFEDailyList extends LitElement {
       if (!Number.isFinite(valueNum)) {
         return nothing;
       }
+      const dimBelow = this._normalizeDimBelow(this.extraAttributeDimBelow);
+      const isDimmed = dimBelow !== undefined && valueNum < dimBelow;
       const classes = ["daily-extra", "precipitationprobability"];
       if (valueNum > 30) {
         classes.push("active");
       }
-      return html`<div class="${classes.join(" ")}" style="display: block;">${valueNum}%</div>`;
+      if (isDimmed) {
+        classes.push("dimmed");
+      }
+      const color = this.extraAttributeColor?.trim();
+      const style = color
+        ? styleMap({ color, display: "block", opacity: isDimmed ? "0.3" : "1" })
+        : "display: block;";
+      return html`<div class=${classes.join(" ")} style=${style}>${valueNum}%</div>`;
     }
 
     if (typeof rawValue === "number") {
@@ -186,7 +198,31 @@ export class WFEDailyList extends LitElement {
     const unitRaw = typeof this.extraAttributeUnit === "string" ? this.extraAttributeUnit : "";
     const unit = unitRaw.trim().length ? unitRaw : "";
 
-    return html`<div class="daily-extra">${display}${unit}</div>`;
+    const dimBelow = this._normalizeDimBelow(this.extraAttributeDimBelow);
+    const numericValue = this._parseNumericValue(rawValue);
+    const isDimmed = dimBelow !== undefined && numericValue !== undefined && numericValue < dimBelow;
+    const classes = ["daily-extra"];
+    if (isDimmed) {
+      classes.push("dimmed");
+    }
+    const color = this.extraAttributeColor?.trim();
+    const style = color
+      ? styleMap({
+          color,
+          opacity: isDimmed ? "0.3" : "1",
+        })
+      : nothing;
+
+    return html`<div class=${classes.join(" ")} style=${style}>${display}${unit}</div>`;
+  }
+
+  private _normalizeDimBelow(value?: number): number | undefined {
+    return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  }
+
+  private _parseNumericValue(rawValue: unknown): number | undefined {
+    const numericValue = typeof rawValue === "number" ? rawValue : Number(rawValue);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
   }
 
   private _computePrecipitationScale(minScale: number, maxScale: number): number | undefined {

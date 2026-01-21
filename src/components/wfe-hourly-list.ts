@@ -1,5 +1,6 @@
 import type { PropertyValues } from "lit";
 import { LitElement, html, nothing, TemplateResult } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property } from "lit/decorators.js";
 import SunCalc from "suncalc";
 import type { SunCoordinates, SunEventType, SunTimesByDay } from "../types";
@@ -20,6 +21,8 @@ export class WFEHourlyList extends LitElement {
   @property({ attribute: false }) sunCoordinates?: SunCoordinates;
   @property({ attribute: false }) extraAttribute?: string;
   @property({ attribute: false }) extraAttributeUnit?: string;
+  @property({ attribute: false }) extraAttributeColor?: string;
+  @property({ attribute: false }) extraAttributeDimBelow?: number;
   private _resizeObserver?: ResizeObserver;
   private _sunTimesByDay: SunTimesByDay = {};
 
@@ -252,7 +255,31 @@ export class WFEHourlyList extends LitElement {
     const unitRaw = typeof this.extraAttributeUnit === "string" ? this.extraAttributeUnit : "";
     const unit = unitRaw.trim().length ? unitRaw : "";
 
-    return html`<div class="hourly-extra">${display}${unit}</div>`;
+    const dimBelow = this._normalizeDimBelow(this.extraAttributeDimBelow);
+    const numericValue = this._parseNumericValue(rawValue);
+    const isDimmed = dimBelow !== undefined && numericValue !== undefined && numericValue < dimBelow;
+    const classes = ["hourly-extra"];
+    if (isDimmed) {
+      classes.push("dimmed");
+    }
+    const color = this.extraAttributeColor?.trim();
+    const style = color
+      ? styleMap({
+          color,
+          opacity: isDimmed ? "0.3" : "1",
+        })
+      : nothing;
+
+    return html`<div class=${classes.join(" ")} style=${style}>${display}${unit}</div>`;
+  }
+
+  private _normalizeDimBelow(value?: number): number | undefined {
+    return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  }
+
+  private _parseNumericValue(rawValue: unknown): number | undefined {
+    const numericValue = typeof rawValue === "number" ? rawValue : Number(rawValue);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
   }
 
   private _computePrecipitationScale(minScale: number, maxScale: number): number | undefined {

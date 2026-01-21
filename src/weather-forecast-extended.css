@@ -453,6 +453,10 @@ ha-card {
   white-space: nowrap;
 }
 
+.forecast .hourly-extra.dimmed {
+  opacity: 0.3;
+}
+
 .forecast .precipitation {
   --precipitation-fill: 0%;
   --wfe-precipitation-indicator-color: var(--state-climate-cool-color);
@@ -505,6 +509,10 @@ ha-card {
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.forecast .daily-extra.dimmed {
+  opacity: 0.3;
 }
 
 .forecast.daily .daily-extra.precipitationprobability {

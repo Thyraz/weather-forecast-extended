@@ -3,7 +3,7 @@ import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { state } from "lit/decorators";
-import type { ForecastEvent, WeatherEntity } from "./weather";
+import type { ForecastAttribute, ForecastEvent, WeatherEntity } from "./weather";
 import { subscribeForecast } from "./weather";
 import { handleAction, hasAction } from "custom-card-helpers";
 import type { ActionConfig, HomeAssistant } from "custom-card-helpers";
@@ -51,6 +51,19 @@ type ExtendedHomeAssistant = HomeAssistant & {
   formatEntityAttributeValue?: HassFormatEntityAttributeValue;
 };
 
+type EnergyPreferences = {
+  energy_sources?: Array<{
+    type?: string;
+    config_entry_solar_forecast?: string[] | null;
+  }>;
+};
+
+type EnergySolarForecast = {
+  wh_hours?: Record<string, number | string>;
+};
+
+const SOLAR_FORECAST_ATTRIBUTE = "solar_forecast";
+
 const isAttributeHeaderChip = (chip: HeaderChip): chip is AttributeHeaderChip =>
   chip.type === "attribute";
 
@@ -71,6 +84,8 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _dailyGap?: number;
   @state() private _hourlyGap?: number;
   @state() private _templateChipValues: Record<number, { display: string; missing: boolean }> = {};
+  @state() private _solarForecastByHour: Record<string, number> = {};
+  @state() private _solarForecastByDay: Record<string, number> = {};
 
   // private property
   private _subscriptions: SubscriptionMap = { hourly: undefined, daily: undefined };
@@ -86,6 +101,7 @@ export class WeatherForecastExtended extends LitElement {
   private _momentumElement: Partial<Record<ForecastType, HTMLElement>> = {};
   private _sunCoordinateCacheKey?: string;
   private _sunCoordinateCache?: SunCoordinates;
+  private _solarForecastRequestId = 0;
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
@@ -96,6 +112,10 @@ export class WeatherForecastExtended extends LitElement {
       .filter(attribute => typeof attribute === "string" && attribute.trim().length > 0);
     const normalizedDailyMinGap = this._normalizeMinGapValue(config.daily_min_gap);
     const normalizedHourlyMinGap = this._normalizeMinGapValue(config.hourly_min_gap);
+    const normalizedHourlyDimBelow = this._normalizeOptionalNumber(config.hourly_extra_attribute_dim_below);
+    const normalizedDailyDimBelow = this._normalizeOptionalNumber(config.daily_extra_attribute_dim_below);
+    const normalizedHourlyColor = this._normalizeOptionalText(config.hourly_extra_attribute_color);
+    const normalizedDailyColor = this._normalizeOptionalText(config.daily_extra_attribute_color);
 
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
@@ -113,8 +133,15 @@ export class WeatherForecastExtended extends LitElement {
       hourly_min_gap: normalizedHourlyMinGap,
       hourly_extra_attribute: config.hourly_extra_attribute,
       hourly_extra_attribute_unit: config.hourly_extra_attribute_unit,
+      hourly_extra_attribute_color: normalizedHourlyColor,
+      hourly_extra_attribute_dim_below: normalizedHourlyDimBelow,
       daily_extra_attribute: config.daily_extra_attribute,
       daily_extra_attribute_unit: config.daily_extra_attribute_unit,
+      daily_extra_attribute_color: normalizedDailyColor,
+      daily_extra_attribute_dim_below: normalizedDailyDimBelow,
+      solar_forecast_entries: Array.isArray(config.solar_forecast_entries)
+        ? config.solar_forecast_entries
+        : undefined,
     };
 
     this._config = defaults;
@@ -197,6 +224,22 @@ export class WeatherForecastExtended extends LitElement {
     }
     const clamped = Math.max(10, numericValue);
     return Math.round(clamped);
+  }
+
+  private _normalizeOptionalNumber(value?: number | string): number | undefined {
+    if (value === null || typeof value === "undefined") {
+      return undefined;
+    }
+    const numericValue = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
+  }
+
+  private _normalizeOptionalText(value?: string): string | undefined {
+    if (value === null || typeof value === "undefined") {
+      return undefined;
+    }
+    const trimmed = String(value).trim();
+    return trimmed.length ? trimmed : undefined;
   }
 
   private _getHeaderChips(): HeaderChip[] {
@@ -540,6 +583,10 @@ export class WeatherForecastExtended extends LitElement {
       this._subscribeForecastEvents();
     }
 
+    if (changedProps.has("_config") || forecastHourlyChanged || forecastDailyChanged) {
+      this._refreshSolarForecastData();
+    }
+
     const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
     const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
     const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
@@ -599,8 +646,10 @@ export class WeatherForecastExtended extends LitElement {
     const showHeader = this._config.show_header !== false;
     const showForecasts = dailyEnabled || hourlyEnabled;
     const showForecastDivider = dailyEnabled && hourlyEnabled;
-    const dailyForecast = this._forecastDailyEvent?.forecast ?? [];
-    const hourlyForecast = this._forecastHourlyEvent?.forecast ?? [];
+    const dailyForecastRaw = this._forecastDailyEvent?.forecast ?? [];
+    const hourlyForecastRaw = this._forecastHourlyEvent?.forecast ?? [];
+    const dailyForecast = this._applySolarForecastToForecast(dailyForecastRaw, "daily");
+    const hourlyForecast = this._applySolarForecastToForecast(hourlyForecastRaw, "hourly");
     const sunCoordinates = this._getLocationCoordinates();
     const showSunTimes = Boolean(this._config.show_sun_times && sunCoordinates && hourlyEnabled);
     const orientation = this._config.orientation ?? "vertical";
@@ -760,6 +809,8 @@ export class WeatherForecastExtended extends LitElement {
                         .max=${this._dailyMaxTemp}
                         .extraAttribute=${this._config.daily_extra_attribute}
                         .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
+                        .extraAttributeColor=${this._config.daily_extra_attribute_color}
+                        .extraAttributeDimBelow=${this._config.daily_extra_attribute_dim_below}
                         @wfe-daily-selected=${this._handleDailySelected}
                       ></wfe-daily-list>
                     </div>
@@ -785,6 +836,8 @@ export class WeatherForecastExtended extends LitElement {
                         .sunCoordinates=${sunCoordinates}
                         .extraAttribute=${this._config.hourly_extra_attribute}
                         .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
+                        .extraAttributeColor=${this._config.hourly_extra_attribute_color}
+                        .extraAttributeDimBelow=${this._config.hourly_extra_attribute_dim_below}
                       ></wfe-hourly-list>
                     </div>
                   </div>
@@ -959,6 +1012,177 @@ export class WeatherForecastExtended extends LitElement {
     this._hourlyMaxTemp = hourlyMax;
     this._dailyMinTemp = dailyMin;
     this._dailyMaxTemp = dailyMax;
+  }
+
+  private _needsSolarForecast(): boolean {
+    if (!this._config) {
+      return false;
+    }
+    return (
+      this._config.hourly_extra_attribute === SOLAR_FORECAST_ATTRIBUTE ||
+      this._config.daily_extra_attribute === SOLAR_FORECAST_ATTRIBUTE
+    );
+  }
+
+  private _refreshSolarForecastData() {
+    if (!this._needsSolarForecast()) {
+      if (Object.keys(this._solarForecastByHour).length || Object.keys(this._solarForecastByDay).length) {
+        this._solarForecastByHour = {};
+        this._solarForecastByDay = {};
+      }
+      return;
+    }
+
+    if (!this._hass?.callWS) {
+      return;
+    }
+
+    const requestId = ++this._solarForecastRequestId;
+    this._loadSolarForecastData(requestId);
+  }
+
+  private async _loadSolarForecastData(requestId: number) {
+    try {
+      const prefs = await this._hass!.callWS<EnergyPreferences>({ type: "energy/get_prefs" });
+      if (requestId !== this._solarForecastRequestId) {
+        return;
+      }
+
+      const availableEntries = this._extractSolarForecastEntries(prefs);
+      const selectedEntries = this._selectSolarForecastEntries(availableEntries);
+
+      if (!selectedEntries.length) {
+        this._solarForecastByHour = {};
+        this._solarForecastByDay = {};
+        return;
+      }
+
+      const forecasts = await this._hass!.callWS<Record<string, EnergySolarForecast>>({
+        type: "energy/solar_forecast",
+      });
+      if (requestId !== this._solarForecastRequestId) {
+        return;
+      }
+
+      const { hourly, daily } = this._buildSolarForecastMaps(forecasts, selectedEntries);
+      this._solarForecastByHour = hourly;
+      this._solarForecastByDay = daily;
+    } catch (_err) {
+      this._solarForecastByHour = {};
+      this._solarForecastByDay = {};
+    }
+  }
+
+  private _extractSolarForecastEntries(prefs?: EnergyPreferences): string[] {
+    const energySources = prefs?.energy_sources ?? [];
+    const entries = new Set<string>();
+
+    energySources.forEach(source => {
+      if (source?.type !== "solar") {
+        return;
+      }
+      const configured = source.config_entry_solar_forecast;
+      if (!Array.isArray(configured)) {
+        return;
+      }
+      configured.forEach(entryId => {
+        if (typeof entryId === "string" && entryId.trim().length) {
+          entries.add(entryId);
+        }
+      });
+    });
+
+    return Array.from(entries);
+  }
+
+  private _selectSolarForecastEntries(availableEntries: string[]): string[] {
+    if (!this._config) {
+      return [];
+    }
+
+    if (this._config.solar_forecast_entries) {
+      if (!this._config.solar_forecast_entries.length) {
+        return [];
+      }
+      const selected = new Set(this._config.solar_forecast_entries);
+      return availableEntries.filter(entryId => selected.has(entryId));
+    }
+
+    return availableEntries;
+  }
+
+  private _buildSolarForecastMaps(
+    forecasts: Record<string, EnergySolarForecast>,
+    selectedEntries: string[],
+  ): { hourly: Record<string, number>; daily: Record<string, number> } {
+    const hourly: Record<string, number> = {};
+    const daily: Record<string, number> = {};
+
+    selectedEntries.forEach(entryId => {
+      const data = forecasts?.[entryId];
+      const whHours = data?.wh_hours ?? {};
+      Object.entries(whHours).forEach(([timestamp, rawValue]) => {
+        const valueWh = typeof rawValue === "number" ? rawValue : Number(rawValue);
+        if (!Number.isFinite(valueWh)) {
+          return;
+        }
+
+        const date = new Date(timestamp);
+        if (!Number.isFinite(date.getTime())) {
+          return;
+        }
+
+        const valueKwh = valueWh / 1000;
+        const hourKey = this._formatSolarHourKey(date);
+        const dayKey = this._formatSolarDayKey(date);
+
+        hourly[hourKey] = (hourly[hourKey] ?? 0) + valueKwh;
+        daily[dayKey] = (daily[dayKey] ?? 0) + valueKwh;
+      });
+    });
+
+    return { hourly, daily };
+  }
+
+  private _applySolarForecastToForecast(
+    forecast: ForecastAttribute[],
+    type: ForecastType,
+  ): ForecastAttribute[] {
+    const source = type === "hourly" ? this._solarForecastByHour : this._solarForecastByDay;
+    if (!forecast?.length || !Object.keys(source).length) {
+      return forecast;
+    }
+
+    return forecast.map(item => {
+      if (!item?.datetime) {
+        return item;
+      }
+      const date = new Date(item.datetime);
+      if (!Number.isFinite(date.getTime())) {
+        return item;
+      }
+      const key = type === "hourly" ? this._formatSolarHourKey(date) : this._formatSolarDayKey(date);
+      const value = source[key];
+      if (value === undefined) {
+        return item;
+      }
+      return { ...item, solar_forecast: value };
+    });
+  }
+
+  private _formatSolarHourKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hour}`;
+  }
+
+  private _formatSolarDayKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   private _getLocationCoordinates(): SunCoordinates | undefined {
