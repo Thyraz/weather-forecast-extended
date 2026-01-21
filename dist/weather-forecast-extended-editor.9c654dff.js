@@ -45,6 +45,8 @@ const $a37b5b928a2fc5d8$var$CHIP_TYPE_OPTIONS = [
         label: "Template"
     }
 ];
+const $a37b5b928a2fc5d8$var$SOLAR_FORECAST_OPTION = "solar_forecast";
+const $a37b5b928a2fc5d8$var$FORECAST_OPTIONS_CACHE = new Map();
 const $a37b5b928a2fc5d8$var$fireEvent = (node, type, detail)=>{
     node.dispatchEvent(new CustomEvent(type, {
         detail: detail,
@@ -87,7 +89,6 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
       border-radius: 12px;
       padding: 16px;
-      background: var(--ha-card-background, #fff);
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -122,6 +123,40 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       gap: 12px;
     }
 
+    .color-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-input-row input[type="color"] {
+      padding: 0;
+      width: 40px;
+      height: 32px;
+      border: none;
+      background: none;
+    }
+
+    .color-input-row input[type="text"] {
+      flex: 1 1 120px;
+      min-width: 120px;
+    }
+
+    .clear-button {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+
+      cursor: pointer;
+      font: inherit;
+      color: var(--primary-text-color);
+    }
+
+    .clear-button:hover {
+      background: var(--secondary-background-color, #f5f5f5);
+    }
+
     .coordinate-field {
       display: flex;
       flex: 1 1 120px;
@@ -135,7 +170,6 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       padding: 6px 8px;
       border-radius: 4px;
       border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
-      background: var(--ha-card-background, #fff);
       color: var(--primary-text-color);
     }
 
@@ -169,10 +203,12 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             header_attributes: normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute)
         };
         this._refreshForecastOptions();
+        this._refreshSolarForecastOptions(true);
     }
     render() {
         if (!this.hass || !this._config) return (0, $j0ZcV.html)``;
         this._refreshForecastOptions();
+        this._ensureSolarForecastOptions();
         const { general: generalSchema , layout: layoutSchema , header: headerSchema , chips: chipSchema , hourly: hourlySchema , daily: dailySchema  } = this._buildSchemas();
         const formData = this._createFormData();
         return (0, $j0ZcV.html)`
@@ -290,6 +326,17 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             </div>
           </div>
           <div class="editor-subsection">
+            <h5 class="section-subtitle">Sunrise & Sunset</h5>
+            <div class="forecast-switch">
+              <span>Show sunrise & sunset</span>
+              <ha-switch
+                name="show_sun_times"
+                .checked=${this._config.show_sun_times ?? false}
+                @change=${this._handleSunToggleChange}
+              ></ha-switch>
+            </div>
+          </div>
+          <div class="editor-subsection">
             <h5 class="section-subtitle">Forecast spacing</h5>
             <p class="location-description">
               Minimum distance between forecast items in pixels (10px or greater)
@@ -322,14 +369,25 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             </div>
           </div>
           <div class="editor-subsection">
-            <h5 class="section-subtitle">Hourly forecast options</h5>
-            <ha-form
+            <h5 class="section-subtitle">Solar forecast</h5>
+            <p class="location-description">
+              The forecast needs to be assigned to a solar panel configuration in the Energy dashboard settings. Otherwise it can't be used here.
+            </p>
+            <ha-selector
               .hass=${this.hass}
-              .data=${formData}
-              .schema=${hourlySchema}
-              .computeLabel=${this._computeLabel}
-              @value-changed=${this._handleValueChanged}
-            ></ha-form>
+              .selector=${{
+            select: {
+                options: this._solarForecastOptions,
+                multiple: true
+            }
+        }}
+              .value=${this._getSolarForecastSelection()}
+              .label=${"Energy solar forecasts"}
+              .required=${false}
+              .disabled=${!this._solarForecastEntryIds.length}
+              @value-changed=${this._handleSolarForecastSelectionChange}
+            ></ha-selector>
+            ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length ? (0, $j0ZcV.html)`<p class="location-description">No Energy solar forecasts configured.</p>` : (0, $j0ZcV.nothing)}
           </div>
           <div class="editor-subsection">
             <h5 class="section-subtitle">Daily forecast options</h5>
@@ -340,16 +398,93 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
               .computeLabel=${this._computeLabel}
               @value-changed=${this._handleValueChanged}
             ></ha-form>
+            ${this._forecastOptionsLoading.daily && !this._dailyExtraOptions.length ? (0, $j0ZcV.html)`<p class="location-description">Loading available weather attributes...</p>` : (0, $j0ZcV.nothing)}
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Extra attribute color</span>
+                <div class="color-input-row">
+                  <input
+                    type="color"
+                    name="daily_extra_attribute_color"
+                    .value=${this._getColorPickerValue(this._config.daily_extra_attribute_color)}
+                    @input=${this._handleColorPickerChange}
+                  />
+                  <input
+                    type="text"
+                    name="daily_extra_attribute_color"
+                    placeholder="#30b3ff"
+                    .value=${String(this._config.daily_extra_attribute_color ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                  <button
+                    class="clear-button"
+                    type="button"
+                    @click=${()=>this._clearOptionalField("daily_extra_attribute_color")}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </label>
+              <label class="coordinate-field">
+                <span>Dim values smaller than:</span>
+                <input
+                  type="number"
+                  name="daily_extra_attribute_dim_below"
+                  step="0.1"
+                  placeholder="No threshold"
+                  .value=${String(this._config.daily_extra_attribute_dim_below ?? "")}
+                  @input=${this._handleOptionalNumberInputChange}
+                />
+              </label>
+            </div>
           </div>
           <div class="editor-subsection">
-            <h5 class="section-subtitle">Sunrise & Sunset</h5>
-            <div class="forecast-switch">
-              <span>Show sunrise & sunset</span>
-              <ha-switch
-                name="show_sun_times"
-                .checked=${this._config.show_sun_times ?? false}
-                @change=${this._handleSunToggleChange}
-              ></ha-switch>
+            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${hourlySchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
+            ${this._forecastOptionsLoading.hourly && !this._hourlyExtraOptions.length ? (0, $j0ZcV.html)`<p class="location-description">Loading available weather attributes...</p>` : (0, $j0ZcV.nothing)}
+            <div class="sun-coordinates">
+              <label class="coordinate-field">
+                <span>Extra attribute color</span>
+                <div class="color-input-row">
+                  <input
+                    type="color"
+                    name="hourly_extra_attribute_color"
+                    .value=${this._getColorPickerValue(this._config.hourly_extra_attribute_color)}
+                    @input=${this._handleColorPickerChange}
+                  />
+                  <input
+                    type="text"
+                    name="hourly_extra_attribute_color"
+                    placeholder="#30b3ff"
+                    .value=${String(this._config.hourly_extra_attribute_color ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                  <button
+                    class="clear-button"
+                    type="button"
+                    @click=${()=>this._clearOptionalField("hourly_extra_attribute_color")}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </label>
+              <label class="coordinate-field">
+                <span>Dim values smaller than:</span>
+                <input
+                  type="number"
+                  name="hourly_extra_attribute_dim_below"
+                  step="0.1"
+                  placeholder="No threshold"
+                  .value=${String(this._config.hourly_extra_attribute_dim_below ?? "")}
+                  @input=${this._handleOptionalNumberInputChange}
+                />
+              </label>
             </div>
           </div>
         </div>
@@ -402,6 +537,44 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         update[key] = value === "" ? undefined : value;
         this._updateConfig(update);
     }
+    _handleOptionalNumberInputChange(event) {
+        const target = event.currentTarget;
+        if (!target) return;
+        const key = target.name;
+        const raw = target.value.trim();
+        const update = {};
+        if (raw === "") update[key] = undefined;
+        else {
+            const numericValue = Number(raw);
+            update[key] = Number.isFinite(numericValue) ? numericValue : undefined;
+        }
+        this._updateConfig(update);
+    }
+    _handleColorPickerChange(event) {
+        const target = event.currentTarget;
+        if (!target) return;
+        const key = target.name;
+        const value = target.value.trim();
+        const update = {};
+        update[key] = value === "" ? undefined : value;
+        this._updateConfig(update);
+    }
+    _clearOptionalField(field) {
+        this._updateConfig({
+            [field]: undefined
+        });
+    }
+    _getColorPickerValue(value) {
+        if (!value) return "#000000";
+        const trimmed = value.trim();
+        const hexMatch = /^#([0-9a-fA-F]{3}){1,2}$/.test(trimmed);
+        if (!hexMatch) return "#000000";
+        if (trimmed.length === 4) {
+            const [r, g, b] = trimmed.slice(1).split("");
+            return `#${r}${r}${g}${g}${b}${b}`;
+        }
+        return trimmed;
+    }
     _handleHeaderActionChange(event, field) {
         event.stopPropagation();
         const value = event.detail?.value;
@@ -409,6 +582,22 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             [field]: value || undefined
         };
         this._updateConfig(update);
+    }
+    _handleSolarForecastSelectionChange(event) {
+        event.stopPropagation();
+        const raw = event.detail?.value;
+        const selection = Array.isArray(raw) ? raw.filter((item)=>typeof item === "string") : [];
+        const available = this._solarForecastEntryIds;
+        const normalized = selection.filter((entryId)=>available.includes(entryId));
+        const update = {};
+        if (!normalized.length) update.solar_forecast_entries = [];
+        else if (normalized.length === available.length) update.solar_forecast_entries = undefined;
+        else update.solar_forecast_entries = normalized;
+        this._updateConfig(update);
+    }
+    _getSolarForecastSelection() {
+        if (this._config?.solar_forecast_entries) return this._config.solar_forecast_entries;
+        return this._solarForecastEntryIds;
     }
     _createFormData() {
         if (!this._config) return {};
@@ -436,6 +625,63 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             }
         });
         return formData;
+    }
+    _ensureSolarForecastOptions() {
+        this._refreshSolarForecastOptions(false);
+    }
+    _refreshSolarForecastOptions(force) {
+        if (!this.hass || this._solarForecastOptionsPromise) return;
+        if (!force && this._solarForecastOptionsLoaded) return;
+        this._solarForecastOptionsPromise = this._fetchSolarForecastOptions().finally(()=>{
+            this._solarForecastOptionsPromise = undefined;
+        });
+    }
+    async _fetchSolarForecastOptions() {
+        try {
+            const prefs = await this.hass.callWS({
+                type: "energy/get_prefs"
+            });
+            const entryIds = this._extractSolarForecastEntries(prefs);
+            const entries = await this.hass.callWS({
+                type: "config_entries/get"
+            });
+            const entryMap = new Map(entries.map((entry)=>[
+                    entry.entry_id,
+                    entry
+                ]));
+            const options = entryIds.map((entryId)=>{
+                const entry = entryMap.get(entryId);
+                const title = entry?.title?.trim();
+                const domain = entry?.domain?.trim();
+                const labelParts = [];
+                if (title) labelParts.push(title);
+                if (domain) labelParts.push(domain);
+                const label = labelParts.length ? labelParts.join(" - ") : entryId;
+                return {
+                    value: entryId,
+                    label: label
+                };
+            });
+            this._solarForecastOptions = options;
+            this._solarForecastEntryIds = entryIds;
+        } catch (_err) {
+            this._solarForecastOptions = [];
+            this._solarForecastEntryIds = [];
+        }
+        this._solarForecastOptionsLoaded = true;
+    }
+    _extractSolarForecastEntries(prefs) {
+        const energySources = prefs?.energy_sources ?? [];
+        const entries = new Set();
+        energySources.forEach((source)=>{
+            if (source?.type !== "solar") return;
+            const configured = source.config_entry_solar_forecast;
+            if (!Array.isArray(configured)) return;
+            configured.forEach((entryId)=>{
+                if (typeof entryId === "string" && entryId.trim().length) entries.add(entryId);
+            });
+        });
+        return Array.from(entries);
     }
     _extractHeaderChips(formValue) {
         const chips = [];
@@ -515,11 +761,18 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             "templow"
         ]);
         const options = this._hourlyExtraOptions.length ? this._hourlyExtraOptions.filter((opt)=>!disallowed.has(opt)) : [];
+        const solarOption = this._solarForecastEntryIds.length ? [
+            {
+                value: $a37b5b928a2fc5d8$var$SOLAR_FORECAST_OPTION,
+                label: "Solar forecast"
+            }
+        ] : [];
         return [
             {
                 value: "",
                 label: "None"
             },
+            ...solarOption,
             ...options.map((value)=>({
                     value: value,
                     label: value
@@ -535,11 +788,18 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             "templow"
         ]);
         const options = this._dailyExtraOptions.length ? this._dailyExtraOptions.filter((opt)=>!disallowed.has(opt)) : [];
+        const solarOption = this._solarForecastEntryIds.length ? [
+            {
+                value: $a37b5b928a2fc5d8$var$SOLAR_FORECAST_OPTION,
+                label: "Solar forecast"
+            }
+        ] : [];
         return [
             {
                 value: "",
                 label: "None"
             },
+            ...solarOption,
             ...options.map((value)=>({
                     value: value,
                     label: value
@@ -569,8 +829,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         ];
         const toggleNames = [
             "show_header",
-            "hourly_forecast",
-            "daily_forecast"
+            "daily_forecast",
+            "hourly_forecast"
         ];
         const layoutSchema = toggleNames.map((name)=>({
                 name: name,
@@ -765,6 +1025,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             ...changes,
             type: "custom:weather-forecast-extended-card"
         };
+        if ("solar_forecast_entries" in changes && changes.solar_forecast_entries === undefined) delete updated.solar_forecast_entries;
         const normalizedChips = this._normalizeHeaderChips(updated);
         updated.header_chips = normalizedChips;
         updated.header_attributes = normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute).filter((attribute)=>typeof attribute === "string" && attribute.trim().length > 0);
@@ -781,14 +1042,31 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     this._hourlyExtraOptions = [];
                     this._dailyExtraOptions = [];
                 }
+                this._forecastOptionsLoading = {
+                    hourly: false,
+                    daily: false,
+                    twice_daily: false
+                };
                 this._forecastOptionsEntity = undefined;
                 return;
             }
             const entityId = this._config.entity;
             if (this._forecastOptionsEntity !== entityId) {
                 this._teardownForecastOptionSubscriptions();
-                this._hourlyExtraOptions = [];
-                this._dailyExtraOptions = [];
+                const cached = $a37b5b928a2fc5d8$var$FORECAST_OPTIONS_CACHE.get(entityId);
+                if (cached) {
+                    this._hourlyExtraOptions = cached.hourly;
+                    this._dailyExtraOptions = cached.daily;
+                    this._forecastOptionsLoading = {
+                        hourly: false,
+                        daily: false,
+                        twice_daily: false
+                    };
+                } else this._forecastOptionsLoading = {
+                    hourly: false,
+                    daily: false,
+                    twice_daily: false
+                };
                 this._forecastOptionsEntity = entityId;
             }
             const stateObj = this.hass.states[entityId];
@@ -801,13 +1079,30 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 "hourly",
                 "daily"
             ].forEach((type)=>{
-                if (!needed.has(type)) this._teardownForecastOptionSubscriptions([
-                    type
-                ]);
-                else if (!this._forecastOptionSubscriptions[type]) try {
+                if (!needed.has(type)) {
+                    this._teardownForecastOptionSubscriptions([
+                        type
+                    ]);
+                    this._forecastOptionsLoading = {
+                        ...this._forecastOptionsLoading,
+                        [type]: false
+                    };
+                } else if (!this._forecastOptionSubscriptions[type]) try {
                     this._forecastOptionSubscriptions[type] = this._subscribeForecast(entityId, type, (event)=>this._handleForecastOptionsEvent(type, event));
+                    const hasOptions = type === "hourly" ? this._hourlyExtraOptions.length : this._dailyExtraOptions.length;
+                    if (!hasOptions) this._forecastOptionsLoading = {
+                        ...this._forecastOptionsLoading,
+                        [type]: true
+                    };
                 } catch (_err) {
                 // ignore subscription errors to avoid breaking the editor
+                }
+                else {
+                    const hasOptions = type === "hourly" ? this._hourlyExtraOptions.length : this._dailyExtraOptions.length;
+                    this._forecastOptionsLoading = {
+                        ...this._forecastOptionsLoading,
+                        [type]: !hasOptions
+                    };
                 }
             });
         } catch (_err) {
@@ -840,7 +1135,18 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const next = Array.from(keys).sort((a, b)=>a.localeCompare(b));
         if (type === "hourly") {
             if (next.join("|") !== this._hourlyExtraOptions.join("|")) this._hourlyExtraOptions = next;
-        } else if (next.join("|") !== this._dailyExtraOptions.join("|")) this._dailyExtraOptions = next;
+            this._forecastOptionsLoading = {
+                ...this._forecastOptionsLoading,
+                hourly: false
+            };
+        } else {
+            if (next.join("|") !== this._dailyExtraOptions.join("|")) this._dailyExtraOptions = next;
+            this._forecastOptionsLoading = {
+                ...this._forecastOptionsLoading,
+                daily: false
+            };
+        }
+        this._cacheForecastOptions();
     }
     _applyForecastOptionsFromAttributes(stateObj) {
         if (!stateObj?.attributes?.forecast) return;
@@ -862,6 +1168,24 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const options = Array.from(keys).sort((a, b)=>a.localeCompare(b));
         if (options.join("|") !== this._hourlyExtraOptions.join("|")) this._hourlyExtraOptions = options;
         if (options.join("|") !== this._dailyExtraOptions.join("|")) this._dailyExtraOptions = options;
+        this._forecastOptionsLoading = {
+            ...this._forecastOptionsLoading,
+            hourly: false,
+            daily: false
+        };
+        this._cacheForecastOptions();
+    }
+    _cacheForecastOptions() {
+        if (!this._forecastOptionsEntity) return;
+        if (!this._hourlyExtraOptions.length && !this._dailyExtraOptions.length) return;
+        $a37b5b928a2fc5d8$var$FORECAST_OPTIONS_CACHE.set(this._forecastOptionsEntity, {
+            hourly: [
+                ...this._hourlyExtraOptions
+            ],
+            daily: [
+                ...this._dailyExtraOptions
+            ]
+        });
     }
     _getSupportedForecastTypes(stateObj) {
         if (!stateObj?.attributes) return [];
@@ -892,6 +1216,10 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             const sub = this._forecastOptionSubscriptions[type];
             sub?.then((unsub)=>unsub?.()).catch(()=>undefined);
             delete this._forecastOptionSubscriptions[type];
+            this._forecastOptionsLoading = {
+                ...this._forecastOptionsLoading,
+                [type]: false
+            };
         });
     }
     disconnectedCallback() {
@@ -907,7 +1235,15 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         };
         this._hourlyExtraOptions = [];
         this._dailyExtraOptions = [];
+        this._forecastOptionsLoading = {
+            hourly: false,
+            daily: false,
+            twice_daily: false
+        };
+        this._solarForecastOptions = [];
+        this._solarForecastEntryIds = [];
         this._forecastOptionSubscriptions = {};
+        this._solarForecastOptionsLoaded = false;
         this._computeLabel = (schema)=>{
             if (!this.hass) return schema.name;
             switch(schema.name){
@@ -968,6 +1304,15 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
 (0, $39J5i.__decorate)([
     (0, $1ZxoT.state)()
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_dailyExtraOptions", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_forecastOptionsLoading", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_solarForecastOptions", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_solarForecastEntryIds", void 0);
 $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
     (0, $1ZxoT.customElement)("weather-forecast-extended-editor")
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b);
@@ -975,4 +1320,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.365f33a2.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.9c654dff.js.map
