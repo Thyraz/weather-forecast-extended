@@ -15,6 +15,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
 - Support to display daily / hourly solar forecast.
+- Optional minute-level nowcast precipitation chart via `get_minute_forecast` actions (OpenWeatherMap, DWD nowcast).
 - Configurable header chips that can display entity attributes or value-templates in the header.
 - Optional tap actions and icons on the header pills / chips.
 - Support for 12 or 24 hour time formats and localized date labels using the Home Assistant user settings.
@@ -59,6 +60,8 @@ use_night_header_backgrounds: true
 | `type` | string | `custom:weather-forecast-extended-card` | Lovelace card type identifier. |
 | `entity` | string | required | Weather entity that supplies current conditions and forecast data. |
 | `header_temperature_entity` | string | current weather temperature | Optional sensor to use for the header temperature. Must report a numeric temperature. |
+| `nowcast_entity` | string | none | Weather entity that supports `get_minute_forecast` and provides minute-level precipitation. |
+| `nowcast_layout` | `pager` \| `inline` | `pager` | `pager` adds a second header page with the nowcast chart and swipe/dots navigation. `inline` shows the chart below the header pills when rain is expected (always in header-only layouts). |
 | `show_header` | boolean | `true` | Toggles hero header containing artwork, current temperature, and condition text. |
 | `hourly_forecast` | boolean | `true` | Shows the hourly forecast. Requires the selected weather entity to provide hourly data. |
 | `daily_forecast` | boolean | `true` | Shows the daily forecast. |
@@ -144,3 +147,4 @@ If you have a solar forecast configured in the Energy dashboard, you can select 
 - Drag or flick the daily and hourly lists.
 - Temperature bars in the daily list scale to the minimum and maximum across the visible forecast window, helping you spot warm or cold days quickly.
 - The hourly list highlights precipitation totals and probabilities above a fixed thresholds.
+- When a nowcast entity is configured, the header can show a second page or inline chart depending on the selected layout.

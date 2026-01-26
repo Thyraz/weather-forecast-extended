@@ -246,6 +246,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     this._config = {
       type: "custom:weather-forecast-extended-card",
       ...config,
+      nowcast_entity: config.nowcast_entity,
+      nowcast_layout: config.nowcast_layout ?? "pager",
       show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
@@ -272,6 +274,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       general: generalSchema,
       layout: layoutSchema,
       header: headerSchema,
+      nowcast: nowcastSchema,
       chips: chipSchema,
       hourly: hourlySchema,
       daily: dailySchema,
@@ -349,6 +352,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             </div>
           `
         : nothing}
+      <div class="editor-section">
+        <h4 class="section-title">Nowcast</h4>
+        <div class="group-card">
+          <p class="location-description">
+            Select a weather entity that supports the <code>get_minute_forecast</code> action
+            (for example OpenWeatherMap or DWD nowcast).
+          </p>
+          <ha-form
+            .hass=${this.hass}
+            .data=${formData}
+            .schema=${nowcastSchema}
+            .computeLabel=${this._computeLabel}
+            @value-changed=${this._handleValueChanged}
+          ></ha-form>
+        </div>
+      </div>
       <div class="editor-section">
         <h4 class="section-title">Forecast options</h4>
         <div class="group-card">
@@ -613,6 +632,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
       case "use_night_header_backgrounds":
         return "Use separate header backgrounds for nightly conditions";
+      case "nowcast_entity":
+        return "Nowcast weather entity";
+      case "nowcast_layout":
+        return "Nowcast layout";
       case "hourly_extra_attribute":
         return "Hourly extra attribute (third line)";
       case "hourly_extra_attribute_unit":
@@ -988,6 +1011,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     general: HaFormSchema[];
     layout: HaFormSchema[];
     header: HaFormSchema[];
+    nowcast: HaFormSchema[];
     chips: HaFormSchema[];
     hourly: HaFormSchema[];
     daily: HaFormSchema[];
@@ -1033,6 +1057,27 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       {
         name: "use_night_header_backgrounds",
         selector: { boolean: {} },
+      },
+    ];
+
+    const nowcastSchema: HaFormSchema[] = [
+      {
+        name: "nowcast_entity",
+        selector: { entity: { domain: "weather" } },
+        optional: true,
+      },
+      {
+        name: "nowcast_layout",
+        selector: {
+          select: {
+            options: [
+              { value: "pager", label: "Header pager" },
+              { value: "inline", label: "Inline header" },
+            ],
+          },
+        },
+        optional: true,
+        disabled: !this._config?.nowcast_entity,
       },
     ];
 
@@ -1120,7 +1165,15 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       });
     });
 
-    return { general: generalSchema, layout: layoutSchema, header: headerSchema, chips: chipsSchema, hourly: hourlySchema, daily: dailySchema };
+    return {
+      general: generalSchema,
+      layout: layoutSchema,
+      header: headerSchema,
+      nowcast: nowcastSchema,
+      chips: chipsSchema,
+      hourly: hourlySchema,
+      daily: dailySchema,
+    };
   }
 
   private _isSectionEnabled(name: ToggleName, config: WeatherForecastExtendedConfig): boolean {

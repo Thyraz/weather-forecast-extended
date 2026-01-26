@@ -8,7 +8,7 @@ ha-card {
 
 .weather {
   width: 100%;
-  height: calc(2.3 * var(--row-height));
+  height: var(--wfe-header-height, calc(2.3 * var(--row-height)));
   /* Background image will be set via JS */
   background-size: cover;
   background-position: center;
@@ -30,17 +30,25 @@ ha-card {
 
 .weather .header-content {
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  justify-content: flex-start;
+  flex-direction: column;
   padding-block: var(--wfe-header-padding-block, 16px);
   padding-inline: var(--wfe-header-padding-inline, 16px);
-  gap: 0;
+  gap: var(--wfe-header-content-gap, 12px);
   width: 100%;
   box-sizing: border-box;
   flex: 1 1 auto;
-  flex-wrap: nowrap;
   min-width: 0;
+}
+
+.weather .header-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
 .weather .header-main {
@@ -152,6 +160,157 @@ ha-card {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.weather .header-pager {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-content {
+  padding: 0;
+  gap: 0;
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-pager {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-pages {
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-page-nowcast,
+.weather.nowcast-pager .nowcast-panel,
+.weather.nowcast-pager wfe-nowcast {
+  min-height: 0;
+}
+
+.weather.nowcast-pager .nowcast-panel {
+  overflow: hidden;
+}
+
+.weather .header-pages {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  transition: transform 0.35s ease;
+  will-change: transform;
+  touch-action: pan-y;
+}
+
+.weather .header-page {
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.weather.nowcast-pager .header-page {
+  padding-inline: var(--wfe-header-padding-inline, 16px);
+  padding-top: var(--wfe-header-padding-block, 16px);
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.weather .nowcast-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 12px 12px 6px 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.weather wfe-nowcast {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+}
+
+.weather .nowcast-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--wfe-nowcast-gap, 5px);
+  flex: 1 1 auto;
+  min-height: 24px;
+}
+
+.weather.nowcast-pager .nowcast-bars {
+  min-height: 16px;
+}
+
+.weather .nowcast-bar {
+  flex: 1 1 0;
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 999px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  min-height: 6px;
+  height: 100%;
+}
+
+.weather .nowcast-bar-fill {
+  width: 100%;
+  height: 0%;
+  background: var(--wfe-nowcast-fill-color, var(--state-climate-cool-color));
+  border-radius: inherit;
+}
+
+.weather .nowcast-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--ha-font-size-s);
+  color: white;
+}
+
+.weather .pager-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.weather.nowcast-pager .pager-dots {
+  padding-inline: var(--wfe-header-padding-inline, 16px);
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+
+.weather .pager-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  padding: 0;
+}
+
+.weather .pager-dot.active {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.weather .pager-dot:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
 }
 
 .forecast-container {

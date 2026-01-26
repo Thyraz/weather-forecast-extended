@@ -13,6 +13,7 @@ import { styles } from "./weather-forecast-extended.styles";
 import { DEFAULT_WEATHER_IMAGE, WeatherImages } from "./weather-images";
 import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
+import "./components/wfe-nowcast";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
 import type { HassEntity } from "home-assistant-js-websocket";
 import SunCalc from "suncalc";
@@ -62,7 +63,26 @@ type EnergySolarForecast = {
   wh_hours?: Record<string, number | string>;
 };
 
+type NowcastForecastItem = {
+  datetime: string;
+  precipitation: number;
+};
+
+type NowcastServiceForecastItem = {
+  datetime?: string;
+  precipitation?: number | string;
+};
+
+type NowcastServiceEntityResponse = {
+  forecast?: NowcastServiceForecastItem[];
+};
+
+type NowcastServiceResponse = {
+  response?: Record<string, NowcastServiceEntityResponse>;
+};
+
 const SOLAR_FORECAST_ATTRIBUTE = "solar_forecast";
+const NOWCAST_SERVICE_NAME = "get_minute_forecast";
 
 const isAttributeHeaderChip = (chip: HeaderChip): chip is AttributeHeaderChip =>
   chip.type === "attribute";
@@ -86,6 +106,9 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _templateChipValues: Record<number, { display: string; missing: boolean }> = {};
   @state() private _solarForecastByHour: Record<string, number> = {};
   @state() private _solarForecastByDay: Record<string, number> = {};
+  @state() private _nowcastForecast: NowcastForecastItem[] = [];
+  @state() private _nowcastHasRain = false;
+  @state() private _headerPageIndex = 0;
 
   // private property
   private _subscriptions: SubscriptionMap = { hourly: undefined, daily: undefined };
@@ -102,9 +125,17 @@ export class WeatherForecastExtended extends LitElement {
   private _sunCoordinateCacheKey?: string;
   private _sunCoordinateCache?: SunCoordinates;
   private _solarForecastRequestId = 0;
+  private _nowcastRequestId = 0;
+  private _nowcastEntityId?: string;
+  private _nowcastServiceDomain?: string;
+  private _nowcastLastUpdated?: string;
+  private _headerSwipeStartX?: number;
+  private _headerSwipePointerId?: number;
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
+    const previousNowcastEntity = this._config?.nowcast_entity;
+    const previousNowcastLayout = this._config?.nowcast_layout;
     const normalizedHeaderChips = this._normalizeHeaderChips(config);
     const normalizedHeaderAttributes = normalizedHeaderChips
       .filter(isAttributeHeaderChip)
@@ -120,6 +151,8 @@ export class WeatherForecastExtended extends LitElement {
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
       ...config,
+      nowcast_entity: config.nowcast_entity,
+      nowcast_layout: config.nowcast_layout ?? "pager",
       show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
@@ -145,6 +178,12 @@ export class WeatherForecastExtended extends LitElement {
     };
 
     this._config = defaults;
+    if (previousNowcastEntity !== defaults.nowcast_entity) {
+      this._resetNowcastState();
+    }
+    if (previousNowcastLayout !== defaults.nowcast_layout) {
+      this._headerPageIndex = 0;
+    }
     this._entity = defaults.entity;
     // call set hass() to immediately adjust to a changed entity
     // while editing the entity in the card editor
@@ -171,6 +210,7 @@ export class WeatherForecastExtended extends LitElement {
       : undefined;
 
     this._refreshTemplateSubscriptions();
+    this._handleNowcastHassUpdate();
   }
 
   private _normalizeHeaderChips(config: WeatherForecastExtendedConfig): HeaderChip[] {
@@ -408,6 +448,11 @@ export class WeatherForecastExtended extends LitElement {
     const showHeader = this._config.show_header !== false;
     const showDaily = this._config.daily_forecast !== false;
     const showHourly = this._config.hourly_forecast !== false;
+    const hasInlineNowcast = Boolean(
+      showHeader &&
+      this._config.nowcast_entity &&
+      (this._config.nowcast_layout ?? "pager") === "inline",
+    );
 
     let rows = 3;
 
@@ -456,6 +501,10 @@ export class WeatherForecastExtended extends LitElement {
       }
 
       rows = Math.max(computed, 2);
+    }
+
+    if (hasInlineNowcast) {
+      rows += 1;
     }
 
     const minRows = rows;
@@ -587,6 +636,10 @@ export class WeatherForecastExtended extends LitElement {
       this._refreshSolarForecastData();
     }
 
+    if (changedProps.has("_config")) {
+      this._refreshNowcastData();
+    }
+
     const card = this.shadowRoot.querySelector('ha-card') as HTMLElement;
     const daily = this.shadowRoot.querySelector('.forecast.daily') as HTMLElement;
     const hourly = this.shadowRoot.querySelector('.forecast.hourly') as HTMLElement;
@@ -666,9 +719,17 @@ export class WeatherForecastExtended extends LitElement {
       "orientation-vertical": orientation !== "horizontal",
     };
 
+    const headerOnly = showHeader && !showForecasts;
+    const nowcastEnabled = this._isNowcastEnabled();
+    const nowcastLayout = this._config.nowcast_layout ?? "pager";
+    const showNowcastPager = nowcastEnabled && nowcastLayout === "pager";
+    const showInlineNowcast = nowcastEnabled && nowcastLayout === "inline" && (this._nowcastHasRain || headerOnly);
+
     const headerClassMap = {
       weather: true,
-      "header-only": showHeader && !showForecasts,
+      "header-only": headerOnly,
+      "nowcast-inline": showInlineNowcast,
+      "nowcast-pager": showNowcastPager,
     };
 
     const hasContent = showHeader || dailyEnabled || hourlyEnabled;
@@ -709,6 +770,122 @@ export class WeatherForecastExtended extends LitElement {
     }
 
     const headerChips = this._computeHeaderChipDisplays();
+    const useSnowNowcastFill = this._shouldUseSnowNowcastFill();
+    const headerStyles: Record<string, string> = {
+      "background-image": `url(${this._getWeatherBgImage(this._state.state)})`,
+    };
+
+    if (showInlineNowcast && !headerOnly) {
+      headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height))";
+    }
+
+    const headerChipsTemplate = headerChips.length
+      ? headerChips.map(chip => {
+        const hasChipAction = hasAction(chip.action);
+        const chipClassMap = {
+          "attribute-chip": true,
+          missing: chip.missing,
+          "template-chip": chip.type === "template",
+          "has-action": hasChipAction,
+        };
+        const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
+        return html`
+          <div
+            class=${classMap(chipClassMap)}
+            title=${chipTitle}
+            role=${hasChipAction ? "button" : nothing}
+            tabindex=${hasChipAction ? 0 : nothing}
+            @click=${hasChipAction ? () => this._handleHeaderChipTap(chip.action) : undefined}
+            @keydown=${hasChipAction
+              ? (ev: KeyboardEvent) => this._handleHeaderChipKeydown(ev, chip.action)
+              : undefined}
+          >
+            ${chip.icon
+              ? html`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>`
+              : nothing}
+            <span class="header-pill-text">${chip.display}</span>
+          </div>
+        `;
+      })
+      : nothing;
+
+    const pagerDotsTemplate = showNowcastPager
+      ? html`
+        <div class="pager-dots">
+          ${[0, 1].map(index => html`
+            <button
+              class=${classMap({ "pager-dot": true, active: index === this._headerPageIndex })}
+              type="button"
+              aria-label=${`Header page ${index + 1}`}
+              @click=${() => this._setHeaderPage(index)}
+            ></button>
+          `)}
+        </div>
+      `
+      : nothing;
+
+    const headerAttributesTemplate = headerChips.length
+      ? html`
+        <div class="header-attributes">
+          ${headerChipsTemplate}
+        </div>
+      `
+      : nothing;
+
+    const headerMainTemplate = html`
+      <div class="header-main">
+        <div
+          class=${classMap({
+            temp: true,
+            "has-action": hasTemperatureTapAction,
+          })}
+          role=${hasTemperatureTapAction ? "button" : nothing}
+          tabindex=${hasTemperatureTapAction ? 0 : nothing}
+          @click=${hasTemperatureTapAction
+            ? () => this._handleHeaderTap(temperatureTapAction, temperatureActionEntity)
+            : undefined}
+          @keydown=${hasTemperatureTapAction
+            ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity)
+            : undefined}
+        >
+          <span class="header-pill-text">${headerTemperature}</span>
+        </div>
+        <div
+          class=${classMap({
+            condition: true,
+            "has-action": hasConditionTapAction,
+          })}
+          role=${hasConditionTapAction ? "button" : nothing}
+          tabindex=${hasConditionTapAction ? 0 : nothing}
+          @click=${hasConditionTapAction ? () => this._handleHeaderTap(conditionTapAction) : undefined}
+          @keydown=${hasConditionTapAction
+            ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, conditionTapAction)
+            : undefined}
+        >
+          <span class="header-pill-text">
+            ${headerCondition}
+          </span>
+        </div>
+      </div>
+    `;
+
+    const headerLayoutTemplate = html`
+      <div class="header-layout">
+        ${headerAttributesTemplate}
+        ${headerMainTemplate}
+      </div>
+    `;
+
+    const nowcastPanelTemplate = html`
+      <div
+        class="nowcast-panel"
+        style=${useSnowNowcastFill
+          ? styleMap({ "--wfe-nowcast-fill-color": "rgba(255, 255, 255, 0.9)" })
+          : nothing}
+      >
+        <wfe-nowcast .forecast=${this._nowcastForecast}></wfe-nowcast>
+      </div>
+    `;
 
     return html`
       <ha-card>
@@ -716,76 +893,33 @@ export class WeatherForecastExtended extends LitElement {
           ? html`
             <div
               class=${classMap(headerClassMap)}
-              style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
+              style=${styleMap(headerStyles)}
             >
               <div class="header-content">
-                ${headerChips.length
+                ${showNowcastPager
                   ? html`
-                    <div class="header-attributes">
-                      ${headerChips.map(chip => {
-                        const hasChipAction = hasAction(chip.action);
-                        const chipClassMap = {
-                          "attribute-chip": true,
-                          missing: chip.missing,
-                          "template-chip": chip.type === "template",
-                          "has-action": hasChipAction,
-                        };
-                        const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
-                        return html`
-                          <div
-                            class=${classMap(chipClassMap)}
-                            title=${chipTitle}
-                            role=${hasChipAction ? "button" : nothing}
-                            tabindex=${hasChipAction ? 0 : nothing}
-                            @click=${hasChipAction ? () => this._handleHeaderChipTap(chip.action) : undefined}
-                            @keydown=${hasChipAction
-                              ? (ev: KeyboardEvent) => this._handleHeaderChipKeydown(ev, chip.action)
-                              : undefined}
-                          >
-                            ${chip.icon
-                              ? html`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>`
-                              : nothing}
-                            <span class="header-pill-text">${chip.display}</span>
-                          </div>
-                        `;
-                      })}
+                    <div class="header-pager">
+                      <div
+                        class="header-pages"
+                        style=${styleMap({ transform: `translateX(-${this._headerPageIndex * 100}%)` })}
+                        @pointerdown=${this._handleHeaderPagerPointerDown}
+                        @pointerup=${this._handleHeaderPagerPointerUp}
+                        @pointercancel=${this._handleHeaderPagerPointerCancel}
+                      >
+                        <div class="header-page header-page-primary">
+                          ${headerLayoutTemplate}
+                        </div>
+                        <div class="header-page header-page-nowcast">
+                          ${nowcastPanelTemplate}
+                        </div>
+                      </div>
+                      ${pagerDotsTemplate}
                     </div>
                   `
-                  : nothing}
-                <div class="header-main">
-                  <div
-                    class=${classMap({
-                      temp: true,
-                      "has-action": hasTemperatureTapAction,
-                    })}
-                    role=${hasTemperatureTapAction ? "button" : nothing}
-                    tabindex=${hasTemperatureTapAction ? 0 : nothing}
-                    @click=${hasTemperatureTapAction
-                      ? () => this._handleHeaderTap(temperatureTapAction, temperatureActionEntity)
-                      : undefined}
-                    @keydown=${hasTemperatureTapAction
-                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity)
-                      : undefined}
-                  >
-                    <span class="header-pill-text">${headerTemperature}</span>
-                  </div>
-                  <div
-                    class=${classMap({
-                      condition: true,
-                      "has-action": hasConditionTapAction,
-                    })}
-                    role=${hasConditionTapAction ? "button" : nothing}
-                    tabindex=${hasConditionTapAction ? 0 : nothing}
-                    @click=${hasConditionTapAction ? () => this._handleHeaderTap(conditionTapAction) : undefined}
-                    @keydown=${hasConditionTapAction
-                      ? (ev: KeyboardEvent) => this._handleHeaderKeydown(ev, conditionTapAction)
-                      : undefined}
-                  >
-                    <span class="header-pill-text">
-                      ${headerCondition}
-                    </span>
-                  </div>
-                </div>
+                  : html`
+                    ${headerLayoutTemplate}
+                    ${showInlineNowcast ? nowcastPanelTemplate : nothing}
+                  `}
               </div>
             </div>
           `
@@ -1170,6 +1304,172 @@ export class WeatherForecastExtended extends LitElement {
     });
   }
 
+  private _resetNowcastState() {
+    this._nowcastRequestId += 1;
+    this._nowcastEntityId = undefined;
+    this._nowcastServiceDomain = undefined;
+    this._nowcastLastUpdated = undefined;
+    this._nowcastForecast = [];
+    this._nowcastHasRain = false;
+    this._headerPageIndex = 0;
+  }
+
+  private _clearNowcastForecast() {
+    if (this._nowcastForecast.length || this._nowcastHasRain) {
+      this._nowcastForecast = [];
+      this._nowcastHasRain = false;
+    }
+  }
+
+  private _refreshNowcastData() {
+    if (!this._isNowcastEnabled() || !this._hass?.callWS) {
+      this._clearNowcastForecast();
+      return;
+    }
+
+    const entityId = this._config?.nowcast_entity;
+    if (!entityId) {
+      this._clearNowcastForecast();
+      return;
+    }
+
+    const requestId = ++this._nowcastRequestId;
+    this._loadNowcastData(requestId, entityId);
+  }
+
+  private async _loadNowcastData(requestId: number, entityId: string) {
+    try {
+      const serviceDomain = await this._resolveNowcastServiceDomain(entityId, requestId);
+      if (!serviceDomain || requestId !== this._nowcastRequestId) {
+        this._clearNowcastForecast();
+        return;
+      }
+
+      const response = await this._hass!.callWS<NowcastServiceResponse>({
+        type: "call_service",
+        domain: serviceDomain,
+        service: NOWCAST_SERVICE_NAME,
+        target: { entity_id: entityId },
+        return_response: true,
+      });
+
+      if (requestId !== this._nowcastRequestId) {
+        return;
+      }
+
+      const forecast = this._extractNowcastForecast(response, entityId);
+      this._setNowcastForecast(forecast);
+    } catch (_err) {
+      this._clearNowcastForecast();
+    }
+  }
+
+  private async _resolveNowcastServiceDomain(
+    entityId: string,
+    requestId: number,
+  ): Promise<string | undefined> {
+    if (this._nowcastEntityId === entityId && this._nowcastServiceDomain) {
+      return this._nowcastServiceDomain;
+    }
+
+    try {
+      const entry = await this._hass!.callWS<{ platform?: string }>({
+        type: "config/entity_registry/get",
+        entity_id: entityId,
+      });
+      if (requestId !== this._nowcastRequestId) {
+        return undefined;
+      }
+      const platform = entry?.platform;
+      this._nowcastEntityId = entityId;
+      this._nowcastServiceDomain = typeof platform === "string" && platform.trim().length
+        ? platform
+        : undefined;
+      return this._nowcastServiceDomain;
+    } catch (_err) {
+      this._nowcastEntityId = entityId;
+      this._nowcastServiceDomain = undefined;
+      return undefined;
+    }
+  }
+
+  private _extractNowcastForecast(
+    response: NowcastServiceResponse,
+    entityId: string,
+  ): NowcastForecastItem[] {
+    const items: NowcastForecastItem[] = [];
+    const entries = response?.response?.[entityId]?.forecast;
+    if (!Array.isArray(entries)) {
+      return items;
+    }
+
+    entries.forEach(entry => {
+      const datetime = typeof entry?.datetime === "string" ? entry.datetime : undefined;
+      if (!datetime) {
+        return;
+      }
+      const timestamp = new Date(datetime).getTime();
+      if (!Number.isFinite(timestamp)) {
+        return;
+      }
+
+      const rawValue = entry?.precipitation;
+      const precipitation = typeof rawValue === "number" ? rawValue : Number(rawValue);
+      if (!Number.isFinite(precipitation)) {
+        return;
+      }
+
+      items.push({ datetime, precipitation: Math.max(0, precipitation) });
+    });
+
+    return items.sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+  }
+
+  private _setNowcastForecast(forecast: NowcastForecastItem[]) {
+    const hasRain = forecast.some(item => item.precipitation > 0);
+    const hadRain = this._nowcastHasRain;
+
+    this._nowcastForecast = forecast;
+    this._nowcastHasRain = hasRain;
+
+    if (!hadRain && hasRain && this._headerPageIndex === 0 && this._isNowcastPagerEnabled()) {
+      this._headerPageIndex = 1;
+    }
+  }
+
+  private _handleNowcastHassUpdate() {
+    if (!this._isNowcastEnabled() || !this._hass) {
+      return;
+    }
+
+    const entityId = this._config?.nowcast_entity;
+    if (!entityId) {
+      return;
+    }
+
+    const state = this._hass.states[entityId] as HassEntity | undefined;
+    if (!state) {
+      this._clearNowcastForecast();
+      return;
+    }
+
+    const lastUpdated = state.last_updated ?? state.last_changed;
+    if (!lastUpdated || lastUpdated === this._nowcastLastUpdated) {
+      return;
+    }
+
+    this._nowcastLastUpdated = lastUpdated;
+    this._refreshNowcastData();
+  }
+
+  private _isNowcastEnabled(): boolean {
+    return Boolean(this._config?.nowcast_entity);
+  }
+
+  private _isNowcastPagerEnabled(): boolean {
+    return this._isNowcastEnabled() && (this._config?.nowcast_layout ?? "pager") === "pager";
+  }
+
   private _formatSolarHourKey(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -1251,6 +1551,11 @@ export class WeatherForecastExtended extends LitElement {
     }
 
     return isDaytime ? variants.day : variants.night;
+  }
+
+  private _shouldUseSnowNowcastFill(): boolean {
+    const condition = this._state?.state;
+    return condition === "snowy" || condition === "snowy-rainy";
   }
 
   private _isDaytimeNow(): boolean {
@@ -1393,6 +1698,58 @@ export class WeatherForecastExtended extends LitElement {
     const offset = itemRect.left - containerRect.left + hourlyContainer.scrollLeft - 16; // account for padding
 
     hourlyContainer.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
+  }
+
+  private _setHeaderPage(index: number) {
+    const clamped = index <= 0 ? 0 : 1;
+    if (clamped === this._headerPageIndex) {
+      return;
+    }
+    this._headerPageIndex = clamped;
+  }
+
+  private _handleHeaderPagerPointerDown(event: PointerEvent) {
+    if (!this._isNowcastPagerEnabled()) {
+      return;
+    }
+    this._headerSwipePointerId = event.pointerId;
+    this._headerSwipeStartX = event.clientX;
+    const target = event.currentTarget as HTMLElement | null;
+    if (target?.setPointerCapture) {
+      target.setPointerCapture(event.pointerId);
+    }
+  }
+
+  private _handleHeaderPagerPointerUp(event: PointerEvent) {
+    if (event.pointerId !== this._headerSwipePointerId) {
+      return;
+    }
+    const startX = this._headerSwipeStartX;
+    const deltaX = startX !== undefined ? event.clientX - startX : 0;
+    const threshold = 32;
+
+    if (Math.abs(deltaX) >= threshold) {
+      this._setHeaderPage(deltaX < 0 ? 1 : 0);
+    }
+
+    const target = event.currentTarget as HTMLElement | null;
+    if (target?.releasePointerCapture) {
+      target.releasePointerCapture(event.pointerId);
+    }
+    this._headerSwipePointerId = undefined;
+    this._headerSwipeStartX = undefined;
+  }
+
+  private _handleHeaderPagerPointerCancel(event: PointerEvent) {
+    if (event.pointerId !== this._headerSwipePointerId) {
+      return;
+    }
+    const target = event.currentTarget as HTMLElement | null;
+    if (target?.releasePointerCapture) {
+      target.releasePointerCapture(event.pointerId);
+    }
+    this._headerSwipePointerId = undefined;
+    this._headerSwipeStartX = undefined;
   }
 
   private _handleHeaderTap(actionConfig?: ActionConfig, entity?: string) {

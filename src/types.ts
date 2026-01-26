@@ -17,6 +17,8 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
   header_temperature_entity?: string;
+  nowcast_entity?: string;
+  nowcast_layout?: "pager" | "inline";
   header_chips?: HeaderChip[];
   header_attributes?: string[];
   show_header?: boolean;
