@@ -248,6 +248,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ...config,
       nowcast_entity: config.nowcast_entity,
       nowcast_layout: config.nowcast_layout ?? "pager",
+      nowcast_always_show: config.nowcast_always_show ?? false,
       show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
@@ -636,6 +637,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return "Nowcast weather entity";
       case "nowcast_layout":
         return "Nowcast layout";
+      case "nowcast_always_show":
+        return "Always show nowcast";
       case "hourly_extra_attribute":
         return "Hourly extra attribute (third line)";
       case "hourly_extra_attribute_unit":
@@ -1076,6 +1079,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             ],
           },
         },
+        optional: true,
+        disabled: !this._config?.nowcast_entity,
+      },
+      {
+        name: "nowcast_always_show",
+        selector: { boolean: {} },
         optional: true,
         disabled: !this._config?.nowcast_entity,
       },

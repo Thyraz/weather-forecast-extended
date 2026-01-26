@@ -270,8 +270,15 @@ ha-card {
 .weather .nowcast-bar-fill {
   width: 100%;
   height: 0%;
-  background: var(--wfe-nowcast-fill-color, var(--state-climate-cool-color));
+  background: var(--wfe-nowcast-fill-color, #4aafff);
   border-radius: inherit;
+  transition: height 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather .nowcast-bar-fill {
+    transition: none;
+  }
 }
 
 .weather .nowcast-labels {

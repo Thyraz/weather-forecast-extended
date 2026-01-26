@@ -62,6 +62,7 @@ use_night_header_backgrounds: true
 | `header_temperature_entity` | string | current weather temperature | Optional sensor to use for the header temperature. Must report a numeric temperature. |
 | `nowcast_entity` | string | none | Weather entity that supports `get_minute_forecast` and provides minute-level precipitation. |
 | `nowcast_layout` | `pager` \| `inline` | `pager` | `pager` adds a second header page with the nowcast chart and swipe/dots navigation. `inline` shows the chart below the header pills when rain is expected (always in header-only layouts). |
+| `nowcast_always_show` | boolean | `false` | When enabled, the nowcast chart stays visible even if no rain is predicted. Useful to keep the header layout consistent. |
 | `show_header` | boolean | `true` | Toggles hero header containing artwork, current temperature, and condition text. |
 | `hourly_forecast` | boolean | `true` | Shows the hourly forecast. Requires the selected weather entity to provide hourly data. |
 | `daily_forecast` | boolean | `true` | Shows the daily forecast. |

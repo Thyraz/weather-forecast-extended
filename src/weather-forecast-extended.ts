@@ -129,6 +129,8 @@ export class WeatherForecastExtended extends LitElement {
   private _nowcastEntityId?: string;
   private _nowcastServiceDomain?: string;
   private _nowcastLastUpdated?: string;
+  private _nowcastRefreshTimeout?: number;
+  private _nowcastRefreshInterval?: number;
   private _headerSwipeStartX?: number;
   private _headerSwipePointerId?: number;
 
@@ -153,6 +155,7 @@ export class WeatherForecastExtended extends LitElement {
       ...config,
       nowcast_entity: config.nowcast_entity,
       nowcast_layout: config.nowcast_layout ?? "pager",
+      nowcast_always_show: config.nowcast_always_show ?? false,
       show_header: config.show_header ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
@@ -192,6 +195,7 @@ export class WeatherForecastExtended extends LitElement {
     }
 
     this._refreshTemplateSubscriptions();
+    this._setupNowcastRefreshTimer();
   }
 
   set hass(hass: HomeAssistant) {
@@ -211,6 +215,7 @@ export class WeatherForecastExtended extends LitElement {
 
     this._refreshTemplateSubscriptions();
     this._handleNowcastHassUpdate();
+    this._setupNowcastRefreshTimer();
   }
 
   private _normalizeHeaderChips(config: WeatherForecastExtendedConfig): HeaderChip[] {
@@ -606,6 +611,7 @@ export class WeatherForecastExtended extends LitElement {
     super.disconnectedCallback();
     this._teardownTemplateSubscriptions({ clearValues: true });
     this._unsubscribeForecastEvents();
+    this._clearNowcastRefreshTimer();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
@@ -723,7 +729,9 @@ export class WeatherForecastExtended extends LitElement {
     const nowcastEnabled = this._isNowcastEnabled();
     const nowcastLayout = this._config.nowcast_layout ?? "pager";
     const showNowcastPager = nowcastEnabled && nowcastLayout === "pager";
-    const showInlineNowcast = nowcastEnabled && nowcastLayout === "inline" && (this._nowcastHasRain || headerOnly);
+    const showInlineNowcast = nowcastEnabled &&
+      nowcastLayout === "inline" &&
+      (this._config.nowcast_always_show || this._nowcastHasRain || headerOnly);
 
     const headerClassMap = {
       weather: true,
@@ -1312,6 +1320,7 @@ export class WeatherForecastExtended extends LitElement {
     this._nowcastForecast = [];
     this._nowcastHasRain = false;
     this._headerPageIndex = 0;
+    this._clearNowcastRefreshTimer();
   }
 
   private _clearNowcastForecast() {
@@ -1468,6 +1477,35 @@ export class WeatherForecastExtended extends LitElement {
 
   private _isNowcastPagerEnabled(): boolean {
     return this._isNowcastEnabled() && (this._config?.nowcast_layout ?? "pager") === "pager";
+  }
+
+  private _setupNowcastRefreshTimer() {
+    if (!this._isNowcastEnabled() || !this._hass) {
+      this._clearNowcastRefreshTimer();
+      return;
+    }
+
+    this._clearNowcastRefreshTimer();
+
+    const now = Date.now();
+    const nextMinuteDelay = 60000 - (now % 60000);
+    this._nowcastRefreshTimeout = window.setTimeout(() => {
+      this._refreshNowcastData();
+      this._nowcastRefreshInterval = window.setInterval(() => {
+        this._refreshNowcastData();
+      }, 60000);
+    }, nextMinuteDelay);
+  }
+
+  private _clearNowcastRefreshTimer() {
+    if (this._nowcastRefreshTimeout !== undefined) {
+      window.clearTimeout(this._nowcastRefreshTimeout);
+      this._nowcastRefreshTimeout = undefined;
+    }
+    if (this._nowcastRefreshInterval !== undefined) {
+      window.clearInterval(this._nowcastRefreshInterval);
+      this._nowcastRefreshInterval = undefined;
+    }
   }
 
   private _formatSolarHourKey(date: Date): string {
