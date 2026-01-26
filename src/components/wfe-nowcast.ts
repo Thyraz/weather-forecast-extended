@@ -12,6 +12,7 @@ const NOWCAST_MINUTES = 60;
 const NOWCAST_MIN_BAR_WIDTH_PX = 5;
 const NOWCAST_MAX_BAR_WIDTH_PX = 7;
 const NOWCAST_BASE_GAP_PX = 5;
+const NOWCAST_PRECIPITATION_MIN_SCALE = 1;
 
 @customElement("wfe-nowcast")
 export class WFENowcast extends LitElement {
@@ -41,6 +42,7 @@ export class WFENowcast extends LitElement {
     const series = this._buildMinuteSeries();
     const bars = this._reduceSeries(series, this._barStride);
     const maxValue = bars.reduce((max, value) => Math.max(max, value), 0);
+    const scale = Math.max(NOWCAST_PRECIPITATION_MIN_SCALE, maxValue);
     const labels = this._barStride > 1
       ? ["Now", "20m", "40m", "60m"]
       : ["Now", "10m", "20m", "30m", "40m", "50m", "60m"];
@@ -51,7 +53,7 @@ export class WFENowcast extends LitElement {
         style=${styleMap({ "--wfe-nowcast-gap": `${this._barGap}px` })}
       >
         ${bars.map(value => {
-          const ratio = maxValue > 0 ? Math.min(1, value / maxValue) : 0;
+          const ratio = Math.min(1, value / scale);
           return html`
             <div class="nowcast-bar">
               <div class="nowcast-bar-fill" style=${styleMap({ height: `${Math.round(ratio * 100)}%` })}></div>
