@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.9c654dff.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.87706908.js").then(()=>parcelRequire("bwZCh"));
 
 });
 
@@ -2789,7 +2789,7 @@ var $ee1328194d522913$export$8d080c28108db9dd = function(e, t, r) {
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: calc(2.3 * var(--row-height));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  box-sizing: border-box;\n  flex-flow: row;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 25px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip .chip-icon, .weather .template-chip .chip-icon {\n  --mdc-icon-size: 20px;\n  color: inherit;\n  margin-right: 6px;\n}\n\n.weather .attribute-chip.has-action, .weather .template-chip.has-action {\n  cursor: pointer;\n}\n\n.weather .attribute-chip.has-action:focus-visible, .weather .template-chip.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp.has-action, .weather .condition.has-action {\n  cursor: pointer;\n}\n\n.weather .temp.has-action:focus-visible, .weather .condition.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .hourly-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .hourly-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast .daily-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .daily-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast.daily .daily-extra.precipitationprobability {\n  color: var(--state-climate-cool-color);\n  opacity: .3;\n  display: block !important;\n}\n\n.forecast .daily-extra.precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability, .forecast.daily .forecast-item > .daily-extra {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .forecast-item > .daily-extra {\n  text-align: center;\n  width: var(--icon-size);\n  grid-row: 5;\n  justify-self: center;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.hourly .forecast-item.no-ampm > .translate-container {\n  margin-top: 4px;\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: var(--wfe-header-height, calc(2.3 * var(--row-height)));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  gap: var(--wfe-header-content-gap, 12px);\n  box-sizing: border-box;\n  flex-direction: column;\n  flex: auto;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-layout {\n  flex-direction: row;\n  flex: none;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 25px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip .chip-icon, .weather .template-chip .chip-icon {\n  --mdc-icon-size: 20px;\n  color: inherit;\n  margin-right: 6px;\n}\n\n.weather .attribute-chip.has-action, .weather .template-chip.has-action {\n  cursor: pointer;\n}\n\n.weather .attribute-chip.has-action:focus-visible, .weather .template-chip.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp.has-action, .weather .condition.has-action {\n  cursor: pointer;\n}\n\n.weather .temp.has-action:focus-visible, .weather .condition.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.weather .header-pager {\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  display: flex;\n  position: relative;\n}\n\n.weather.nowcast-pager .header-content {\n  gap: 0;\n  min-height: 0;\n  padding: 0;\n}\n\n.weather.nowcast-pager .header-pager {\n  min-height: 0;\n  overflow: hidden;\n}\n\n.weather.nowcast-pager .header-pages {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-layout {\n  flex: auto;\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-page-nowcast, .weather.nowcast-pager .nowcast-panel, .weather.nowcast-pager wfe-nowcast {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .nowcast-panel {\n  overflow: hidden;\n}\n\n.weather .header-pages {\n  will-change: transform;\n  touch-action: pan-y;\n  flex-direction: row;\n  flex: auto;\n  width: 100%;\n  min-height: 0;\n  transition: transform .35s;\n  display: flex;\n}\n\n.weather .header-page {\n  flex-direction: column;\n  flex: 0 0 100%;\n  gap: 12px;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather.nowcast-pager .header-page {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: var(--wfe-header-padding-block, 16px);\n  box-sizing: border-box;\n  padding-bottom: 0;\n}\n\n.weather .nowcast-panel {\n  background: #0000004d;\n  border-radius: 16px;\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  padding: 12px 12px 6px;\n  display: flex;\n}\n\n.weather wfe-nowcast {\n  flex-direction: column;\n  gap: 0;\n  height: 100%;\n  display: flex;\n}\n\n.weather .nowcast-bars {\n  align-items: flex-end;\n  gap: var(--wfe-nowcast-gap, 5px);\n  flex: auto;\n  min-height: 24px;\n  display: flex;\n}\n\n.weather.nowcast-pager .nowcast-bars {\n  min-height: 16px;\n}\n\n.weather .nowcast-bar {\n  background: #ffffff06;\n  border-radius: 999px;\n  flex: 1 1 0;\n  align-items: flex-end;\n  height: 100%;\n  min-height: 6px;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather .nowcast-bar-fill {\n  background: var(--wfe-nowcast-fill-color, #4aafff);\n  border-radius: inherit;\n  width: 100%;\n  height: 0%;\n  transition: height .35s;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .weather .nowcast-bar-fill {\n    transition: none;\n  }\n}\n\n.weather .nowcast-labels {\n  font-size: var(--ha-font-size-s);\n  color: #fff;\n  justify-content: space-between;\n  display: flex;\n}\n\n.weather .pager-dots {\n  justify-content: center;\n  gap: 6px;\n  padding-top: 6px;\n  display: flex;\n}\n\n.weather.nowcast-pager .pager-dots {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: 2px;\n  padding-bottom: 4px;\n}\n\n.weather .pager-dot {\n  cursor: pointer;\n  background: #ffffff73;\n  border: none;\n  border-radius: 50%;\n  width: 6px;\n  height: 6px;\n  padding: 0;\n}\n\n.weather .pager-dot.active {\n  background: #ffffffe6;\n}\n\n.weather .pager-dot:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .hourly-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .hourly-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast .daily-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .daily-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast.daily .daily-extra.precipitationprobability {\n  color: var(--state-climate-cool-color);\n  opacity: .3;\n  display: block !important;\n}\n\n.forecast .daily-extra.precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability, .forecast.daily .forecast-item > .daily-extra {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .forecast-item > .daily-extra {\n  text-align: center;\n  width: var(--icon-size);\n  grid-row: 5;\n  justify-self: center;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.hourly .forecast-item.no-ampm > .translate-container {\n  margin-top: 4px;\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $j8KxL.css)`
@@ -3850,6 +3850,164 @@ $93e18bf828c9bae2$export$c4d9e0638219e78c = (0, $39J5i.__decorate)([
 ], $93e18bf828c9bae2$export$c4d9e0638219e78c);
 
 
+
+var $39J5i = parcelRequire("39J5i");
+parcelRequire("j0ZcV");
+var $l56HR = parcelRequire("l56HR");
+var $eGUNk = parcelRequire("eGUNk");
+
+
+parcelRequire("1ZxoT");
+var $dsTCw = parcelRequire("dsTCw");
+var $pklEb = parcelRequire("pklEb");
+var $1KSgR = parcelRequire("1KSgR");
+const $4ccfc45860c73208$var$NOWCAST_MINUTES = 60;
+const $4ccfc45860c73208$var$NOWCAST_MIN_BAR_WIDTH_PX = 5;
+const $4ccfc45860c73208$var$NOWCAST_MAX_BAR_WIDTH_PX = 7;
+const $4ccfc45860c73208$var$NOWCAST_BASE_GAP_PX = 5;
+const $4ccfc45860c73208$var$NOWCAST_PRECIPITATION_MIN_SCALE = 1;
+let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eGUNk.LitElement) {
+    createRenderRoot() {
+        return this;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._setupResizeObserver();
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = undefined;
+        }
+    }
+    render() {
+        const series = this._buildMinuteSeries();
+        const bars = this._reduceSeries(series, this._barStride);
+        const maxValue = bars.reduce((max, value)=>Math.max(max, value), 0);
+        const scale = Math.max($4ccfc45860c73208$var$NOWCAST_PRECIPITATION_MIN_SCALE, maxValue);
+        const labels = this._barStride > 1 ? [
+            "Now",
+            "20m",
+            "40m",
+            "60m"
+        ] : [
+            "Now",
+            "10m",
+            "20m",
+            "30m",
+            "40m",
+            "50m",
+            "60m"
+        ];
+        return (0, $l56HR.html)`
+      <div
+        class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+            "nowcast-bars": true
+        })}
+        style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+            "--wfe-nowcast-gap": `${this._barGap}px`
+        })}
+      >
+        ${bars.map((value)=>{
+            const ratio = Math.min(1, value / scale);
+            return (0, $l56HR.html)`
+            <div class="nowcast-bar">
+              <div class="nowcast-bar-fill" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+                height: `${Math.round(ratio * 100)}%`
+            })}></div>
+            </div>
+          `;
+        })}
+      </div>
+      <div class="nowcast-labels">
+        ${labels.map((label)=>(0, $l56HR.html)`<span>${label}</span>`)}
+      </div>
+    `;
+    }
+    _setupResizeObserver() {
+        if (this._resizeObserver) return;
+        this._resizeObserver = new ResizeObserver((entries)=>{
+            const width = entries[0]?.contentRect?.width ?? this.clientWidth;
+            this._updateResolution(width);
+        });
+        this._resizeObserver.observe(this);
+    }
+    _updateResolution(width) {
+        if (!Number.isFinite(width) || width <= 0) return;
+        const { stride: stride , gap: gap  } = this._resolveLayout(width);
+        if (stride !== this._barStride) this._barStride = stride;
+        if (gap !== this._barGap) this._barGap = gap;
+    }
+    _buildMinuteSeries() {
+        const normalized = (Array.isArray(this.forecast) ? this.forecast : []).map((item)=>{
+            const timestamp = new Date(item.datetime).getTime();
+            return {
+                timestamp: timestamp,
+                value: Number.isFinite(item.precipitation) ? Math.max(0, item.precipitation) : 0
+            };
+        }).filter((item)=>Number.isFinite(item.timestamp)).sort((a, b)=>a.timestamp - b.timestamp);
+        const values = normalized.map((item)=>item.value);
+        const series = values.slice(0, $4ccfc45860c73208$var$NOWCAST_MINUTES);
+        while(series.length < $4ccfc45860c73208$var$NOWCAST_MINUTES)series.push(0);
+        return series;
+    }
+    _reduceSeries(series, stride) {
+        if (stride <= 1) return series;
+        const grouped = [];
+        for(let index = 0; index < series.length; index += stride){
+            const chunk = series.slice(index, index + stride);
+            grouped.push(chunk.reduce((max, value)=>Math.max(max, value), 0));
+        }
+        return grouped;
+    }
+    _resolveLayout(width) {
+        let stride = 1;
+        let gap = $4ccfc45860c73208$var$NOWCAST_BASE_GAP_PX;
+        while(stride < $4ccfc45860c73208$var$NOWCAST_MINUTES){
+            const barWidth = this._computeBarWidth(width, stride, gap);
+            if (barWidth >= $4ccfc45860c73208$var$NOWCAST_MIN_BAR_WIDTH_PX) break;
+            stride += 1;
+        }
+        const barCount = Math.ceil($4ccfc45860c73208$var$NOWCAST_MINUTES / stride);
+        if (barCount > 1) {
+            const maxGap = (width - barCount * $4ccfc45860c73208$var$NOWCAST_MAX_BAR_WIDTH_PX) / (barCount - 1);
+            if (maxGap > gap) gap = maxGap;
+        }
+        return {
+            stride: stride,
+            gap: Math.max(0, gap)
+        };
+    }
+    _computeBarWidth(width, stride, gap) {
+        const barCount = Math.ceil($4ccfc45860c73208$var$NOWCAST_MINUTES / stride);
+        if (barCount <= 0) return 0;
+        if (barCount === 1) return width;
+        return (width - gap * (barCount - 1)) / barCount;
+    }
+    constructor(...args){
+        super(...args);
+        this.forecast = [];
+        this._barStride = 1;
+        this._barGap = $4ccfc45860c73208$var$NOWCAST_BASE_GAP_PX;
+    }
+};
+(0, $39J5i.__decorate)([
+    (0, $dsTCw.property)({
+        attribute: false
+    })
+], $4ccfc45860c73208$export$b13ff882ae67cf8e.prototype, "forecast", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $4ccfc45860c73208$export$b13ff882ae67cf8e.prototype, "_barStride", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $4ccfc45860c73208$export$b13ff882ae67cf8e.prototype, "_barGap", void 0);
+$4ccfc45860c73208$export$b13ff882ae67cf8e = (0, $39J5i.__decorate)([
+    (0, $1KSgR.customElement)("wfe-nowcast")
+], $4ccfc45860c73208$export$b13ff882ae67cf8e);
+
+
 const $aefd8b71d9c18f54$var$DEFAULT_OPTIONS = {
     threshold: 0.005,
     maxVelocity: 5,
@@ -4093,12 +4251,15 @@ const $aefd8b71d9c18f54$export$3bc24c4fed096b83 = (container)=>{
 
 const $e6159c9afb48cae5$var$MISSING_ATTRIBUTE_TEXT = "missing";
 const $e6159c9afb48cae5$var$SOLAR_FORECAST_ATTRIBUTE = "solar_forecast";
+const $e6159c9afb48cae5$var$NOWCAST_SERVICE_NAME = "get_minute_forecast";
 const $e6159c9afb48cae5$var$isAttributeHeaderChip = (chip)=>chip.type === "attribute";
 const $e6159c9afb48cae5$var$isTemplateHeaderChip = (chip)=>chip.type === "template";
 
 class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
     // Called by HA
     setConfig(config) {
+        const previousNowcastEntity = this._config?.nowcast_entity;
+        const previousNowcastLayout = this._config?.nowcast_layout;
         const normalizedHeaderChips = this._normalizeHeaderChips(config);
         const normalizedHeaderAttributes = normalizedHeaderChips.filter($e6159c9afb48cae5$var$isAttributeHeaderChip).map((chip)=>chip.attribute).filter((attribute)=>typeof attribute === "string" && attribute.trim().length > 0);
         const normalizedDailyMinGap = this._normalizeMinGapValue(config.daily_min_gap);
@@ -4110,6 +4271,9 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const defaults = {
             type: "custom:weather-forecast-extended-card",
             ...config,
+            nowcast_entity: config.nowcast_entity,
+            nowcast_layout: config.nowcast_layout ?? "pager",
+            nowcast_always_show: config.nowcast_always_show ?? false,
             show_header: config.show_header ?? true,
             hourly_forecast: config.hourly_forecast ?? true,
             daily_forecast: config.daily_forecast ?? true,
@@ -4132,11 +4296,14 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             solar_forecast_entries: Array.isArray(config.solar_forecast_entries) ? config.solar_forecast_entries : undefined
         };
         this._config = defaults;
+        if (previousNowcastEntity !== defaults.nowcast_entity) this._resetNowcastState();
+        if (previousNowcastLayout !== defaults.nowcast_layout) this._headerPageIndex = 0;
         this._entity = defaults.entity;
         // call set hass() to immediately adjust to a changed entity
         // while editing the entity in the card editor
         if (this._hass) this.hass = this._hass;
         this._refreshTemplateSubscriptions();
+        this._setupNowcastRefreshTimer();
     }
     set hass(hass) {
         this._hass = hass;
@@ -4149,6 +4316,8 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const headerTemperatureEntity = this._config?.header_temperature_entity;
         this._headerTemperatureState = headerTemperatureEntity ? hass.states[headerTemperatureEntity] : undefined;
         this._refreshTemplateSubscriptions();
+        this._handleNowcastHassUpdate();
+        this._setupNowcastRefreshTimer();
     }
     _normalizeHeaderChips(config) {
         const limit = 3;
@@ -4330,6 +4499,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const showHeader = this._config.show_header !== false;
         const showDaily = this._config.daily_forecast !== false;
         const showHourly = this._config.hourly_forecast !== false;
+        const hasInlineNowcast = Boolean(showHeader && this._config.nowcast_entity && (this._config.nowcast_layout ?? "pager") === "inline");
         let rows = 3;
         if (orientation === "horizontal") {
             if (!showDaily && !showHourly) rows = showHeader ? 3 : 3;
@@ -4349,6 +4519,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             if (!showHeader && !showDaily && !showHourly) computed = 2;
             rows = Math.max(computed, 2);
         }
+        if (hasInlineNowcast) rows += 1;
         const minRows = rows;
         return {
             columns: 12,
@@ -4427,6 +4598,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             clearValues: true
         });
         this._unsubscribeForecastEvents();
+        this._clearNowcastRefreshTimer();
         if (this._resizeObserver) this._resizeObserver.disconnect();
         Object.values(this._momentumCleanup).forEach((cleanup)=>cleanup?.());
         this._momentumCleanup = {};
@@ -4440,6 +4612,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!this._config || !this._hass) return;
         if (changedProps.has("_config") || !this._subscriptions.hourly && !this._subscriptions.daily) this._subscribeForecastEvents();
         if (changedProps.has("_config") || forecastHourlyChanged || forecastDailyChanged) this._refreshSolarForecastData();
+        if (changedProps.has("_config")) this._refreshNowcastData();
         const card = this.shadowRoot.querySelector("ha-card");
         const daily = this.shadowRoot.querySelector(".forecast.daily");
         const hourly = this.shadowRoot.querySelector(".forecast.hourly");
@@ -4495,9 +4668,16 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             "orientation-horizontal": orientation === "horizontal",
             "orientation-vertical": orientation !== "horizontal"
         };
+        const headerOnly = showHeader && !showForecasts;
+        const nowcastEnabled = this._isNowcastEnabled();
+        const nowcastLayout = this._config.nowcast_layout ?? "pager";
+        const showNowcastPager = nowcastEnabled && nowcastLayout === "pager";
+        const showInlineNowcast = nowcastEnabled && nowcastLayout === "inline" && (this._config.nowcast_always_show || this._nowcastHasRain || headerOnly);
         const headerClassMap = {
             weather: true,
-            "header-only": showHeader && !showForecasts
+            "header-only": headerOnly,
+            "nowcast-inline": showInlineNowcast,
+            "nowcast-pager": showNowcastPager
         };
         const hasContent = showHeader || dailyEnabled || hourlyEnabled;
         const dailyStyle = (()=>{
@@ -4525,17 +4705,12 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
       `;
         }
         const headerChips = this._computeHeaderChipDisplays();
-        return (0, $l56HR.html)`
-      <ha-card>
-        ${showHeader ? (0, $l56HR.html)`
-            <div
-              class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(headerClassMap)}
-              style=${`background-image: url(${this._getWeatherBgImage(this._state.state)})`}
-            >
-              <div class="header-content">
-                ${headerChips.length ? (0, $l56HR.html)`
-                    <div class="header-attributes">
-                      ${headerChips.map((chip)=>{
+        const useSnowNowcastFill = this._shouldUseSnowNowcastFill();
+        const headerStyles = {
+            "background-image": `url(${this._getWeatherBgImage(this._state.state)})`
+        };
+        if (showInlineNowcast && !headerOnly) headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height))";
+        const headerChipsTemplate = headerChips.length ? headerChips.map((chip)=>{
             const hasChipAction = (0, $ee1328194d522913$export$e217e69099d082f5)(chip.action);
             const chipClassMap = {
                 "attribute-chip": true,
@@ -4545,49 +4720,120 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             };
             const chipTitle = chip.tooltip || `${chip.label}: ${chip.display}`;
             return (0, $l56HR.html)`
-                          <div
-                            class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(chipClassMap)}
-                            title=${chipTitle}
-                            role=${hasChipAction ? "button" : (0, $l56HR.nothing)}
-                            tabindex=${hasChipAction ? 0 : (0, $l56HR.nothing)}
-                            @click=${hasChipAction ? ()=>this._handleHeaderChipTap(chip.action) : undefined}
-                            @keydown=${hasChipAction ? (ev)=>this._handleHeaderChipKeydown(ev, chip.action) : undefined}
-                          >
-                            ${chip.icon ? (0, $l56HR.html)`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>` : (0, $l56HR.nothing)}
-                            <span class="header-pill-text">${chip.display}</span>
-                          </div>
-                        `;
-        })}
-                    </div>
-                  ` : (0, $l56HR.nothing)}
-                <div class="header-main">
-                  <div
-                    class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+          <div
+            class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(chipClassMap)}
+            title=${chipTitle}
+            role=${hasChipAction ? "button" : (0, $l56HR.nothing)}
+            tabindex=${hasChipAction ? 0 : (0, $l56HR.nothing)}
+            @click=${hasChipAction ? ()=>this._handleHeaderChipTap(chip.action) : undefined}
+            @keydown=${hasChipAction ? (ev)=>this._handleHeaderChipKeydown(ev, chip.action) : undefined}
+          >
+            ${chip.icon ? (0, $l56HR.html)`<ha-icon class="chip-icon" .icon=${chip.icon}></ha-icon>` : (0, $l56HR.nothing)}
+            <span class="header-pill-text">${chip.display}</span>
+          </div>
+        `;
+        }) : (0, $l56HR.nothing);
+        const pagerDotsTemplate = showNowcastPager ? (0, $l56HR.html)`
+        <div class="pager-dots">
+          ${[
+            0,
+            1
+        ].map((index)=>(0, $l56HR.html)`
+            <button
+              class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+                "pager-dot": true,
+                active: index === this._headerPageIndex
+            })}
+              type="button"
+              aria-label=${`Header page ${index + 1}`}
+              @click=${()=>this._setHeaderPage(index)}
+            ></button>
+          `)}
+        </div>
+      ` : (0, $l56HR.nothing);
+        const headerAttributesTemplate = headerChips.length ? (0, $l56HR.html)`
+        <div class="header-attributes">
+          ${headerChipsTemplate}
+        </div>
+      ` : (0, $l56HR.nothing);
+        const headerMainTemplate = (0, $l56HR.html)`
+      <div class="header-main">
+        <div
+          class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
             temp: true,
             "has-action": hasTemperatureTapAction
         })}
-                    role=${hasTemperatureTapAction ? "button" : (0, $l56HR.nothing)}
-                    tabindex=${hasTemperatureTapAction ? 0 : (0, $l56HR.nothing)}
-                    @click=${hasTemperatureTapAction ? ()=>this._handleHeaderTap(temperatureTapAction, temperatureActionEntity) : undefined}
-                    @keydown=${hasTemperatureTapAction ? (ev)=>this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity) : undefined}
-                  >
-                    <span class="header-pill-text">${headerTemperature}</span>
-                  </div>
-                  <div
-                    class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
+          role=${hasTemperatureTapAction ? "button" : (0, $l56HR.nothing)}
+          tabindex=${hasTemperatureTapAction ? 0 : (0, $l56HR.nothing)}
+          @click=${hasTemperatureTapAction ? ()=>this._handleHeaderTap(temperatureTapAction, temperatureActionEntity) : undefined}
+          @keydown=${hasTemperatureTapAction ? (ev)=>this._handleHeaderKeydown(ev, temperatureTapAction, temperatureActionEntity) : undefined}
+        >
+          <span class="header-pill-text">${headerTemperature}</span>
+        </div>
+        <div
+          class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)({
             condition: true,
             "has-action": hasConditionTapAction
         })}
-                    role=${hasConditionTapAction ? "button" : (0, $l56HR.nothing)}
-                    tabindex=${hasConditionTapAction ? 0 : (0, $l56HR.nothing)}
-                    @click=${hasConditionTapAction ? ()=>this._handleHeaderTap(conditionTapAction) : undefined}
-                    @keydown=${hasConditionTapAction ? (ev)=>this._handleHeaderKeydown(ev, conditionTapAction) : undefined}
-                  >
-                    <span class="header-pill-text">
-                      ${headerCondition}
-                    </span>
-                  </div>
-                </div>
+          role=${hasConditionTapAction ? "button" : (0, $l56HR.nothing)}
+          tabindex=${hasConditionTapAction ? 0 : (0, $l56HR.nothing)}
+          @click=${hasConditionTapAction ? ()=>this._handleHeaderTap(conditionTapAction) : undefined}
+          @keydown=${hasConditionTapAction ? (ev)=>this._handleHeaderKeydown(ev, conditionTapAction) : undefined}
+        >
+          <span class="header-pill-text">
+            ${headerCondition}
+          </span>
+        </div>
+      </div>
+    `;
+        const headerLayoutTemplate = (0, $l56HR.html)`
+      <div class="header-layout">
+        ${headerAttributesTemplate}
+        ${headerMainTemplate}
+      </div>
+    `;
+        const nowcastPanelTemplate = (0, $l56HR.html)`
+      <div
+        class="nowcast-panel"
+        style=${useSnowNowcastFill ? (0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+            "--wfe-nowcast-fill-color": "rgba(255, 255, 255, 0.9)"
+        }) : (0, $l56HR.nothing)}
+      >
+        <wfe-nowcast .forecast=${this._nowcastForecast}></wfe-nowcast>
+      </div>
+    `;
+        return (0, $l56HR.html)`
+      <ha-card>
+        ${showHeader ? (0, $l56HR.html)`
+            <div
+              class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(headerClassMap)}
+              style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)(headerStyles)}
+            >
+              <div class="header-content">
+                ${showNowcastPager ? (0, $l56HR.html)`
+                    <div class="header-pager">
+                      <div
+                        class="header-pages"
+                        style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+            transform: `translateX(-${this._headerPageIndex * 100}%)`
+        })}
+                        @pointerdown=${this._handleHeaderPagerPointerDown}
+                        @pointerup=${this._handleHeaderPagerPointerUp}
+                        @pointercancel=${this._handleHeaderPagerPointerCancel}
+                      >
+                        <div class="header-page header-page-primary">
+                          ${headerLayoutTemplate}
+                        </div>
+                        <div class="header-page header-page-nowcast">
+                          ${nowcastPanelTemplate}
+                        </div>
+                      </div>
+                      ${pagerDotsTemplate}
+                    </div>
+                  ` : (0, $l56HR.html)`
+                    ${headerLayoutTemplate}
+                    ${showInlineNowcast ? nowcastPanelTemplate : (0, $l56HR.nothing)}
+                  `}
               </div>
             </div>
           ` : (0, $l56HR.nothing)}
@@ -4879,6 +5125,147 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             };
         });
     }
+    _resetNowcastState() {
+        this._nowcastRequestId += 1;
+        this._nowcastEntityId = undefined;
+        this._nowcastServiceDomain = undefined;
+        this._nowcastLastUpdated = undefined;
+        this._nowcastForecast = [];
+        this._nowcastHasRain = false;
+        this._headerPageIndex = 0;
+        this._clearNowcastRefreshTimer();
+    }
+    _clearNowcastForecast() {
+        if (this._nowcastForecast.length || this._nowcastHasRain) {
+            this._nowcastForecast = [];
+            this._nowcastHasRain = false;
+        }
+    }
+    _refreshNowcastData() {
+        if (!this._isNowcastEnabled() || !this._hass?.callWS) {
+            this._clearNowcastForecast();
+            return;
+        }
+        const entityId = this._config?.nowcast_entity;
+        if (!entityId) {
+            this._clearNowcastForecast();
+            return;
+        }
+        const requestId = ++this._nowcastRequestId;
+        this._loadNowcastData(requestId, entityId);
+    }
+    async _loadNowcastData(requestId, entityId) {
+        try {
+            const serviceDomain = await this._resolveNowcastServiceDomain(entityId, requestId);
+            if (!serviceDomain || requestId !== this._nowcastRequestId) {
+                this._clearNowcastForecast();
+                return;
+            }
+            const response = await this._hass.callWS({
+                type: "call_service",
+                domain: serviceDomain,
+                service: $e6159c9afb48cae5$var$NOWCAST_SERVICE_NAME,
+                target: {
+                    entity_id: entityId
+                },
+                return_response: true
+            });
+            if (requestId !== this._nowcastRequestId) return;
+            const forecast = this._extractNowcastForecast(response, entityId);
+            this._setNowcastForecast(forecast);
+        } catch (_err) {
+            this._clearNowcastForecast();
+        }
+    }
+    async _resolveNowcastServiceDomain(entityId, requestId) {
+        if (this._nowcastEntityId === entityId && this._nowcastServiceDomain) return this._nowcastServiceDomain;
+        try {
+            const entry = await this._hass.callWS({
+                type: "config/entity_registry/get",
+                entity_id: entityId
+            });
+            if (requestId !== this._nowcastRequestId) return undefined;
+            const platform = entry?.platform;
+            this._nowcastEntityId = entityId;
+            this._nowcastServiceDomain = typeof platform === "string" && platform.trim().length ? platform : undefined;
+            return this._nowcastServiceDomain;
+        } catch (_err) {
+            this._nowcastEntityId = entityId;
+            this._nowcastServiceDomain = undefined;
+            return undefined;
+        }
+    }
+    _extractNowcastForecast(response, entityId) {
+        const items = [];
+        const entries = response?.response?.[entityId]?.forecast;
+        if (!Array.isArray(entries)) return items;
+        entries.forEach((entry)=>{
+            const datetime = typeof entry?.datetime === "string" ? entry.datetime : undefined;
+            if (!datetime) return;
+            const timestamp = new Date(datetime).getTime();
+            if (!Number.isFinite(timestamp)) return;
+            const rawValue = entry?.precipitation;
+            const precipitation = typeof rawValue === "number" ? rawValue : Number(rawValue);
+            if (!Number.isFinite(precipitation)) return;
+            items.push({
+                datetime: datetime,
+                precipitation: Math.max(0, precipitation)
+            });
+        });
+        return items.sort((a, b)=>new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+    }
+    _setNowcastForecast(forecast) {
+        const hasRain = forecast.some((item)=>item.precipitation > 0);
+        const hadRain = this._nowcastHasRain;
+        this._nowcastForecast = forecast;
+        this._nowcastHasRain = hasRain;
+        if (!hadRain && hasRain && this._headerPageIndex === 0 && this._isNowcastPagerEnabled()) this._headerPageIndex = 1;
+    }
+    _handleNowcastHassUpdate() {
+        if (!this._isNowcastEnabled() || !this._hass) return;
+        const entityId = this._config?.nowcast_entity;
+        if (!entityId) return;
+        const state = this._hass.states[entityId];
+        if (!state) {
+            this._clearNowcastForecast();
+            return;
+        }
+        const lastUpdated = state.last_updated ?? state.last_changed;
+        if (!lastUpdated || lastUpdated === this._nowcastLastUpdated) return;
+        this._nowcastLastUpdated = lastUpdated;
+        this._refreshNowcastData();
+    }
+    _isNowcastEnabled() {
+        return Boolean(this._config?.nowcast_entity);
+    }
+    _isNowcastPagerEnabled() {
+        return this._isNowcastEnabled() && (this._config?.nowcast_layout ?? "pager") === "pager";
+    }
+    _setupNowcastRefreshTimer() {
+        if (!this._isNowcastEnabled() || !this._hass) {
+            this._clearNowcastRefreshTimer();
+            return;
+        }
+        this._clearNowcastRefreshTimer();
+        const now = Date.now();
+        const nextMinuteDelay = 60000 - now % 60000;
+        this._nowcastRefreshTimeout = window.setTimeout(()=>{
+            this._refreshNowcastData();
+            this._nowcastRefreshInterval = window.setInterval(()=>{
+                this._refreshNowcastData();
+            }, 60000);
+        }, nextMinuteDelay);
+    }
+    _clearNowcastRefreshTimer() {
+        if (this._nowcastRefreshTimeout !== undefined) {
+            window.clearTimeout(this._nowcastRefreshTimeout);
+            this._nowcastRefreshTimeout = undefined;
+        }
+        if (this._nowcastRefreshInterval !== undefined) {
+            window.clearInterval(this._nowcastRefreshInterval);
+            this._nowcastRefreshInterval = undefined;
+        }
+    }
     _formatSolarHourKey(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -4931,6 +5318,10 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!variants) return fallback;
         if (!useNightBackgrounds) return variants.day;
         return isDaytime ? variants.day : variants.night;
+    }
+    _shouldUseSnowNowcastFill() {
+        const condition = this._state?.state;
+        return condition === "snowy" || condition === "snowy-rainy";
     }
     _isDaytimeNow() {
         const attributeValue = this._state?.attributes?.is_daytime;
@@ -5020,6 +5411,36 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             behavior: "smooth"
         });
     }
+    _setHeaderPage(index) {
+        const clamped = index <= 0 ? 0 : 1;
+        if (clamped === this._headerPageIndex) return;
+        this._headerPageIndex = clamped;
+    }
+    _handleHeaderPagerPointerDown(event) {
+        if (!this._isNowcastPagerEnabled()) return;
+        this._headerSwipePointerId = event.pointerId;
+        this._headerSwipeStartX = event.clientX;
+        const target = event.currentTarget;
+        if (target?.setPointerCapture) target.setPointerCapture(event.pointerId);
+    }
+    _handleHeaderPagerPointerUp(event) {
+        if (event.pointerId !== this._headerSwipePointerId) return;
+        const startX = this._headerSwipeStartX;
+        const deltaX = startX !== undefined ? event.clientX - startX : 0;
+        const threshold = 32;
+        if (Math.abs(deltaX) >= threshold) this._setHeaderPage(deltaX < 0 ? 1 : 0);
+        const target = event.currentTarget;
+        if (target?.releasePointerCapture) target.releasePointerCapture(event.pointerId);
+        this._headerSwipePointerId = undefined;
+        this._headerSwipeStartX = undefined;
+    }
+    _handleHeaderPagerPointerCancel(event) {
+        if (event.pointerId !== this._headerSwipePointerId) return;
+        const target = event.currentTarget;
+        if (target?.releasePointerCapture) target.releasePointerCapture(event.pointerId);
+        this._headerSwipePointerId = undefined;
+        this._headerSwipeStartX = undefined;
+    }
     _handleHeaderTap(actionConfig, entity) {
         this._executeTapAction(actionConfig, entity);
     }
@@ -5059,6 +5480,9 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         this._templateChipValues = {};
         this._solarForecastByHour = {};
         this._solarForecastByDay = {};
+        this._nowcastForecast = [];
+        this._nowcastHasRain = false;
+        this._headerPageIndex = 0;
         // private property
         this._subscriptions = {
             hourly: undefined,
@@ -5068,6 +5492,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         this._momentumCleanup = {};
         this._momentumElement = {};
         this._solarForecastRequestId = 0;
+        this._nowcastRequestId = 0;
     }
 }
 (0, $39J5i.__decorate)([
@@ -5112,6 +5537,15 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
 (0, $39J5i.__decorate)([
     (0, $pklEb.state)()
 ], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_solarForecastByDay", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_nowcastForecast", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_nowcastHasRain", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $e6159c9afb48cae5$export$53427b5d95bebd88.prototype, "_headerPageIndex", void 0);
 
 
 customElements.define("weather-forecast-extended-card", (0, $e6159c9afb48cae5$export$53427b5d95bebd88));

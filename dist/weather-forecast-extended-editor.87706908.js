@@ -187,6 +187,72 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
     .forecast-switch span {
       font-size: 14px;
     }
+
+    .editor-expander {
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--card-background-color, #fff);
+    }
+
+    .editor-expander summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .editor-expander summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .editor-expander > summary ha-icon {
+      transition: transform 0.2s ease;
+    }
+
+    .editor-expander[open] > summary ha-icon {
+      transform: rotate(180deg);
+    }
+
+    .editor-expander[open] summary {
+      border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+    }
+
+    .editor-expander .summary-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .editor-expander.disabled summary {
+      color: var(--secondary-text-color);
+      cursor: default;
+    }
+
+    .editor-expander.disabled > summary ha-icon {
+      opacity: 0.4;
+    }
+
+    .editor-expander .expander-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .editor-expander.nested summary {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .editor-expander.nested .expander-content {
+      padding: 12px;
+    }
   `;
     })();
     setConfig(config) {
@@ -195,6 +261,9 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         this._config = {
             type: "custom:weather-forecast-extended-card",
             ...config,
+            nowcast_entity: config.nowcast_entity,
+            nowcast_layout: config.nowcast_layout ?? "pager",
+            nowcast_always_show: config.nowcast_always_show ?? false,
             show_header: config.show_header ?? true,
             hourly_forecast: config.hourly_forecast ?? true,
             daily_forecast: config.daily_forecast ?? true,
@@ -209,7 +278,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         if (!this.hass || !this._config) return (0, $j0ZcV.html)``;
         this._refreshForecastOptions();
         this._ensureSolarForecastOptions();
-        const { general: generalSchema , layout: layoutSchema , header: headerSchema , chips: chipSchema , hourly: hourlySchema , daily: dailySchema  } = this._buildSchemas();
+        const { general: generalSchema , layout: layoutSchema , header: headerSchema , nowcast: nowcastSchema , chips: chipSchema , hourly: hourlySchema , daily: dailySchema  } = this._buildSchemas();
         const formData = this._createFormData();
         return (0, $j0ZcV.html)`
       <ha-form
@@ -220,78 +289,10 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         @value-changed=${this._handleValueChanged}
       ></ha-form>
       <div class="editor-section">
-        <h4 class="section-title">Layout</h4>
-        <div class="group-card">
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${layoutSchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-      </div>
-      ${this._config.show_header !== false ? (0, $j0ZcV.html)`
-            <div class="editor-section">
-              <h4 class="section-title">Header options</h4>
-              <div class="group-card">
-                <ha-form
-                  .hass=${this.hass}
-                  .data=${formData}
-                  .schema=${headerSchema}
-                  .computeLabel=${this._computeLabel}
-                  @value-changed=${this._handleValueChanged}
-                ></ha-form>
-                <div class="editor-subsection">
-                  <h5 class="section-subtitle">Tap actions</h5>
-                  <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
-                  <ha-selector
-                    .hass=${this.hass}
-                    .selector=${{
-            ui_action: {}
-        }}
-                    .value=${this._config.header_tap_action_temperature}
-                    .label=${"Temperature tap action"}
-                    .required=${false}
-                    .disabled=${this._config.show_header === false}
-                    @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_temperature")}
-                  ></ha-selector>
-                  <ha-selector
-                    .hass=${this.hass}
-                    .selector=${{
-            ui_action: {}
-        }}
-                    .value=${this._config.header_tap_action_condition}
-                    .label=${"Condition tap action"}
-                    .required=${false}
-                    .disabled=${this._config.show_header === false}
-                    @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_condition")}
-                  ></ha-selector>
-                </div>
-                <div class="chips-section">
-                  <h5 class="section-subtitle">Chips</h5>
-                  <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
-                  <ha-form
-                    .hass=${this.hass}
-                    .data=${formData}
-                    .schema=${chipSchema}
-                    .computeLabel=${this._computeLabel}
-                    @value-changed=${this._handleValueChanged}
-                  ></ha-form>
-                </div>
-              </div>
-            </div>
-          ` : (0, $j0ZcV.nothing)}
-      <div class="editor-section">
-        <h4 class="section-title">Forecast options</h4>
-        <div class="group-card">
-          <div class="editor-subsection">
-            <div>
-              <h5 class="section-subtitle">Location</h5>
-              <p class="location-description">
-                Needed for sunrise/sunset markers and day/night backgrounds
-              </p>
-            </div>
+        ${this._renderExpander("gps-coordinates", "GPS Coordinates", (0, $j0ZcV.html)`
+            <p class="location-description">
+              Needed for sunrise/sunset markers and day/night backgrounds
+            </p>
             <div class="forecast-switch">
               <span>Use Home Assistant location</span>
               <ha-switch
@@ -324,52 +325,10 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 />
               </label>
             </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Sunrise & Sunset</h5>
-            <div class="forecast-switch">
-              <span>Show sunrise & sunset</span>
-              <ha-switch
-                name="show_sun_times"
-                .checked=${this._config.show_sun_times ?? false}
-                @change=${this._handleSunToggleChange}
-              ></ha-switch>
-            </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Forecast spacing</h5>
-            <p class="location-description">
-              Minimum distance between forecast items in pixels (10px or greater)
-            </p>
-            <div class="sun-coordinates">
-              <label class="coordinate-field">
-                <span>Daily min gap (px)</span>
-                <input
-                  type="number"
-                  name="daily_min_gap"
-                  min="10"
-                  step="1"
-                  placeholder="Default 30"
-                  .value=${String(this._config.daily_min_gap ?? "")}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-              <label class="coordinate-field">
-                <span>Hourly min gap (px)</span>
-                <input
-                  type="number"
-                  name="hourly_min_gap"
-                  min="10"
-                  step="1"
-                  placeholder="Default 16"
-                  .value=${String(this._config.hourly_min_gap ?? "")}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-            </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Solar forecast</h5>
+          `)}
+      </div>
+      <div class="editor-section">
+        ${this._renderExpander("solar-forecast", "Solar Forecast", (0, $j0ZcV.html)`
             <p class="location-description">
               The forecast needs to be assigned to a solar panel configuration in the Energy dashboard settings. Otherwise it can't be used here.
             </p>
@@ -388,9 +347,73 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
               @value-changed=${this._handleSolarForecastSelectionChange}
             ></ha-selector>
             ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length ? (0, $j0ZcV.html)`<p class="location-description">No Energy solar forecasts configured.</p>` : (0, $j0ZcV.nothing)}
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Daily forecast options</h5>
+          `)}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander("header", "Header", "show_header", (0, $j0ZcV.html)`
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${headerSchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Tap actions</h5>
+              <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{
+            ui_action: {}
+        }}
+                .value=${this._config.header_tap_action_temperature}
+                .label=${"Temperature tap action"}
+                .required=${false}
+                .disabled=${this._config.show_header === false}
+                @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+              ></ha-selector>
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{
+            ui_action: {}
+        }}
+                .value=${this._config.header_tap_action_condition}
+                .label=${"Condition tap action"}
+                .required=${false}
+                .disabled=${this._config.show_header === false}
+                @value-changed=${(event)=>this._handleHeaderActionChange(event, "header_tap_action_condition")}
+              ></ha-selector>
+            </div>
+            ${this._renderExpander("header-chips", "Chips", (0, $j0ZcV.html)`
+                <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${chipSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              `, {
+            nested: true
+        })}
+            ${this._renderExpander("header-nowcast", "Nowcast", (0, $j0ZcV.html)`
+                <p class="location-description">
+                  Controls the minute-by-minute precipitation chart shown inside the header.
+                </p>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${nowcastSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              `, {
+            nested: true
+        })}
+          `)}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander("daily-forecast", "Daily forecast", "daily_forecast", (0, $j0ZcV.html)`
             <ha-form
               .hass=${this.hass}
               .data=${formData}
@@ -437,9 +460,30 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 />
               </label>
             </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Forecast spacing</h5>
+              <p class="location-description">
+                Minimum distance between forecast items in pixels (10px or greater)
+              </p>
+              <div class="sun-coordinates">
+                <label class="coordinate-field">
+                  <span>Daily min gap (px)</span>
+                  <input
+                    type="number"
+                    name="daily_min_gap"
+                    min="10"
+                    step="1"
+                    placeholder="Default 30"
+                    .value=${String(this._config.daily_min_gap ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                </label>
+              </div>
+            </div>
+          `)}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander("hourly-forecast", "Hourly forecast", "hourly_forecast", (0, $j0ZcV.html)`
             <ha-form
               .hass=${this.hass}
               .data=${formData}
@@ -486,9 +530,53 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 />
               </label>
             </div>
-          </div>
-        </div>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Sunrise & Sunset</h5>
+              <div class="forecast-switch">
+                <span>Show sunrise & sunset</span>
+                <ha-switch
+                  name="show_sun_times"
+                  .checked=${this._config.show_sun_times ?? false}
+                  @change=${this._handleSunToggleChange}
+                ></ha-switch>
+              </div>
+            </div>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Forecast spacing</h5>
+              <p class="location-description">
+                Minimum distance between forecast items in pixels (10px or greater)
+              </p>
+              <div class="sun-coordinates">
+                <label class="coordinate-field">
+                  <span>Hourly min gap (px)</span>
+                  <input
+                    type="number"
+                    name="hourly_min_gap"
+                    min="10"
+                    step="1"
+                    placeholder="Default 16"
+                    .value=${String(this._config.hourly_min_gap ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                </label>
+              </div>
+            </div>
+          `)}
       </div>
+      ${this._config.daily_forecast !== false && this._config.hourly_forecast !== false ? (0, $j0ZcV.html)`
+            <div class="editor-section">
+              <h4 class="section-title">Orientation</h4>
+              <div class="group-card">
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${layoutSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              </div>
+            </div>
+          ` : (0, $j0ZcV.nothing)}
     `;
     }
     _handleValueChanged(event) {
@@ -536,6 +624,27 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         const update = {};
         update[key] = value === "" ? undefined : value;
         this._updateConfig(update);
+    }
+    _handleExpanderToggle(event, id) {
+        const target = event.currentTarget;
+        if (!target) return;
+        this._expandedSections = {
+            ...this._expandedSections,
+            [id]: target.open
+        };
+    }
+    _handleExpanderSummaryClick(event, disabled) {
+        if (!disabled) return;
+        event.preventDefault();
+    }
+    _isToggleDisabled(name, config) {
+        const toggleNames = [
+            "show_header",
+            "daily_forecast",
+            "hourly_forecast"
+        ];
+        const enabledCount = toggleNames.reduce((count, key)=>this._isSectionEnabled(key, config) ? count + 1 : count, 0);
+        return enabledCount <= 1 && this._isSectionEnabled(name, config);
     }
     _handleOptionalNumberInputChange(event) {
         const target = event.currentTarget;
@@ -625,6 +734,58 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             }
         });
         return formData;
+    }
+    _renderExpander(id, title, content, options = {}) {
+        const className = options.nested ? "editor-expander nested" : "editor-expander";
+        const isOpen = this._expandedSections[id] ?? options.open ?? false;
+        return (0, $j0ZcV.html)`
+      <details
+        class=${className}
+        ?open=${isOpen}
+        @toggle=${(event)=>this._handleExpanderToggle(event, id)}
+      >
+        <summary>
+          <span>${title}</span>
+          <ha-icon icon="mdi:chevron-down"></ha-icon>
+        </summary>
+        <div class="expander-content">
+          ${content}
+        </div>
+      </details>
+    `;
+    }
+    _renderToggleExpander(id, title, toggleName, content, options = {}) {
+        const config = this._config;
+        if (!config) return 0, $j0ZcV.nothing;
+        const isEnabled = this._isSectionEnabled(toggleName, config);
+        const toggleDisabled = this._isToggleDisabled(toggleName, config);
+        const isOpen = isEnabled && (this._expandedSections[id] ?? options.open ?? false);
+        const className = `editor-expander${isEnabled ? "" : " disabled"}`;
+        return (0, $j0ZcV.html)`
+      <details
+        class=${className}
+        ?open=${isOpen}
+        @toggle=${(event)=>this._handleExpanderToggle(event, id)}
+      >
+        <summary @click=${(event)=>this._handleExpanderSummaryClick(event, !isEnabled)}>
+          <span>${title}</span>
+          <span class="summary-actions">
+            <ha-switch
+              class="expander-toggle"
+              name=${toggleName}
+              .checked=${isEnabled}
+              ?disabled=${toggleDisabled}
+              @click=${(event)=>event.stopPropagation()}
+              @change=${this._handleSunToggleChange}
+            ></ha-switch>
+            <ha-icon icon="mdi:chevron-down"></ha-icon>
+          </span>
+        </summary>
+        <div class="expander-content">
+          ${content}
+        </div>
+      </details>
+    `;
     }
     _ensureSolarForecastOptions() {
         this._refreshSolarForecastOptions(false);
@@ -815,7 +976,29 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                         domain: "weather"
                     }
                 }
-            },
+            }
+        ];
+        const layoutSchema = [
+            {
+                name: "orientation",
+                selector: {
+                    select: {
+                        options: [
+                            {
+                                value: "vertical",
+                                label: "Vertical"
+                            },
+                            {
+                                value: "horizontal",
+                                label: "Horizontal"
+                            }
+                        ]
+                    }
+                },
+                optional: true
+            }
+        ];
+        const headerSchema = [
             {
                 name: "header_temperature_entity",
                 selector: {
@@ -825,51 +1008,50 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     }
                 },
                 optional: true
-            }
-        ];
-        const toggleNames = [
-            "show_header",
-            "daily_forecast",
-            "hourly_forecast"
-        ];
-        const layoutSchema = toggleNames.map((name)=>({
-                name: name,
-                selector: {
-                    boolean: {}
-                }
-            }));
-        const config = this._config;
-        if (config) {
-            const enabledCount = toggleNames.reduce((count, name)=>this._isSectionEnabled(name, config) ? count + 1 : count, 0);
-            toggleNames.forEach((name, index)=>{
-                const isEnabled = this._isSectionEnabled(name, config);
-                layoutSchema[index].disabled = enabledCount <= 1 && isEnabled;
-            });
-        }
-        layoutSchema.push({
-            name: "orientation",
-            selector: {
-                select: {
-                    options: [
-                        {
-                            value: "vertical",
-                            label: "Vertical"
-                        },
-                        {
-                            value: "horizontal",
-                            label: "Horizontal"
-                        }
-                    ]
-                }
             },
-            optional: true
-        });
-        const headerSchema = [
             {
                 name: "use_night_header_backgrounds",
                 selector: {
                     boolean: {}
                 }
+            }
+        ];
+        const nowcastSchema = [
+            {
+                name: "nowcast_entity",
+                selector: {
+                    entity: {
+                        domain: "weather"
+                    }
+                },
+                optional: true
+            },
+            {
+                name: "nowcast_layout",
+                selector: {
+                    select: {
+                        options: [
+                            {
+                                value: "pager",
+                                label: "Header pager"
+                            },
+                            {
+                                value: "inline",
+                                label: "Inline header"
+                            }
+                        ]
+                    }
+                },
+                optional: true,
+                disabled: !this._config?.nowcast_entity
+            },
+            {
+                name: "nowcast_always_show",
+                selector: {
+                    boolean: {}
+                },
+                optional: true,
+                disabled: !this._config?.nowcast_entity
             }
         ];
         const attributeOptions = this._buildAttributeOptions();
@@ -962,6 +1144,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             general: generalSchema,
             layout: layoutSchema,
             header: headerSchema,
+            nowcast: nowcastSchema,
             chips: chipsSchema,
             hourly: hourlySchema,
             daily: dailySchema
@@ -1242,6 +1425,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
         };
         this._solarForecastOptions = [];
         this._solarForecastEntryIds = [];
+        this._expandedSections = {};
         this._forecastOptionSubscriptions = {};
         this._solarForecastOptionsLoaded = false;
         this._computeLabel = (schema)=>{
@@ -1250,7 +1434,7 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 case "entity":
                     return "Weather Entity";
                 case "header_temperature_entity":
-                    return "Local header temperature sensor (optional)";
+                    return "Local Temperature Sensor Entity (Overrides the current temperature value of the forecast)";
                 case "show_header":
                     return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
                 case "hourly_forecast":
@@ -1261,6 +1445,12 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
                 case "use_night_header_backgrounds":
                     return "Use separate header backgrounds for nightly conditions";
+                case "nowcast_entity":
+                    return "Nowcast Entity (For next-hour precipitation. The entity integration must provide a get_minute_forecast action to fetch the data.)";
+                case "nowcast_layout":
+                    return "Nowcast layout";
+                case "nowcast_always_show":
+                    return "Always show nowcast";
                 case "hourly_extra_attribute":
                     return "Hourly extra attribute (third line)";
                 case "hourly_extra_attribute_unit":
@@ -1313,6 +1503,9 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
 (0, $39J5i.__decorate)([
     (0, $1ZxoT.state)()
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_solarForecastEntryIds", void 0);
+(0, $39J5i.__decorate)([
+    (0, $1ZxoT.state)()
+], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b.prototype, "_expandedSections", void 0);
 $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
     (0, $1ZxoT.customElement)("weather-forecast-extended-editor")
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b);
@@ -1320,4 +1513,4 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 });
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.9c654dff.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.87706908.js.map
