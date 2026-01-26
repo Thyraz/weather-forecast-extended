@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, LitElement, nothing, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import type { HeaderChip, WeatherForecastExtendedConfig } from "../types";
@@ -105,6 +105,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   };
   @state() private _solarForecastOptions: Array<{ value: string; label: string }> = [];
   @state() private _solarForecastEntryIds: string[] = [];
+  @state() private _expandedSections: Record<string, boolean> = {};
 
   private _forecastOptionSubscriptions: Partial<Record<ModernForecastType, Promise<() => void> | undefined>> = {};
   private _forecastOptionsEntity?: string;
@@ -237,6 +238,72 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     .forecast-switch span {
       font-size: 14px;
     }
+
+    .editor-expander {
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--card-background-color, #fff);
+    }
+
+    .editor-expander summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .editor-expander summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .editor-expander > summary ha-icon {
+      transition: transform 0.2s ease;
+    }
+
+    .editor-expander[open] > summary ha-icon {
+      transform: rotate(180deg);
+    }
+
+    .editor-expander[open] summary {
+      border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+    }
+
+    .editor-expander .summary-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .editor-expander.disabled summary {
+      color: var(--secondary-text-color);
+      cursor: default;
+    }
+
+    .editor-expander.disabled > summary ha-icon {
+      opacity: 0.4;
+    }
+
+    .editor-expander .expander-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .editor-expander.nested summary {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .editor-expander.nested .expander-content {
+      padding: 12px;
+    }
   `;
 
   public setConfig(config: WeatherForecastExtendedConfig): void {
@@ -291,94 +358,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         @value-changed=${this._handleValueChanged}
       ></ha-form>
       <div class="editor-section">
-        <h4 class="section-title">Layout</h4>
-        <div class="group-card">
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${layoutSchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-      </div>
-      ${this._config.show_header !== false
-        ? html`
-            <div class="editor-section">
-              <h4 class="section-title">Header options</h4>
-              <div class="group-card">
-                <ha-form
-                  .hass=${this.hass}
-                  .data=${formData}
-                  .schema=${headerSchema}
-                  .computeLabel=${this._computeLabel}
-                  @value-changed=${this._handleValueChanged}
-                ></ha-form>
-                <div class="editor-subsection">
-                  <h5 class="section-subtitle">Tap actions</h5>
-                  <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
-                  <ha-selector
-                    .hass=${this.hass}
-                    .selector=${{ ui_action: {} }}
-                    .value=${this._config.header_tap_action_temperature}
-                    .label=${"Temperature tap action"}
-                    .required=${false}
-                    .disabled=${this._config.show_header === false}
-                    @value-changed=${(event: CustomEvent) =>
-                      this._handleHeaderActionChange(event, "header_tap_action_temperature")}
-                  ></ha-selector>
-                  <ha-selector
-                    .hass=${this.hass}
-                    .selector=${{ ui_action: {} }}
-                    .value=${this._config.header_tap_action_condition}
-                    .label=${"Condition tap action"}
-                    .required=${false}
-                    .disabled=${this._config.show_header === false}
-                    @value-changed=${(event: CustomEvent) =>
-                      this._handleHeaderActionChange(event, "header_tap_action_condition")}
-                  ></ha-selector>
-                </div>
-                <div class="chips-section">
-                  <h5 class="section-subtitle">Chips</h5>
-                  <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
-                  <ha-form
-                    .hass=${this.hass}
-                    .data=${formData}
-                    .schema=${chipSchema}
-                    .computeLabel=${this._computeLabel}
-                    @value-changed=${this._handleValueChanged}
-                  ></ha-form>
-                </div>
-              </div>
-            </div>
-          `
-        : nothing}
-      <div class="editor-section">
-        <h4 class="section-title">Nowcast</h4>
-        <div class="group-card">
-          <p class="location-description">
-            Select a weather entity that supports the <code>get_minute_forecast</code> action
-            (for example OpenWeatherMap or DWD nowcast).
-          </p>
-          <ha-form
-            .hass=${this.hass}
-            .data=${formData}
-            .schema=${nowcastSchema}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._handleValueChanged}
-          ></ha-form>
-        </div>
-      </div>
-      <div class="editor-section">
-        <h4 class="section-title">Forecast options</h4>
-        <div class="group-card">
-          <div class="editor-subsection">
-            <div>
-              <h5 class="section-subtitle">Location</h5>
-              <p class="location-description">
-                Needed for sunrise/sunset markers and day/night backgrounds
-              </p>
-            </div>
+        ${this._renderExpander(
+          "gps-coordinates",
+          "GPS Coordinates",
+          html`
+            <p class="location-description">
+              Needed for sunrise/sunset markers and day/night backgrounds
+            </p>
             <div class="forecast-switch">
               <span>Use Home Assistant location</span>
               <ha-switch
@@ -411,52 +397,14 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
                 />
               </label>
             </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Sunrise & Sunset</h5>
-            <div class="forecast-switch">
-              <span>Show sunrise & sunset</span>
-              <ha-switch
-                name="show_sun_times"
-                .checked=${this._config.show_sun_times ?? false}
-                @change=${this._handleSunToggleChange}
-              ></ha-switch>
-            </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Forecast spacing</h5>
-            <p class="location-description">
-              Minimum distance between forecast items in pixels (10px or greater)
-            </p>
-            <div class="sun-coordinates">
-              <label class="coordinate-field">
-                <span>Daily min gap (px)</span>
-                <input
-                  type="number"
-                  name="daily_min_gap"
-                  min="10"
-                  step="1"
-                  placeholder="Default 30"
-                  .value=${String(this._config.daily_min_gap ?? "")}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-              <label class="coordinate-field">
-                <span>Hourly min gap (px)</span>
-                <input
-                  type="number"
-                  name="hourly_min_gap"
-                  min="10"
-                  step="1"
-                  placeholder="Default 16"
-                  .value=${String(this._config.hourly_min_gap ?? "")}
-                  @input=${this._handleSunInputChange}
-                />
-              </label>
-            </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Solar forecast</h5>
+          `,
+        )}
+      </div>
+      <div class="editor-section">
+        ${this._renderExpander(
+          "solar-forecast",
+          "Solar Forecast",
+          html`
             <p class="location-description">
               The forecast needs to be assigned to a solar panel configuration in the Energy dashboard settings. Otherwise it can't be used here.
             </p>
@@ -472,9 +420,87 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length
               ? html`<p class="location-description">No Energy solar forecasts configured.</p>`
               : nothing}
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Daily forecast options</h5>
+          `,
+        )}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander(
+          "header",
+          "Header",
+          "show_header",
+          html`
+            <ha-form
+              .hass=${this.hass}
+              .data=${formData}
+              .schema=${headerSchema}
+              .computeLabel=${this._computeLabel}
+              @value-changed=${this._handleValueChanged}
+            ></ha-form>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Tap actions</h5>
+              <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ ui_action: {} }}
+                .value=${this._config.header_tap_action_temperature}
+                .label=${"Temperature tap action"}
+                .required=${false}
+                .disabled=${this._config.show_header === false}
+                @value-changed=${(event: CustomEvent) =>
+                  this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+              ></ha-selector>
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ ui_action: {} }}
+                .value=${this._config.header_tap_action_condition}
+                .label=${"Condition tap action"}
+                .required=${false}
+                .disabled=${this._config.show_header === false}
+                @value-changed=${(event: CustomEvent) =>
+                  this._handleHeaderActionChange(event, "header_tap_action_condition")}
+              ></ha-selector>
+            </div>
+            ${this._renderExpander(
+              "header-chips",
+              "Chips",
+              html`
+                <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${chipSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              `,
+              { nested: true },
+            )}
+            ${this._renderExpander(
+              "header-nowcast",
+              "Nowcast",
+              html`
+                <p class="location-description">
+                  Controls the minute-by-minute precipitation chart shown inside the header.
+                </p>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${nowcastSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              `,
+              { nested: true },
+            )}
+          `,
+        )}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander(
+          "daily-forecast",
+          "Daily forecast",
+          "daily_forecast",
+          html`
             <ha-form
               .hass=${this.hass}
               .data=${formData}
@@ -523,9 +549,35 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
                 />
               </label>
             </div>
-          </div>
-          <div class="editor-subsection">
-            <h5 class="section-subtitle">Hourly forecast options</h5>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Forecast spacing</h5>
+              <p class="location-description">
+                Minimum distance between forecast items in pixels (10px or greater)
+              </p>
+              <div class="sun-coordinates">
+                <label class="coordinate-field">
+                  <span>Daily min gap (px)</span>
+                  <input
+                    type="number"
+                    name="daily_min_gap"
+                    min="10"
+                    step="1"
+                    placeholder="Default 30"
+                    .value=${String(this._config.daily_min_gap ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                </label>
+              </div>
+            </div>
+          `,
+        )}
+      </div>
+      <div class="editor-section">
+        ${this._renderToggleExpander(
+          "hourly-forecast",
+          "Hourly forecast",
+          "hourly_forecast",
+          html`
             <ha-form
               .hass=${this.hass}
               .data=${formData}
@@ -574,9 +626,56 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
                 />
               </label>
             </div>
-          </div>
-        </div>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Sunrise & Sunset</h5>
+              <div class="forecast-switch">
+                <span>Show sunrise & sunset</span>
+                <ha-switch
+                  name="show_sun_times"
+                  .checked=${this._config.show_sun_times ?? false}
+                  @change=${this._handleSunToggleChange}
+                ></ha-switch>
+              </div>
+            </div>
+            <div class="editor-subsection">
+              <h5 class="section-subtitle">Forecast spacing</h5>
+              <p class="location-description">
+                Minimum distance between forecast items in pixels (10px or greater)
+              </p>
+              <div class="sun-coordinates">
+                <label class="coordinate-field">
+                  <span>Hourly min gap (px)</span>
+                  <input
+                    type="number"
+                    name="hourly_min_gap"
+                    min="10"
+                    step="1"
+                    placeholder="Default 16"
+                    .value=${String(this._config.hourly_min_gap ?? "")}
+                    @input=${this._handleSunInputChange}
+                  />
+                </label>
+              </div>
+            </div>
+          `,
+        )}
       </div>
+      ${this._config.daily_forecast !== false && this._config.hourly_forecast !== false
+        ? html`
+            <div class="editor-section">
+              <h4 class="section-title">Orientation</h4>
+              <div class="group-card">
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${formData}
+                  .schema=${layoutSchema}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${this._handleValueChanged}
+                ></ha-form>
+              </div>
+            </div>
+          `
+        : nothing}
     `;
   }
 
@@ -622,7 +721,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       case "entity":
         return "Weather Entity";
       case "header_temperature_entity":
-        return "Local header temperature sensor (optional)";
+        return "Local Temperature Sensor Entity (Overrides the current temperature value of the forecast)";
       case "show_header":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
@@ -634,7 +733,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       case "use_night_header_backgrounds":
         return "Use separate header backgrounds for nightly conditions";
       case "nowcast_entity":
-        return "Nowcast weather entity";
+        return "Nowcast Entity (For next-hour precipitation. The entity integration must provide a get_minute_forecast action to fetch the data.)";
       case "nowcast_layout":
         return "Nowcast layout";
       case "nowcast_always_show":
@@ -698,6 +797,29 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     const update: Partial<WeatherForecastExtendedConfig> = {};
     (update as any)[key] = value === "" ? undefined : value;
     this._updateConfig(update);
+  }
+
+  private _handleExpanderToggle(event: Event, id: string) {
+    const target = event.currentTarget as HTMLDetailsElement | null;
+    if (!target) {
+      return;
+    }
+    this._expandedSections = { ...this._expandedSections, [id]: target.open };
+  }
+
+  private _handleExpanderSummaryClick(event: Event, disabled: boolean) {
+    if (!disabled) {
+      return;
+    }
+    event.preventDefault();
+  }
+
+  private _isToggleDisabled(name: ToggleName, config: WeatherForecastExtendedConfig): boolean {
+    const toggleNames: ToggleName[] = ["show_header", "daily_forecast", "hourly_forecast"];
+    const enabledCount = toggleNames.reduce((count, key) =>
+      this._isSectionEnabled(key, config) ? count + 1 : count,
+    0);
+    return enabledCount <= 1 && this._isSectionEnabled(name, config);
   }
 
   private _handleOptionalNumberInputChange(event: Event) {
@@ -822,6 +944,74 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     });
 
     return formData;
+  }
+
+  private _renderExpander(
+    id: string,
+    title: string,
+    content: TemplateResult,
+    options: { open?: boolean; nested?: boolean } = {},
+  ): TemplateResult {
+    const className = options.nested ? "editor-expander nested" : "editor-expander";
+    const isOpen = this._expandedSections[id] ?? options.open ?? false;
+    return html`
+      <details
+        class=${className}
+        ?open=${isOpen}
+        @toggle=${(event: Event) => this._handleExpanderToggle(event, id)}
+      >
+        <summary>
+          <span>${title}</span>
+          <ha-icon icon="mdi:chevron-down"></ha-icon>
+        </summary>
+        <div class="expander-content">
+          ${content}
+        </div>
+      </details>
+    `;
+  }
+
+  private _renderToggleExpander(
+    id: string,
+    title: string,
+    toggleName: ToggleName,
+    content: TemplateResult,
+    options: { open?: boolean } = {},
+  ): TemplateResult {
+    const config = this._config;
+    if (!config) {
+      return nothing;
+    }
+    const isEnabled = this._isSectionEnabled(toggleName, config);
+    const toggleDisabled = this._isToggleDisabled(toggleName, config);
+    const isOpen = isEnabled && (this._expandedSections[id] ?? options.open ?? false);
+    const className = `editor-expander${isEnabled ? "" : " disabled"}`;
+
+    return html`
+      <details
+        class=${className}
+        ?open=${isOpen}
+        @toggle=${(event: Event) => this._handleExpanderToggle(event, id)}
+      >
+        <summary @click=${(event: Event) => this._handleExpanderSummaryClick(event, !isEnabled)}>
+          <span>${title}</span>
+          <span class="summary-actions">
+            <ha-switch
+              class="expander-toggle"
+              name=${toggleName}
+              .checked=${isEnabled}
+              ?disabled=${toggleDisabled}
+              @click=${(event: Event) => event.stopPropagation()}
+              @change=${this._handleSunToggleChange}
+            ></ha-switch>
+            <ha-icon icon="mdi:chevron-down"></ha-icon>
+          </span>
+        </summary>
+        <div class="expander-content">
+          ${content}
+        </div>
+      </details>
+    `;
   }
 
   private _ensureSolarForecastOptions() {
@@ -1021,42 +1211,29 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   } {
     const generalSchema: HaFormSchema[] = [
       { name: "entity", selector: { entity: { domain: "weather" } } },
+    ];
+
+    const layoutSchema: HaFormSchema[] = [
+      {
+        name: "orientation",
+        selector: {
+          select: {
+            options: [
+              { value: "vertical", label: "Vertical" },
+              { value: "horizontal", label: "Horizontal" },
+            ],
+          },
+        },
+        optional: true,
+      },
+    ];
+
+    const headerSchema: HaFormSchema[] = [
       {
         name: "header_temperature_entity",
         selector: { entity: { domain: "sensor", device_class: "temperature" } },
         optional: true,
       },
-    ];
-
-    const toggleNames: ToggleName[] = ["show_header", "daily_forecast", "hourly_forecast"];
-    const layoutSchema: HaFormSchema[] = toggleNames.map(name => ({ name, selector: { boolean: {} } }));
-
-    const config = this._config;
-    if (config) {
-      const enabledCount = toggleNames.reduce((count, name) =>
-        this._isSectionEnabled(name, config) ? count + 1 : count,
-      0);
-
-      toggleNames.forEach((name, index) => {
-        const isEnabled = this._isSectionEnabled(name, config);
-        layoutSchema[index].disabled = enabledCount <= 1 && isEnabled;
-      });
-    }
-
-    layoutSchema.push({
-      name: "orientation",
-      selector: {
-        select: {
-          options: [
-            { value: "vertical", label: "Vertical" },
-            { value: "horizontal", label: "Horizontal" },
-          ],
-        },
-      },
-      optional: true,
-    });
-
-    const headerSchema: HaFormSchema[] = [
       {
         name: "use_night_header_backgrounds",
         selector: { boolean: {} },
