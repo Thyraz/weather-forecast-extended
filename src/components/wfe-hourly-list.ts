@@ -3,7 +3,7 @@ import { LitElement, html, nothing, TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property } from "lit/decorators.js";
 import SunCalc from "suncalc";
-import type { SunCoordinates, SunEventType, SunTimesByDay } from "../types";
+import type { SunCoordinates, SunEventType, SunTimesByDay, WeatherIconMap } from "../types";
 import type { ForecastAttribute } from "../weather";
 import { formatDayPeriod, formatDateWeekdayShort, formatHour, formatHourMinute, useAmPm } from "../date-time";
 import { getWeatherStateIcon } from "../weather";
@@ -23,6 +23,7 @@ export class WFEHourlyList extends LitElement {
   @property({ attribute: false }) extraAttributeUnit?: string;
   @property({ attribute: false }) extraAttributeColor?: string;
   @property({ attribute: false }) extraAttributeDimBelow?: number;
+  @property({ attribute: false }) iconMap?: WeatherIconMap;
   private _resizeObserver?: ResizeObserver;
   private _sunTimesByDay: SunTimesByDay = {};
 
@@ -161,7 +162,12 @@ export class WFEHourlyList extends LitElement {
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
             <div class="forecast-image-icon">
-              ${getWeatherStateIcon(item.condition!, this, this._shouldUseNightIcon(item, date))}
+              ${getWeatherStateIcon(
+                item.condition!,
+                this,
+                this._shouldUseNightIcon(item, date),
+                this.iconMap,
+              )}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>

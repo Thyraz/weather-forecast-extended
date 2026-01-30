@@ -5,6 +5,7 @@ import type { ForecastAttribute } from "../weather";
 import { formatDateDayTwoDigit, formatDateWeekdayShort, isNewDay } from "../date-time";
 import { getWeatherStateIcon } from "../weather";
 import type { HomeAssistant } from "custom-card-helpers";
+import type { WeatherIconMap } from "../types";
 
 const PRECIPITATION_DISPLAY_THRESHOLD = 0.3;
 const DAILY_PRECIPITATION_MIN_SCALE = 4;
@@ -20,6 +21,7 @@ export class WFEDailyList extends LitElement {
   @property({ attribute: false }) extraAttributeUnit?: string;
   @property({ attribute: false }) extraAttributeColor?: string;
   @property({ attribute: false }) extraAttributeDimBelow?: number;
+  @property({ attribute: false }) iconMap?: WeatherIconMap;
 
   protected createRenderRoot() {
     // Render in light DOM so parent CSS applies
@@ -58,7 +60,7 @@ export class WFEDailyList extends LitElement {
         <div class="translate-container">
           <div class="icon-container">
             <div class="forecast-image-icon">
-              ${getWeatherStateIcon(item.condition!, this, false)}
+              ${getWeatherStateIcon(item.condition!, this, false, this.iconMap)}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>

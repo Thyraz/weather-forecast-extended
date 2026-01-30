@@ -1,7 +1,8 @@
 import { css, html, LitElement, nothing, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
-import type { HeaderChip, WeatherForecastExtendedConfig } from "../types";
+import { WEATHER_CONDITIONS } from "../types";
+import type { HeaderChip, WeatherCondition, WeatherForecastExtendedConfig } from "../types";
 import type { ForecastEvent } from "../weather";
 
 const HEADER_CHIP_INDEXES = [0, 1, 2] as const;
@@ -44,6 +45,25 @@ const CHIP_TYPE_OPTIONS: Array<{ value: "attribute" | "template"; label: string 
 
 const SOLAR_FORECAST_OPTION = "solar_forecast";
 const FORECAST_OPTIONS_CACHE = new Map<string, { hourly: string[]; daily: string[] }>();
+
+const ICON_MAP_LABELS: Record<WeatherCondition, string> = {
+  "clear-night": "Clear night",
+  cloudy: "Cloudy",
+  fog: "Fog",
+  hail: "Hail",
+  lightning: "Lightning",
+  "lightning-rainy": "Lightning rainy",
+  partlycloudy: "Partly cloudy",
+  "partlycloudy-night": "Partly cloudy night",
+  pouring: "Pouring",
+  rainy: "Rainy",
+  snowy: "Snowy",
+  "snowy-rainy": "Snowy rainy",
+  sunny: "Sunny",
+  windy: "Windy",
+  "windy-variant": "Windy variant",
+  exceptional: "Exceptional",
+};
 
 type HaFormSelector =
   | { entity: { domain?: string; device_class?: string | string[] } }
@@ -192,6 +212,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     .color-input-row input[type="text"] {
       flex: 1 1 120px;
       min-width: 120px;
+    }
+
+    .icon-map-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .icon-map-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-map-row ha-selector {
+      flex: 1 1 auto;
     }
 
     .clear-button {
@@ -420,6 +456,34 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length
               ? html`<p class="location-description">No Energy solar forecasts configured.</p>`
               : nothing}
+          `,
+        )}
+      </div>
+      <div class="editor-section">
+        ${this._renderExpander(
+          "custom-icons",
+          "Custom Icons",
+          html`
+            <p class="location-description">
+              Override the default weather icons with any icon available in Home Assistant.
+            </p>
+            <div class="icon-map-list">
+              ${WEATHER_CONDITIONS.map(condition => {
+                const value = this._getIconMapValue(condition);
+                return html`
+                  <div class="icon-map-row">
+                    <ha-selector
+                      .hass=${this.hass}
+                      .selector=${{ icon: {} }}
+                      .value=${value}
+                      .label=${ICON_MAP_LABELS[condition]}
+                      .required=${false}
+                      @value-changed=${(event: CustomEvent) => this._handleIconMapChange(condition, event)}
+                    ></ha-selector>
+                  </div>
+                `;
+              })}
+            </div>
           `,
         )}
       </div>
@@ -853,6 +917,33 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
   private _clearOptionalField(field: keyof WeatherForecastExtendedConfig) {
     this._updateConfig({ [field]: undefined } as Partial<WeatherForecastExtendedConfig>);
+  }
+
+  private _getIconMapValue(condition: WeatherCondition): string {
+    const iconMap = this._config?.icon_map;
+    if (!iconMap) {
+      return "";
+    }
+    const value = iconMap[condition];
+    return typeof value === "string" ? value : "";
+  }
+
+  private _handleIconMapChange(condition: WeatherCondition, event: CustomEvent<{ value?: unknown }>) {
+    event.stopPropagation();
+    if (!this._config) {
+      return;
+    }
+    const raw = event.detail?.value;
+    const value = typeof raw === "string" ? raw.trim() : "";
+    const nextMap = { ...(this._config.icon_map ?? {}) };
+
+    if (!value) {
+      delete (nextMap as Partial<Record<WeatherCondition, string>>)[condition];
+    } else {
+      (nextMap as Partial<Record<WeatherCondition, string>>)[condition] = value;
+    }
+
+    this._updateConfig({ icon_map: Object.keys(nextMap).length ? nextMap : undefined });
   }
 
   private _getColorPickerValue(value?: string): string {

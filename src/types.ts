@@ -22,6 +22,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   nowcast_always_show?: boolean;
   header_chips?: HeaderChip[];
   header_attributes?: string[];
+  icon_map?: WeatherIconMap;
   show_header?: boolean;
   hourly_forecast?: boolean;
   daily_forecast?: boolean;
@@ -44,7 +45,31 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   daily_extra_attribute_color?: string;
   daily_extra_attribute_dim_below?: number;
   solar_forecast_entries?: string[];
+  masonry_rows?: number;
 }
+
+export const WEATHER_CONDITIONS = [
+  "clear-night",
+  "cloudy",
+  "fog",
+  "hail",
+  "lightning",
+  "lightning-rainy",
+  "partlycloudy",
+  "partlycloudy-night",
+  "pouring",
+  "rainy",
+  "snowy",
+  "snowy-rainy",
+  "sunny",
+  "windy",
+  "windy-variant",
+  "exceptional",
+] as const;
+
+export type WeatherCondition = typeof WEATHER_CONDITIONS[number];
+
+export type WeatherIconMap = Partial<Record<WeatherCondition, string>>;
 
 export interface SunCoordinates {
   latitude: number;

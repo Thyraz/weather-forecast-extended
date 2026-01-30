@@ -74,6 +74,7 @@ use_night_header_backgrounds: true
 | `sun_latitude` | number \| string | Home Assistant latitude | Latitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `sun_longitude` | number \| string | Home Assistant longitude | Longitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
+| `icon_map` | object | none | Optional overrides for forecast condition icons. Keys are weather conditions, values are Home Assistant icon names (including custom icon sets). |
 | `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. |
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
 | `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. |
@@ -86,6 +87,7 @@ use_night_header_backgrounds: true
 | `daily_extra_attribute_dim_below` | number | none | Optional numeric threshold. values below are displayed with lowered opacity in the daily extra attribute. |
 | `header_chips` | array | `[]` | Up to three chip definitions shown in the header. Each chip can display an entity attribute or template output and may include its own `icon` and `tap_action`. |
 | `solar_forecast_entries` | array | all Energy solar forecasts | Optional list of config entry IDs to include when `solar_forecast` is selected as an extra attribute. Leave empty to include none, or omit to include all Energy dashboard selections. |
+| `masonry_rows` | number | none | Masonry layout only: override the card height (1 row is handled as 50px by HA). Ignored in Sections view. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
 
@@ -126,6 +128,21 @@ header_tap_action_temperature:
 header_tap_action_condition:
   action: more-info
 ```
+
+### Custom icons
+Override the daily/hourly condition icons with any icon available in Home Assistant (including custom icon packs):
+
+```yaml
+type: custom:weather-forecast-extended-card
+entity: weather.home
+icon_map:
+  sunny: mdi:weather-sunny
+  rainy: phu:rainy
+  lightning-rainy: mdi:weather-lightning-rainy
+```
+
+Supported keys: `clear-night`, `cloudy`, `fog`, `hail`, `lightning`, `lightning-rainy`, `partlycloudy`,
+`partlycloudy-night`, `pouring`, `rainy`, `snowy`, `snowy-rainy`, `sunny`, `windy`, `windy-variant`, `exceptional`.
 
 ### Hourly extra attribute
 Add a third text row beneath precipitation and probability in the hourly forecast. Choose any forecast attribute except the built-ins already shown (datetime, condition, precipitation, precipitation_probability, temperature).

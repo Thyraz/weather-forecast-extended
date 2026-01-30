@@ -8,7 +8,7 @@ ha-card {
 
 .weather {
   width: 100%;
-  height: var(--wfe-header-height, calc(2.3 * var(--row-height)));
+  min-height: var(--wfe-header-height, calc(2.3 * var(--row-height, 56px)));
   /* Background image will be set via JS */
   background-size: cover;
   background-position: center;
@@ -242,11 +242,16 @@ ha-card {
   flex-direction: column;
   gap: 0;
   height: 100%;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .weather .nowcast-bars {
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: var(--wfe-nowcast-gap, 5px);
   flex: 1 1 auto;
   min-height: 24px;
@@ -264,7 +269,8 @@ ha-card {
   align-items: flex-end;
   overflow: hidden;
   min-height: 6px;
-  height: 100%;
+  height: auto;
+  align-self: stretch;
 }
 
 .weather .nowcast-bar-fill {
@@ -279,6 +285,10 @@ ha-card {
   .weather .nowcast-bar-fill {
     transition: none;
   }
+
+  .weather .nowcast-labels {
+    transition: none;
+  }
 }
 
 .weather .nowcast-labels {
@@ -286,6 +296,8 @@ ha-card {
   justify-content: space-between;
   font-size: var(--ha-font-size-s);
   color: white;
+  transition: transform 0.35s ease;
+  will-change: transform;
 }
 
 .weather .pager-dots {
@@ -765,6 +777,10 @@ ha-card {
 .forecast-image-icon > * {
   width: var(--icon-size);
   height: var(--icon-size);
+}
+
+.forecast-image-icon ha-icon {
+  --mdc-icon-size: var(--icon-size);
 }
 
 /* Styles from weather.ts */

@@ -13,12 +13,14 @@ const NOWCAST_MIN_BAR_WIDTH_PX = 5;
 const NOWCAST_MAX_BAR_WIDTH_PX = 7;
 const NOWCAST_BASE_GAP_PX = 5;
 const NOWCAST_PRECIPITATION_MIN_SCALE = 1;
+const NOWCAST_LABEL_HYSTERESIS_MINUTES = 2;
 
 @customElement("wfe-nowcast")
 export class WFENowcast extends LitElement {
   @property({ attribute: false }) forecast: NowcastForecastItem[] = [];
   @state() private _barStride = 1;
   @state() private _barGap = NOWCAST_BASE_GAP_PX;
+  @state() private _containerWidth = 0;
   private _resizeObserver?: ResizeObserver;
 
   protected createRenderRoot() {
@@ -43,6 +45,7 @@ export class WFENowcast extends LitElement {
     const bars = this._reduceSeries(series, this._barStride);
     const maxValue = bars.reduce((max, value) => Math.max(max, value), 0);
     const scale = Math.max(NOWCAST_PRECIPITATION_MIN_SCALE, maxValue);
+    const labelOffset = this._computeLabelOffset(this._containerWidth || this.clientWidth);
     const labels = this._barStride > 1
       ? ["Now", "20m", "40m", "60m"]
       : ["Now", "10m", "20m", "30m", "40m", "50m", "60m"];
@@ -61,7 +64,7 @@ export class WFENowcast extends LitElement {
           `;
         })}
       </div>
-      <div class="nowcast-labels">
+      <div class="nowcast-labels" style=${styleMap({ transform: `translateX(${labelOffset}px)` })}>
         ${labels.map(label => html`<span>${label}</span>`)}
       </div>
     `;
@@ -74,6 +77,9 @@ export class WFENowcast extends LitElement {
 
     this._resizeObserver = new ResizeObserver(entries => {
       const width = entries[0]?.contentRect?.width ?? this.clientWidth;
+      if (Number.isFinite(width) && width > 0 && width !== this._containerWidth) {
+        this._containerWidth = width;
+      }
       this._updateResolution(width);
     });
     this._resizeObserver.observe(this);
@@ -90,6 +96,30 @@ export class WFENowcast extends LitElement {
     if (gap !== this._barGap) {
       this._barGap = gap;
     }
+  }
+
+  private _computeLabelOffset(width: number): number {
+    if (!this.forecast?.length || !Number.isFinite(width) || width <= 0) {
+      return 0;
+    }
+
+    const timestamps = this.forecast
+      .map(item => new Date(item.datetime).getTime())
+      .filter(timestamp => Number.isFinite(timestamp))
+      .sort((a, b) => a - b);
+
+    if (!timestamps.length) {
+      return 0;
+    }
+
+    const firstTimestamp = timestamps[0];
+    const diffMinutes = Math.round((Date.now() - firstTimestamp) / 60000);
+    if (Math.abs(diffMinutes) <= NOWCAST_LABEL_HYSTERESIS_MINUTES) {
+      return 0;
+    }
+
+    const pixelsPerMinute = width / NOWCAST_MINUTES;
+    return diffMinutes * pixelsPerMinute;
   }
 
   private _buildMinuteSeries(): number[] {

@@ -9,6 +9,7 @@ import type { SVGTemplateResult, TemplateResult } from "lit";
 import { css, html, svg } from "lit";
 import { styleMap } from "lit/directives/style-map";
 import type { HomeAssistant } from "custom-card-helpers";
+import type { WeatherIconMap } from "./types";
 
 export const enum WeatherEntityFeature {
   FORECAST_DAILY = 1,
@@ -479,8 +480,17 @@ const getWeatherStateSVG = (
 export const getWeatherStateIcon = (
   state: string,
   element: HTMLElement,
-  nightTime?: boolean
+  nightTime?: boolean,
+  iconMap?: WeatherIconMap
 ): TemplateResult | undefined => {
+  const isPartlyCloudyNight = state === "partlycloudy" && nightTime;
+  const mapKey = isPartlyCloudyNight ? "partlycloudy-night" : state;
+  const mappedIcon = iconMap?.[mapKey as keyof WeatherIconMap];
+  const normalizedIcon = typeof mappedIcon === "string" ? mappedIcon.trim() : "";
+  if (normalizedIcon) {
+    return html`<ha-icon icon=${normalizedIcon}></ha-icon>`;
+  }
+
   const userDefinedIcon = getComputedStyle(element).getPropertyValue(
     `--weather-icon-${state}`
   );

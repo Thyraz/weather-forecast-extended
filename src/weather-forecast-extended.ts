@@ -7,7 +7,7 @@ import type { ForecastAttribute, ForecastEvent, WeatherEntity } from "./weather"
 import { subscribeForecast } from "./weather";
 import { handleAction, hasAction } from "custom-card-helpers";
 import type { ActionConfig, HomeAssistant } from "custom-card-helpers";
-import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig } from "./types";
+import { LovelaceGridOptions, SunCoordinates, WeatherForecastExtendedConfig, WeatherIconMap } from "./types";
 import type { AttributeHeaderChip, HeaderChip, TemplateHeaderChip } from "./types";
 import { styles } from "./weather-forecast-extended.styles";
 import { DEFAULT_WEATHER_IMAGE, WeatherImages } from "./weather-images";
@@ -149,6 +149,8 @@ export class WeatherForecastExtended extends LitElement {
     const normalizedDailyDimBelow = this._normalizeOptionalNumber(config.daily_extra_attribute_dim_below);
     const normalizedHourlyColor = this._normalizeOptionalText(config.hourly_extra_attribute_color);
     const normalizedDailyColor = this._normalizeOptionalText(config.daily_extra_attribute_color);
+    const normalizedIconMap = this._normalizeIconMap(config.icon_map);
+    const normalizedMasonryRows = this._normalizeMasonryRows(config.masonry_rows);
 
     const defaults: WeatherForecastExtendedConfig = {
       type: "custom:weather-forecast-extended-card",
@@ -165,6 +167,7 @@ export class WeatherForecastExtended extends LitElement {
       use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
       header_chips: normalizedHeaderChips,
       header_attributes: normalizedHeaderAttributes,
+      icon_map: normalizedIconMap,
       daily_min_gap: normalizedDailyMinGap,
       hourly_min_gap: normalizedHourlyMinGap,
       hourly_extra_attribute: config.hourly_extra_attribute,
@@ -178,6 +181,7 @@ export class WeatherForecastExtended extends LitElement {
       solar_forecast_entries: Array.isArray(config.solar_forecast_entries)
         ? config.solar_forecast_entries
         : undefined,
+      masonry_rows: normalizedMasonryRows,
     };
 
     this._config = defaults;
@@ -285,6 +289,57 @@ export class WeatherForecastExtended extends LitElement {
     }
     const trimmed = String(value).trim();
     return trimmed.length ? trimmed : undefined;
+  }
+
+  private _normalizeMasonryRows(value?: number | string): number | undefined {
+    if (value === null || typeof value === "undefined") {
+      return undefined;
+    }
+    const numericValue = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return undefined;
+    }
+    if (numericValue <= 0) {
+      return undefined;
+    }
+    return Math.max(1, Math.round(numericValue));
+  }
+
+  private _normalizeIconMap(iconMap?: WeatherIconMap): WeatherIconMap | undefined {
+    if (!iconMap || typeof iconMap !== "object") {
+      return undefined;
+    }
+
+    const normalized: WeatherIconMap = {};
+    Object.entries(iconMap).forEach(([key, value]) => {
+      if (typeof value !== "string") {
+        return;
+      }
+      const trimmed = value.trim();
+      if (trimmed.length) {
+        (normalized as Record<string, string>)[key] = trimmed;
+      }
+    });
+
+    return Object.keys(normalized).length ? normalized : undefined;
+  }
+
+  private _shouldApplyMasonryHeight(): boolean {
+    if (!this._config?.masonry_rows) {
+      return false;
+    }
+    if (!this.isConnected) {
+      return true;
+    }
+    const rowHeight = getComputedStyle(this).getPropertyValue("--row-height").trim();
+    if (rowHeight) {
+      return false;
+    }
+    return !Boolean(
+      this.closest("hui-sections-view") ||
+      this.closest("hui-section-view") ||
+      this.closest("hui-section")
+    );
   }
 
   private _getHeaderChips(): HeaderChip[] {
@@ -437,6 +492,17 @@ export class WeatherForecastExtended extends LitElement {
 
     const { [index]: _removed, ...rest } = this._templateChipValues;
     this._templateChipValues = rest;
+  }
+
+  public getCardSize(): number {
+    if (this._config?.masonry_rows !== undefined) {
+      return Math.max(1, Math.ceil(this._config.masonry_rows));
+    }
+
+    const gridRows = this.getGridOptions()?.rows ?? 3;
+    const sectionRowHeightPx = 56;
+    const estimatedHeight = gridRows * sectionRowHeightPx;
+    return Math.max(1, Math.ceil(estimatedHeight / 50));
   }
 
   public getGridOptions(): LovelaceGridOptions {
@@ -768,6 +834,17 @@ export class WeatherForecastExtended extends LitElement {
       return Object.keys(styles).length ? styleMap(styles) : nothing;
     })();
 
+    const cardStyle = (() => {
+      if (!this._shouldApplyMasonryHeight()) {
+        return nothing;
+      }
+      const rowCount = this._config?.masonry_rows ?? 0;
+      if (!Number.isFinite(rowCount) || rowCount <= 0) {
+        return nothing;
+      }
+      return styleMap({ "min-height": `${rowCount * 50}px` });
+    })();
+
     if (!hasContent) {
       const cardLabel = this._name || this._entity;
       return html`
@@ -784,7 +861,7 @@ export class WeatherForecastExtended extends LitElement {
     };
 
     if (showInlineNowcast && !headerOnly) {
-      headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height))";
+      headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height, 56px))";
     }
 
     const headerChipsTemplate = headerChips.length
@@ -896,7 +973,7 @@ export class WeatherForecastExtended extends LitElement {
     `;
 
     return html`
-      <ha-card>
+      <ha-card style=${cardStyle}>
         ${showHeader
           ? html`
             <div
@@ -953,6 +1030,7 @@ export class WeatherForecastExtended extends LitElement {
                         .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
                         .extraAttributeColor=${this._config.daily_extra_attribute_color}
                         .extraAttributeDimBelow=${this._config.daily_extra_attribute_dim_below}
+                        .iconMap=${this._config.icon_map}
                         @wfe-daily-selected=${this._handleDailySelected}
                       ></wfe-daily-list>
                     </div>
@@ -980,6 +1058,7 @@ export class WeatherForecastExtended extends LitElement {
                         .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
                         .extraAttributeColor=${this._config.hourly_extra_attribute_color}
                         .extraAttributeDimBelow=${this._config.hourly_extra_attribute_dim_below}
+                        .iconMap=${this._config.icon_map}
                       ></wfe-hourly-list>
                     </div>
                   </div>
