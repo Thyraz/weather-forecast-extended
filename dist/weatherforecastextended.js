@@ -1454,7 +1454,7 @@ var $7p6n6 = parcelRequire("7p6n6");
 
 
 parcelRequire.register("iFK5S", function(module, exports) {
-module.exports = import("./weather-forecast-extended-editor.87706908.js").then(()=>parcelRequire("bwZCh"));
+module.exports = import("./weather-forecast-extended-editor.3d7dce5b.js").then(()=>parcelRequire("bwZCh"));
 
 });
 
@@ -1871,7 +1871,12 @@ const $a670ed82a1e76f75$var$getWeatherStateSVG = (state, nightTime)=>(0, $l56HR.
           />
         ` : ""}
   </svg>`;
-const $a670ed82a1e76f75$export$e0801f527146069 = (state, element, nightTime)=>{
+const $a670ed82a1e76f75$export$e0801f527146069 = (state, element, nightTime, iconMap)=>{
+    const isPartlyCloudyNight = state === "partlycloudy" && nightTime;
+    const mapKey = isPartlyCloudyNight ? "partlycloudy-night" : state;
+    const mappedIcon = iconMap?.[mapKey];
+    const normalizedIcon = typeof mappedIcon === "string" ? mappedIcon.trim() : "";
+    if (normalizedIcon) return (0, $l56HR.html)`<ha-icon icon=${normalizedIcon}></ha-icon>`;
     const userDefinedIcon = getComputedStyle(element).getPropertyValue(`--weather-icon-${state}`);
     if (userDefinedIcon) return (0, $l56HR.html)`
       <div
@@ -2789,7 +2794,7 @@ var $ee1328194d522913$export$8d080c28108db9dd = function(e, t, r) {
 parcelRequire("j0ZcV");
 var $j8KxL = parcelRequire("j8KxL");
 var $1b50081e774bdf57$exports = {};
-$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  height: var(--wfe-header-height, calc(2.3 * var(--row-height)));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  gap: var(--wfe-header-content-gap, 12px);\n  box-sizing: border-box;\n  flex-direction: column;\n  flex: auto;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-layout {\n  flex-direction: row;\n  flex: none;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 25px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip .chip-icon, .weather .template-chip .chip-icon {\n  --mdc-icon-size: 20px;\n  color: inherit;\n  margin-right: 6px;\n}\n\n.weather .attribute-chip.has-action, .weather .template-chip.has-action {\n  cursor: pointer;\n}\n\n.weather .attribute-chip.has-action:focus-visible, .weather .template-chip.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp.has-action, .weather .condition.has-action {\n  cursor: pointer;\n}\n\n.weather .temp.has-action:focus-visible, .weather .condition.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.weather .header-pager {\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  display: flex;\n  position: relative;\n}\n\n.weather.nowcast-pager .header-content {\n  gap: 0;\n  min-height: 0;\n  padding: 0;\n}\n\n.weather.nowcast-pager .header-pager {\n  min-height: 0;\n  overflow: hidden;\n}\n\n.weather.nowcast-pager .header-pages {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-layout {\n  flex: auto;\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-page-nowcast, .weather.nowcast-pager .nowcast-panel, .weather.nowcast-pager wfe-nowcast {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .nowcast-panel {\n  overflow: hidden;\n}\n\n.weather .header-pages {\n  will-change: transform;\n  touch-action: pan-y;\n  flex-direction: row;\n  flex: auto;\n  width: 100%;\n  min-height: 0;\n  transition: transform .35s;\n  display: flex;\n}\n\n.weather .header-page {\n  flex-direction: column;\n  flex: 0 0 100%;\n  gap: 12px;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather.nowcast-pager .header-page {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: var(--wfe-header-padding-block, 16px);\n  box-sizing: border-box;\n  padding-bottom: 0;\n}\n\n.weather .nowcast-panel {\n  background: #0000004d;\n  border-radius: 16px;\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  padding: 12px 12px 6px;\n  display: flex;\n}\n\n.weather wfe-nowcast {\n  flex-direction: column;\n  gap: 0;\n  height: 100%;\n  display: flex;\n}\n\n.weather .nowcast-bars {\n  align-items: flex-end;\n  gap: var(--wfe-nowcast-gap, 5px);\n  flex: auto;\n  min-height: 24px;\n  display: flex;\n}\n\n.weather.nowcast-pager .nowcast-bars {\n  min-height: 16px;\n}\n\n.weather .nowcast-bar {\n  background: #ffffff06;\n  border-radius: 999px;\n  flex: 1 1 0;\n  align-items: flex-end;\n  height: 100%;\n  min-height: 6px;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather .nowcast-bar-fill {\n  background: var(--wfe-nowcast-fill-color, #4aafff);\n  border-radius: inherit;\n  width: 100%;\n  height: 0%;\n  transition: height .35s;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .weather .nowcast-bar-fill {\n    transition: none;\n  }\n}\n\n.weather .nowcast-labels {\n  font-size: var(--ha-font-size-s);\n  color: #fff;\n  justify-content: space-between;\n  display: flex;\n}\n\n.weather .pager-dots {\n  justify-content: center;\n  gap: 6px;\n  padding-top: 6px;\n  display: flex;\n}\n\n.weather.nowcast-pager .pager-dots {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: 2px;\n  padding-bottom: 4px;\n}\n\n.weather .pager-dot {\n  cursor: pointer;\n  background: #ffffff73;\n  border: none;\n  border-radius: 50%;\n  width: 6px;\n  height: 6px;\n  padding: 0;\n}\n\n.weather .pager-dot.active {\n  background: #ffffffe6;\n}\n\n.weather .pager-dot:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .hourly-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .hourly-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast .daily-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .daily-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast.daily .daily-extra.precipitationprobability {\n  color: var(--state-climate-cool-color);\n  opacity: .3;\n  display: block !important;\n}\n\n.forecast .daily-extra.precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability, .forecast.daily .forecast-item > .daily-extra {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .forecast-item > .daily-extra {\n  text-align: center;\n  width: var(--icon-size);\n  grid-row: 5;\n  justify-self: center;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.hourly .forecast-item.no-ampm > .translate-container {\n  margin-top: 4px;\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
+$1b50081e774bdf57$exports = "ha-card {\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather {\n  width: 100%;\n  min-height: var(--wfe-header-height, calc(2.3 * var(--row-height, 56px)));\n  border-top-left-radius: var(--ha-card-border-radius, 12px);\n  border-top-right-radius: var(--ha-card-border-radius, 12px);\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  flex-direction: column;\n  flex-shrink: 0;\n  display: flex;\n}\n\n.weather.header-only {\n  border-bottom-left-radius: var(--ha-card-border-radius, 12px);\n  border-bottom-right-radius: var(--ha-card-border-radius, 12px);\n  flex: auto;\n  height: 100%;\n}\n\n.weather .header-content {\n  padding-block: var(--wfe-header-padding-block, 16px);\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  gap: var(--wfe-header-content-gap, 12px);\n  box-sizing: border-box;\n  flex-direction: column;\n  flex: auto;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-layout {\n  flex-direction: row;\n  flex: none;\n  justify-content: flex-start;\n  align-items: stretch;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  display: flex;\n}\n\n.weather .header-main {\n  padding-left: var(--wfe-header-columns-gap, 16px);\n  justify-content: space-between;\n  align-items: flex-end;\n  gap: var(--wfe-header-main-gap, 10px);\n  flex-direction: column;\n  flex: 0 auto;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  margin-left: auto;\n  display: flex;\n}\n\n.weather .header-attributes {\n  justify-content: space-between;\n  gap: var(--wfe-header-attribute-gap, 8px);\n  flex-direction: column;\n  flex: 1 1 0;\n  align-self: stretch;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather .attribute-chip {\n  font-size: var(--ha-font-size-m);\n  line-height: calc(6px + var(--ha-font-size-m));\n  color: inherit;\n  background-color: #00000059;\n  border-radius: 25px;\n  align-self: flex-start;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 12px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .attribute-chip .chip-icon, .weather .template-chip .chip-icon {\n  --mdc-icon-size: 20px;\n  color: inherit;\n  margin-right: 6px;\n}\n\n.weather .attribute-chip.has-action, .weather .template-chip.has-action {\n  cursor: pointer;\n}\n\n.weather .attribute-chip.has-action:focus-visible, .weather .template-chip.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .attribute-chip.missing {\n  opacity: .8;\n  font-style: italic;\n}\n\n.weather .condition {\n  font-size: var(--ha-font-size-xl);\n  line-height: calc(10px + var(--ha-font-size-xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 4px 15px;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .temp.has-action, .weather .condition.has-action {\n  cursor: pointer;\n}\n\n.weather .temp.has-action:focus-visible, .weather .condition.has-action:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.weather .temp {\n  font-size: var(--ha-font-size-5xl);\n  line-height: calc(10px + var(--ha-font-size-5xl));\n  background-color: #0000004d;\n  border-radius: 100px;\n  justify-content: center;\n  align-items: center;\n  min-width: 0;\n  max-width: 100%;\n  padding: 2px 17px;\n  font-weight: bolder;\n  display: inline-flex;\n  overflow: hidden;\n}\n\n.weather .header-pill-text {\n  white-space: nowrap;\n  text-overflow: ellipsis;\n  flex: 0 auto;\n  min-width: 0;\n  overflow: hidden;\n}\n\n.weather .header-pager {\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  display: flex;\n  position: relative;\n}\n\n.weather.nowcast-pager .header-content {\n  gap: 0;\n  min-height: 0;\n  padding: 0;\n}\n\n.weather.nowcast-pager .header-pager {\n  min-height: 0;\n  overflow: hidden;\n}\n\n.weather.nowcast-pager .header-pages {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-layout {\n  flex: auto;\n  min-height: 0;\n}\n\n.weather.nowcast-pager .header-page-nowcast, .weather.nowcast-pager .nowcast-panel, .weather.nowcast-pager wfe-nowcast {\n  min-height: 0;\n}\n\n.weather.nowcast-pager .nowcast-panel {\n  overflow: hidden;\n}\n\n.weather .header-pages {\n  will-change: transform;\n  touch-action: pan-y;\n  flex-direction: row;\n  flex: auto;\n  width: 100%;\n  min-height: 0;\n  transition: transform .35s;\n  display: flex;\n}\n\n.weather .header-page {\n  flex-direction: column;\n  flex: 0 0 100%;\n  gap: 12px;\n  min-width: 0;\n  min-height: 0;\n  display: flex;\n}\n\n.weather.nowcast-pager .header-page {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: var(--wfe-header-padding-block, 16px);\n  box-sizing: border-box;\n  padding-bottom: 0;\n}\n\n.weather .nowcast-panel {\n  background: #0000004d;\n  border-radius: 16px;\n  flex-direction: column;\n  flex: auto;\n  min-height: 0;\n  padding: 12px 12px 6px;\n  display: flex;\n}\n\n.weather wfe-nowcast {\n  flex-direction: column;\n  flex: auto;\n  gap: 0;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 0;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather .nowcast-bars {\n  align-items: stretch;\n  gap: var(--wfe-nowcast-gap, 5px);\n  flex: auto;\n  min-height: 24px;\n  display: flex;\n}\n\n.weather.nowcast-pager .nowcast-bars {\n  min-height: 16px;\n}\n\n.weather .nowcast-bar {\n  background: #ffffff06;\n  border-radius: 999px;\n  flex: 1 1 0;\n  align-self: stretch;\n  align-items: flex-end;\n  height: auto;\n  min-height: 6px;\n  display: flex;\n  overflow: hidden;\n}\n\n.weather .nowcast-bar-fill {\n  background: var(--wfe-nowcast-fill-color, #4aafff);\n  border-radius: inherit;\n  width: 100%;\n  height: 0%;\n  transition: height .35s;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .weather .nowcast-bar-fill, .weather .nowcast-labels {\n    transition: none;\n  }\n}\n\n.weather .nowcast-labels {\n  font-size: var(--ha-font-size-s);\n  color: #fff;\n  will-change: transform;\n  justify-content: space-between;\n  transition: transform .35s;\n  display: flex;\n}\n\n.weather .pager-dots {\n  justify-content: center;\n  gap: 6px;\n  padding-top: 6px;\n  display: flex;\n}\n\n.weather.nowcast-pager .pager-dots {\n  padding-inline: var(--wfe-header-padding-inline, 16px);\n  padding-top: 2px;\n  padding-bottom: 4px;\n}\n\n.weather .pager-dot {\n  cursor: pointer;\n  background: #ffffff73;\n  border: none;\n  border-radius: 50%;\n  width: 6px;\n  height: 6px;\n  padding: 0;\n}\n\n.weather .pager-dot.active {\n  background: #ffffffe6;\n}\n\n.weather .pager-dot:focus-visible {\n  outline-offset: 2px;\n  outline: 2px solid #ffffffe6;\n}\n\n.forecast-container {\n  flex: auto;\n  width: 100%;\n  padding-top: 4px;\n  padding-bottom: 20px;\n  display: flex;\n}\n\n.forecast-container.orientation-vertical {\n  flex-direction: column;\n  gap: 4px;\n}\n\n.forecast-container.orientation-horizontal {\n  flex-direction: row;\n  align-items: stretch;\n  gap: 0;\n}\n\n.divider {\n  background-color: var(--primary-background-color);\n}\n\n.card-divider {\n  height: 4px;\n}\n\n.forecast-divider {\n  border-radius: 2px;\n}\n\n.forecast-container.orientation-vertical > .forecast-divider {\n  height: 4px;\n  margin: 14px 16px 4px;\n}\n\n.forecast-container.orientation-horizontal > .forecast-divider {\n  flex: 0 0 4px;\n  align-self: stretch;\n  width: 4px;\n  margin: 16px 0 0;\n}\n\n.forecast-container.orientation-horizontal > .forecast-daily-container, .forecast-container.orientation-horizontal > .forecast-hourly-container {\n  flex: 1;\n}\n\n.forecast-daily-container, .forecast-hourly-container {\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  display: flex;\n  position: relative;\n  overflow: hidden;\n}\n\n.fade-left, .fade-right {\n  pointer-events: none;\n  z-index: 2;\n  width: 16px;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.fade-left {\n  background: linear-gradient(to right, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  left: 0;\n}\n\n.fade-right {\n  background: linear-gradient(to left, var(--card-background-color) 0%, var(--card-background-color) 2px, transparent 100%);\n  right: 0;\n}\n\n.forecast {\n  --forecast-inline-padding: 16px;\n  scroll-snap-type: x mandatory;\n  height: auto;\n  scroll-padding-left: var(--forecast-inline-padding);\n  scroll-padding-right: var(--forecast-inline-padding);\n  justify-content: space-around;\n  align-items: stretch;\n  gap: var(--dynamic-gap, 20px);\n  padding: 8px var(--forecast-inline-padding) 0px;\n  flex: auto;\n  display: flex;\n  overflow: auto clip;\n}\n\n@supports (-webkit-touch-callout: none) {\n  .forecast {\n    padding-bottom: 12px;\n  }\n}\n\n.forecast wfe-daily-list, .forecast wfe-hourly-list {\n  display: contents;\n}\n\n.forecast.daily {\n  --min-gap: 30px;\n  --icon-size: 40px;\n  --icon-container-width: 40px;\n  --temp-bar-width: 8px;\n  --temp-bar-min: -20;\n  --temp-bar-max: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.daily .temperature-bar {\n  width: var(--temp-bar-width);\n  border-radius: 4px;\n  height: 32px;\n  margin: 0 auto 4px;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast.daily .temperature-bar:before {\n  content: \"\";\n  background-color: var(--primary-text-color, #fff);\n  opacity: .1;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.forecast.daily .temperature-bar-inner {\n  background-color: var(--primary-text-color, #fff);\n  opacity: .5;\n  border-radius: 4px;\n  width: 100%;\n  position: absolute;\n}\n\n.forecast.hourly {\n  --min-gap: 16px;\n  --icon-size: 25px;\n  --icon-container-width: 25px;\n  --day-marker-width: 40px;\n  --translate-content-height: 50px;\n  --translate-container-height: 50px;\n  --min-temp: -20;\n  --max-temp: 50;\n  cursor: grab;\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n.forecast.hourly.dragging, .forecast.hourly.momentum, .forecast.daily.dragging, .forecast.daily.momentum {\n  scroll-snap-type: none;\n}\n\n.forecast.hourly.grabbing, .forecast.daily.grabbing {\n  cursor: grabbing;\n}\n\n.forecast::-webkit-scrollbar {\n  height: 0;\n}\n\n.forecast::-webkit-scrollbar-thumb {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-track {\n  background: none;\n}\n\n.forecast::-webkit-scrollbar-corner {\n  background: none;\n}\n\n.forecast {\n  -ms-overflow-style: none;\n  scrollbar-width: none;\n}\n\n.forecast::-webkit-scrollbar {\n  display: none;\n}\n\n.forecast-item {\n  scroll-snap-align: start;\n  text-align: center;\n  flex-direction: column;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item {\n  width: var(--icon-container-width);\n  align-items: center;\n  overflow: visible;\n}\n\n.forecast.hourly .day-marker {\n  --day-marker-translate-x: calc((var(--dynamic-gap, 20px)  + var(--icon-container-width)  - var(--day-marker-width)) / 2);\n  left: calc((((var(--day-marker-width)  - var(--icon-container-width)) / 2) * -1)  - var(--day-marker-translate-x));\n  transform: translateX(var(--day-marker-translate-x));\n  color: #fff;\n  background-color: var(--state-climate-cool-color);\n  pointer-events: none;\n  white-space: nowrap;\n  z-index: 3;\n  scroll-snap-align: none;\n  width: var(--day-marker-width);\n  margin-right: calc(var(--day-marker-width) * -1 - var(--dynamic-gap) / 2);\n  margin-right: calc(round(up, var(--day-marker-width) * -1 - var(--dynamic-gap) / 2, 1px));\n  margin-left: calc(var(--dynamic-gap) * -1 / 2);\n  border-radius: 999px;\n  flex: none;\n  justify-content: center;\n  align-self: start;\n  align-items: center;\n  font-weight: 600;\n  display: inline-flex;\n  position: sticky;\n}\n\n.forecast .day-of-month {\n  opacity: .3;\n  margin-top: -4px;\n  font-size: 13px;\n}\n\n.forecast .date.sunrise {\n  color: var(--orange-color, #ff9800);\n  font-weight: 500;\n}\n\n.forecast .date.sunset {\n  color: var(--purple-color, #926bc7);\n  font-weight: 500;\n}\n\n.forecast.hourly .date {\n  width: var(--icon-container-width);\n  text-align: center;\n  white-space: nowrap;\n  justify-content: center;\n  align-items: center;\n  margin: 0 auto;\n  display: flex;\n}\n\n.forecast .ampm {\n  opacity: .3;\n  font-size: 11px;\n}\n\n.forecast .temp {\n  font-size: var(--ha-font-size-l);\n  font-weight: bolder;\n}\n\n.forecast .templow {\n  opacity: .5;\n  font-weight: bolder;\n}\n\n.forecast .precipitation, .forecast .precipitationprobability {\n  opacity: .3;\n  color: var(--state-climate-cool-color);\n  min-height: 20px;\n}\n\n.forecast .hourly-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .hourly-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast .precipitation {\n  --precipitation-fill: 0%;\n  --wfe-precipitation-indicator-color: var(--state-climate-cool-color);\n  --wfe-precipitation-indicator-opacity: .2;\n  --wfe-precipitation-indicator-padding-inline: 8px;\n  --wfe-precipitation-indicator-padding-block: 0px;\n  --wfe-precipitation-indicator-offset-top: 0px;\n  --wfe-precipitation-indicator-offset-bottom: 0px;\n  padding-inline: var(--wfe-precipitation-indicator-padding-inline);\n  padding-block: var(--wfe-precipitation-indicator-padding-block);\n  border-radius: var(--wfe-precipitation-indicator-radius, 4px);\n  z-index: 0;\n  display: inline-block;\n  position: relative;\n  overflow: hidden;\n}\n\n.forecast .precipitation:before {\n  content: \"\";\n  inset-inline: 0;\n  top: calc(100% - var(--precipitation-fill, 0%)  - var(--wfe-precipitation-indicator-offset-top, 0px));\n  bottom: calc(0px - var(--wfe-precipitation-indicator-offset-bottom, 0px));\n  background-color: var(--wfe-precipitation-indicator-color, var(--state-climate-cool-color));\n  opacity: var(--wfe-precipitation-indicator-opacity, .2);\n  border-radius: inherit;\n  pointer-events: none;\n  z-index: -1;\n  transition: top .15s ease-in-out, background-color .15s ease-in-out;\n  position: absolute;\n}\n\n.forecast .precipitation.overflow {\n  --wfe-precipitation-indicator-color: var(--red-color, #f44336);\n  color: var(--red-color, #f44336);\n}\n\n.forecast.daily .forecast-item > .precipitation {\n  line-height: 18px;\n}\n\n.forecast .precipitation.active, .forecast .precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast .daily-extra {\n  opacity: .6;\n  color: var(--primary-text-color);\n  white-space: nowrap;\n  min-height: 20px;\n  font-size: 13px;\n  font-weight: 500;\n}\n\n.forecast .daily-extra.dimmed {\n  opacity: .3;\n}\n\n.forecast.daily .daily-extra.precipitationprobability {\n  color: var(--state-climate-cool-color);\n  opacity: .3;\n  display: block !important;\n}\n\n.forecast .daily-extra.precipitationprobability.active {\n  opacity: 1;\n}\n\n.forecast.daily .forecast-item {\n  grid-template-rows: max-content max-content minmax(80px, 1fr) max-content max-content;\n  align-content: start;\n  display: grid;\n}\n\n.forecast.daily .forecast-item > .date, .forecast.daily .forecast-item > .day-of-month, .forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability, .forecast.daily .forecast-item > .daily-extra {\n  min-height: auto;\n}\n\n.forecast.daily .forecast-item > .date {\n  grid-row: 1;\n}\n\n.forecast.daily .forecast-item > .day-of-month {\n  grid-row: 2;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  grid-row: 3;\n}\n\n.forecast.daily .forecast-item > .precipitation, .forecast.daily .forecast-item > .precipitationprobability {\n  grid-row: 4;\n}\n\n.forecast.daily .forecast-item > .daily-extra {\n  text-align: center;\n  width: var(--icon-size);\n  grid-row: 5;\n  justify-self: center;\n}\n\n.forecast.daily .precipitationprobability {\n  display: none;\n}\n\n.forecast-item .translate-container {\n  width: var(--icon-container-width);\n  flex-direction: column;\n  flex: auto;\n  justify-content: flex-start;\n  align-items: center;\n  height: 100%;\n  display: flex;\n}\n\n.forecast.daily .forecast-item > .translate-container {\n  min-height: 80px;\n}\n\n.forecast.hourly .forecast-item .translate-container {\n  justify-content: center;\n}\n\n.forecast-item .icon-container {\n  flex-direction: column;\n  display: flex;\n}\n\n.forecast.hourly .forecast-item .icon-container {\n  --item-temp: 0;\n  --max-translation: calc((var(--translate-container-height)  - var(--translate-content-height)) / 2);\n  --percentual-translation: calc((var(--item-temp)  - var(--min-temp)) / (var(--max-temp)  - var(--min-temp)));\n  transform: translateY(calc(var(--max-translation)  - (var(--percentual-translation) * 2 * var(--max-translation))));\n}\n\n.forecast.hourly .forecast-item.no-ampm > .translate-container {\n  margin-top: 4px;\n}\n\n.forecast.daily .forecast-item .icon-container {\n  flex: none;\n}\n\n.forecast.daily .temperature-bar {\n  flex: auto;\n}\n\n.forecast-image-icon {\n  justify-content: center;\n  display: flex;\n}\n\n.forecast-image-icon > * {\n  width: var(--icon-size);\n  height: var(--icon-size);\n}\n\n.forecast-image-icon ha-icon {\n  --mdc-icon-size: var(--icon-size);\n}\n\n.rain {\n  fill: var(--weather-icon-rain-color, #30b3ff);\n}\n\n.sun {\n  fill: var(--weather-icon-sun-color, #fdd93c);\n}\n\n.moon {\n  fill: var(--weather-icon-moon-color, #fcf497);\n}\n\n.cloud-back {\n  fill: var(--weather-icon-cloud-back-color, #d4d4d4);\n}\n\n.cloud-front {\n  fill: var(--weather-icon-cloud-front-color, #f9f9f9);\n}\n\n.snow {\n  fill: var(--weather-icon-snow-color, #f9f9f9);\n  stroke: var(--weather-icon-snow-stroke-color, #d4d4d4);\n  stroke-width: 1px;\n  paint-order: stroke;\n}\n\n";
 
 
 const $b377d607dfc671f6$export$9dd6ff9ea0189349 = (0, $j8KxL.css)`
@@ -3091,7 +3096,7 @@ let $e0faea6f638c1177$export$dc909bdc6ed8e8f6 = class WFEDailyList extends (0, $
         <div class="translate-container">
           <div class="icon-container">
             <div class="forecast-image-icon">
-              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, false)}
+              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, false, this.iconMap)}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>
@@ -3271,6 +3276,11 @@ let $e0faea6f638c1177$export$dc909bdc6ed8e8f6 = class WFEDailyList extends (0, $
         attribute: false
     })
 ], $e0faea6f638c1177$export$dc909bdc6ed8e8f6.prototype, "extraAttributeDimBelow", void 0);
+(0, $39J5i.__decorate)([
+    (0, $dsTCw.property)({
+        attribute: false
+    })
+], $e0faea6f638c1177$export$dc909bdc6ed8e8f6.prototype, "iconMap", void 0);
 $e0faea6f638c1177$export$dc909bdc6ed8e8f6 = (0, $39J5i.__decorate)([
     (0, $1KSgR.customElement)("wfe-daily-list")
 ], $e0faea6f638c1177$export$dc909bdc6ed8e8f6);
@@ -3607,7 +3617,7 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
         <div class="translate-container">
           <div class="icon-container" style=${`--item-temp: ${item.temperature}`}>
             <div class="forecast-image-icon">
-              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, this._shouldUseNightIcon(item, date))}
+              ${(0, $a670ed82a1e76f75$export$e0801f527146069)(item.condition, this, this._shouldUseNightIcon(item, date), this.iconMap)}
             </div>
             <div class="temp">${Math.round(item.temperature)}°</div>
           </div>
@@ -3845,6 +3855,11 @@ let $93e18bf828c9bae2$export$c4d9e0638219e78c = class WFEHourlyList extends (0, 
         attribute: false
     })
 ], $93e18bf828c9bae2$export$c4d9e0638219e78c.prototype, "extraAttributeDimBelow", void 0);
+(0, $39J5i.__decorate)([
+    (0, $dsTCw.property)({
+        attribute: false
+    })
+], $93e18bf828c9bae2$export$c4d9e0638219e78c.prototype, "iconMap", void 0);
 $93e18bf828c9bae2$export$c4d9e0638219e78c = (0, $39J5i.__decorate)([
     (0, $1KSgR.customElement)("wfe-hourly-list")
 ], $93e18bf828c9bae2$export$c4d9e0638219e78c);
@@ -3866,6 +3881,7 @@ const $4ccfc45860c73208$var$NOWCAST_MIN_BAR_WIDTH_PX = 5;
 const $4ccfc45860c73208$var$NOWCAST_MAX_BAR_WIDTH_PX = 7;
 const $4ccfc45860c73208$var$NOWCAST_BASE_GAP_PX = 5;
 const $4ccfc45860c73208$var$NOWCAST_PRECIPITATION_MIN_SCALE = 1;
+const $4ccfc45860c73208$var$NOWCAST_LABEL_HYSTERESIS_MINUTES = 2;
 let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eGUNk.LitElement) {
     createRenderRoot() {
         return this;
@@ -3886,6 +3902,7 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
         const bars = this._reduceSeries(series, this._barStride);
         const maxValue = bars.reduce((max, value)=>Math.max(max, value), 0);
         const scale = Math.max($4ccfc45860c73208$var$NOWCAST_PRECIPITATION_MIN_SCALE, maxValue);
+        const labelOffset = this._computeLabelOffset(this._containerWidth || this.clientWidth);
         const labels = this._barStride > 1 ? [
             "Now",
             "20m",
@@ -3920,7 +3937,9 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
           `;
         })}
       </div>
-      <div class="nowcast-labels">
+      <div class="nowcast-labels" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+            transform: `translateX(${labelOffset}px)`
+        })}>
         ${labels.map((label)=>(0, $l56HR.html)`<span>${label}</span>`)}
       </div>
     `;
@@ -3929,6 +3948,7 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
         if (this._resizeObserver) return;
         this._resizeObserver = new ResizeObserver((entries)=>{
             const width = entries[0]?.contentRect?.width ?? this.clientWidth;
+            if (Number.isFinite(width) && width > 0 && width !== this._containerWidth) this._containerWidth = width;
             this._updateResolution(width);
         });
         this._resizeObserver.observe(this);
@@ -3938,6 +3958,16 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
         const { stride: stride , gap: gap  } = this._resolveLayout(width);
         if (stride !== this._barStride) this._barStride = stride;
         if (gap !== this._barGap) this._barGap = gap;
+    }
+    _computeLabelOffset(width) {
+        if (!this.forecast?.length || !Number.isFinite(width) || width <= 0) return 0;
+        const timestamps = this.forecast.map((item)=>new Date(item.datetime).getTime()).filter((timestamp)=>Number.isFinite(timestamp)).sort((a, b)=>a - b);
+        if (!timestamps.length) return 0;
+        const firstTimestamp = timestamps[0];
+        const diffMinutes = Math.round((Date.now() - firstTimestamp) / 60000);
+        if (Math.abs(diffMinutes) <= $4ccfc45860c73208$var$NOWCAST_LABEL_HYSTERESIS_MINUTES) return 0;
+        const pixelsPerMinute = width / $4ccfc45860c73208$var$NOWCAST_MINUTES;
+        return diffMinutes * pixelsPerMinute;
     }
     _buildMinuteSeries() {
         const normalized = (Array.isArray(this.forecast) ? this.forecast : []).map((item)=>{
@@ -3990,6 +4020,7 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
         this.forecast = [];
         this._barStride = 1;
         this._barGap = $4ccfc45860c73208$var$NOWCAST_BASE_GAP_PX;
+        this._containerWidth = 0;
     }
 };
 (0, $39J5i.__decorate)([
@@ -4003,6 +4034,9 @@ let $4ccfc45860c73208$export$b13ff882ae67cf8e = class WFENowcast extends (0, $eG
 (0, $39J5i.__decorate)([
     (0, $pklEb.state)()
 ], $4ccfc45860c73208$export$b13ff882ae67cf8e.prototype, "_barGap", void 0);
+(0, $39J5i.__decorate)([
+    (0, $pklEb.state)()
+], $4ccfc45860c73208$export$b13ff882ae67cf8e.prototype, "_containerWidth", void 0);
 $4ccfc45860c73208$export$b13ff882ae67cf8e = (0, $39J5i.__decorate)([
     (0, $1KSgR.customElement)("wfe-nowcast")
 ], $4ccfc45860c73208$export$b13ff882ae67cf8e);
@@ -4268,6 +4302,8 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const normalizedDailyDimBelow = this._normalizeOptionalNumber(config.daily_extra_attribute_dim_below);
         const normalizedHourlyColor = this._normalizeOptionalText(config.hourly_extra_attribute_color);
         const normalizedDailyColor = this._normalizeOptionalText(config.daily_extra_attribute_color);
+        const normalizedIconMap = this._normalizeIconMap(config.icon_map);
+        const normalizedMasonryRows = this._normalizeMasonryRows(config.masonry_rows);
         const defaults = {
             type: "custom:weather-forecast-extended-card",
             ...config,
@@ -4283,6 +4319,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
             header_chips: normalizedHeaderChips,
             header_attributes: normalizedHeaderAttributes,
+            icon_map: normalizedIconMap,
             daily_min_gap: normalizedDailyMinGap,
             hourly_min_gap: normalizedHourlyMinGap,
             hourly_extra_attribute: config.hourly_extra_attribute,
@@ -4293,7 +4330,8 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             daily_extra_attribute_unit: config.daily_extra_attribute_unit,
             daily_extra_attribute_color: normalizedDailyColor,
             daily_extra_attribute_dim_below: normalizedDailyDimBelow,
-            solar_forecast_entries: Array.isArray(config.solar_forecast_entries) ? config.solar_forecast_entries : undefined
+            solar_forecast_entries: Array.isArray(config.solar_forecast_entries) ? config.solar_forecast_entries : undefined,
+            masonry_rows: normalizedMasonryRows
         };
         this._config = defaults;
         if (previousNowcastEntity !== defaults.nowcast_entity) this._resetNowcastState();
@@ -4371,6 +4409,30 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (value === null || typeof value === "undefined") return undefined;
         const trimmed = String(value).trim();
         return trimmed.length ? trimmed : undefined;
+    }
+    _normalizeMasonryRows(value) {
+        if (value === null || typeof value === "undefined") return undefined;
+        const numericValue = typeof value === "number" ? value : Number(value);
+        if (!Number.isFinite(numericValue)) return undefined;
+        if (numericValue <= 0) return undefined;
+        return Math.max(1, Math.round(numericValue));
+    }
+    _normalizeIconMap(iconMap) {
+        if (!iconMap || typeof iconMap !== "object") return undefined;
+        const normalized = {};
+        Object.entries(iconMap).forEach(([key, value])=>{
+            if (typeof value !== "string") return;
+            const trimmed = value.trim();
+            if (trimmed.length) normalized[key] = trimmed;
+        });
+        return Object.keys(normalized).length ? normalized : undefined;
+    }
+    _shouldApplyMasonryHeight() {
+        if (!this._config?.masonry_rows) return false;
+        if (!this.isConnected) return true;
+        const rowHeight = getComputedStyle(this).getPropertyValue("--row-height").trim();
+        if (rowHeight) return false;
+        return !Boolean(this.closest("hui-sections-view") || this.closest("hui-section-view") || this.closest("hui-section"));
     }
     _getHeaderChips() {
         if (!this._config) return [];
@@ -4487,6 +4549,13 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         if (!(index in this._templateChipValues)) return;
         const { [index]: _removed , ...rest } = this._templateChipValues;
         this._templateChipValues = rest;
+    }
+    getCardSize() {
+        if (this._config?.masonry_rows !== undefined) return Math.max(1, Math.ceil(this._config.masonry_rows));
+        const gridRows = this.getGridOptions()?.rows ?? 3;
+        const sectionRowHeightPx = 56;
+        const estimatedHeight = gridRows * sectionRowHeightPx;
+        return Math.max(1, Math.ceil(estimatedHeight / 50));
     }
     getGridOptions() {
         if (!this._config) return {
@@ -4696,6 +4765,14 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
             if (this._config?.hourly_min_gap !== undefined) styles["--min-gap"] = `${this._config.hourly_min_gap}px`;
             return Object.keys(styles).length ? (0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)(styles) : (0, $l56HR.nothing);
         })();
+        const cardStyle = (()=>{
+            if (!this._shouldApplyMasonryHeight()) return 0, $l56HR.nothing;
+            const rowCount = this._config?.masonry_rows ?? 0;
+            if (!Number.isFinite(rowCount) || rowCount <= 0) return 0, $l56HR.nothing;
+            return (0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
+                "min-height": `${rowCount * 50}px`
+            });
+        })();
         if (!hasContent) {
             const cardLabel = this._name || this._entity;
             return (0, $l56HR.html)`
@@ -4709,7 +4786,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
         const headerStyles = {
             "background-image": `url(${this._getWeatherBgImage(this._state.state)})`
         };
-        if (showInlineNowcast && !headerOnly) headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height))";
+        if (showInlineNowcast && !headerOnly) headerStyles["--wfe-header-height"] = "calc(4 * var(--row-height, 56px))";
         const headerChipsTemplate = headerChips.length ? headerChips.map((chip)=>{
             const hasChipAction = (0, $ee1328194d522913$export$e217e69099d082f5)(chip.action);
             const chipClassMap = {
@@ -4803,7 +4880,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
       </div>
     `;
         return (0, $l56HR.html)`
-      <ha-card>
+      <ha-card style=${cardStyle}>
         ${showHeader ? (0, $l56HR.html)`
             <div
               class=${(0, $ca7e425cc484d5ff$export$56cc687933817664)(headerClassMap)}
@@ -4854,6 +4931,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                         .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
                         .extraAttributeColor=${this._config.daily_extra_attribute_color}
                         .extraAttributeDimBelow=${this._config.daily_extra_attribute_dim_below}
+                        .iconMap=${this._config.icon_map}
                         @wfe-daily-selected=${this._handleDailySelected}
                       ></wfe-daily-list>
                     </div>
@@ -4877,6 +4955,7 @@ class $e6159c9afb48cae5$export$53427b5d95bebd88 extends (0, $eGUNk.LitElement) {
                         .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
                         .extraAttributeColor=${this._config.hourly_extra_attribute_color}
                         .extraAttributeDimBelow=${this._config.hourly_extra_attribute_dim_below}
+                        .iconMap=${this._config.icon_map}
                       ></wfe-hourly-list>
                     </div>
                   </div>

@@ -21,6 +21,8 @@ var $39J5i = parcelRequire("39J5i");
 var $j0ZcV = parcelRequire("j0ZcV");
 
 var $1ZxoT = parcelRequire("1ZxoT");
+
+var $aGwLT = parcelRequire("aGwLT");
 const $a37b5b928a2fc5d8$var$HEADER_CHIP_INDEXES = [
     0,
     1,
@@ -47,6 +49,24 @@ const $a37b5b928a2fc5d8$var$CHIP_TYPE_OPTIONS = [
 ];
 const $a37b5b928a2fc5d8$var$SOLAR_FORECAST_OPTION = "solar_forecast";
 const $a37b5b928a2fc5d8$var$FORECAST_OPTIONS_CACHE = new Map();
+const $a37b5b928a2fc5d8$var$ICON_MAP_LABELS = {
+    "clear-night": "Clear night",
+    cloudy: "Cloudy",
+    fog: "Fog",
+    hail: "Hail",
+    lightning: "Lightning",
+    "lightning-rainy": "Lightning rainy",
+    partlycloudy: "Partly cloudy",
+    "partlycloudy-night": "Partly cloudy night",
+    pouring: "Pouring",
+    rainy: "Rainy",
+    snowy: "Snowy",
+    "snowy-rainy": "Snowy rainy",
+    sunny: "Sunny",
+    windy: "Windy",
+    "windy-variant": "Windy variant",
+    exceptional: "Exceptional"
+};
 const $a37b5b928a2fc5d8$var$fireEvent = (node, type, detail)=>{
     node.dispatchEvent(new CustomEvent(type, {
         detail: detail,
@@ -141,6 +161,22 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
     .color-input-row input[type="text"] {
       flex: 1 1 120px;
       min-width: 120px;
+    }
+
+    .icon-map-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .icon-map-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-map-row ha-selector {
+      flex: 1 1 auto;
     }
 
     .clear-button {
@@ -347,6 +383,32 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
               @value-changed=${this._handleSolarForecastSelectionChange}
             ></ha-selector>
             ${this._solarForecastOptionsLoaded && !this._solarForecastEntryIds.length ? (0, $j0ZcV.html)`<p class="location-description">No Energy solar forecasts configured.</p>` : (0, $j0ZcV.nothing)}
+          `)}
+      </div>
+      <div class="editor-section">
+        ${this._renderExpander("custom-icons", "Custom Icons", (0, $j0ZcV.html)`
+            <p class="location-description">
+              Override the default weather icons with any icon available in Home Assistant.
+            </p>
+            <div class="icon-map-list">
+              ${(0, $aGwLT.WEATHER_CONDITIONS).map((condition)=>{
+            const value = this._getIconMapValue(condition);
+            return (0, $j0ZcV.html)`
+                  <div class="icon-map-row">
+                    <ha-selector
+                      .hass=${this.hass}
+                      .selector=${{
+                icon: {}
+            }}
+                      .value=${value}
+                      .label=${$a37b5b928a2fc5d8$var$ICON_MAP_LABELS[condition]}
+                      .required=${false}
+                      @value-changed=${(event)=>this._handleIconMapChange(condition, event)}
+                    ></ha-selector>
+                  </div>
+                `;
+        })}
+            </div>
           `)}
       </div>
       <div class="editor-section">
@@ -671,6 +733,26 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
     _clearOptionalField(field) {
         this._updateConfig({
             [field]: undefined
+        });
+    }
+    _getIconMapValue(condition) {
+        const iconMap = this._config?.icon_map;
+        if (!iconMap) return "";
+        const value = iconMap[condition];
+        return typeof value === "string" ? value : "";
+    }
+    _handleIconMapChange(condition, event) {
+        event.stopPropagation();
+        if (!this._config) return;
+        const raw = event.detail?.value;
+        const value = typeof raw === "string" ? raw.trim() : "";
+        const nextMap = {
+            ...this._config.icon_map ?? {}
+        };
+        if (!value) delete nextMap[condition];
+        else nextMap[condition] = value;
+        this._updateConfig({
+            icon_map: Object.keys(nextMap).length ? nextMap : undefined
         });
     }
     _getColorPickerValue(value) {
@@ -1511,6 +1593,31 @@ $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = (0, $39J5i.__decorate)([
 ], $a37b5b928a2fc5d8$export$4f91f681c03a7b8b);
 
 });
+parcelRequire.register("aGwLT", function(module, exports) {
+
+$parcel$export(module.exports, "WEATHER_CONDITIONS", () => $c0977d1f14d5c39b$export$7f18ae76d74a6de0);
+// Collection of types from HA frontend
+const $c0977d1f14d5c39b$export$7f18ae76d74a6de0 = [
+    "clear-night",
+    "cloudy",
+    "fog",
+    "hail",
+    "lightning",
+    "lightning-rainy",
+    "partlycloudy",
+    "partlycloudy-night",
+    "pouring",
+    "rainy",
+    "snowy",
+    "snowy-rainy",
+    "sunny",
+    "windy",
+    "windy-variant",
+    "exceptional"
+];
+
+});
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.87706908.js.map
+
+//# sourceMappingURL=weather-forecast-extended-editor.3d7dce5b.js.map
