@@ -126,6 +126,11 @@ ha-card {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .weather .temp.has-action,
@@ -152,6 +157,11 @@ ha-card {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .weather .header-pill-text {
