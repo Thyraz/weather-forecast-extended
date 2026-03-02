@@ -1911,11 +1911,15 @@ export class WeatherForecastExtended extends LitElement {
       }
     }
 
+    const actionEntityRaw = (actionConfig as { entity?: unknown }).entity;
+    const actionEntity = typeof actionEntityRaw === "string" ? actionEntityRaw.trim() : "";
+    const resolvedEntity = actionEntity || entityOverride || this._entity;
+
     handleAction(
       this,
       this._hass,
       {
-        entity: entityOverride || this._entity,
+        entity: resolvedEntity,
         tap_action: actionConfig,
       },
       "tap",

@@ -12,7 +12,8 @@ type HeaderChipFieldName =
   | `header_chip_${1 | 2 | 3}_attribute`
   | `header_chip_${1 | 2 | 3}_template`
   | `header_chip_${1 | 2 | 3}_icon`
-  | `header_chip_${1 | 2 | 3}_tap_action`;
+  | `header_chip_${1 | 2 | 3}_tap_action`
+  | `header_chip_${1 | 2 | 3}_tap_action_entity`;
 
 type EditorFormData = WeatherForecastExtendedConfig & Partial<Record<HeaderChipFieldName, any>>;
 
@@ -26,6 +27,8 @@ const chipIconFieldName = (index: number): HeaderChipFieldName =>
   `header_chip_${index + 1}_icon` as HeaderChipFieldName;
 const chipActionFieldName = (index: number): HeaderChipFieldName =>
   `header_chip_${index + 1}_tap_action` as HeaderChipFieldName;
+const chipActionEntityFieldName = (index: number): HeaderChipFieldName =>
+  `header_chip_${index + 1}_tap_action_entity` as HeaderChipFieldName;
 
 const CHIP_FORM_FIELD_NAMES = HEADER_CHIP_INDEXES.reduce<HeaderChipFieldName[]>((names, index) => {
   names.push(
@@ -34,6 +37,7 @@ const CHIP_FORM_FIELD_NAMES = HEADER_CHIP_INDEXES.reduce<HeaderChipFieldName[]>(
     chipTemplateFieldName(index),
     chipIconFieldName(index),
     chipActionFieldName(index),
+    chipActionEntityFieldName(index),
   );
   return names;
 }, []);
@@ -42,6 +46,8 @@ const CHIP_TYPE_OPTIONS: Array<{ value: "attribute" | "template"; label: string 
   { value: "attribute", label: "Attribute" },
   { value: "template", label: "Template" },
 ];
+
+const ACTIONS_WITH_ENTITY = new Set(["more-info", "toggle"]);
 
 const SOLAR_FORECAST_OPTION = "solar_forecast";
 const FORECAST_OPTIONS_CACHE = new Map<string, { hourly: string[]; daily: string[] }>();
@@ -171,10 +177,25 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       gap: 12px;
     }
 
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-label {
+      display: block;
+      margin: 0;
+    }
+
     .chips-section {
       display: flex;
       flex-direction: column;
       gap: 8px;
+    }
+
+    .chips-section + .chips-section {
+      margin-top: 12px;
     }
 
     .chips-hint {
@@ -212,6 +233,11 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     .color-input-row input[type="text"] {
       flex: 1 1 120px;
       min-width: 120px;
+    }
+
+    ha-entity-picker {
+      display: block;
+      width: 100%;
     }
 
     .icon-map-list {
@@ -379,11 +405,17 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       layout: layoutSchema,
       header: headerSchema,
       nowcast: nowcastSchema,
-      chips: chipSchema,
       hourly: hourlySchema,
       daily: dailySchema,
     } = this._buildSchemas();
     const formData = this._createFormData();
+    const attributeOptions = this._buildAttributeOptions();
+    const temperatureAction = this._config.header_tap_action_temperature;
+    const conditionAction = this._config.header_tap_action_condition;
+    const showTemperatureActionEntity = this._shouldShowActionEntity(temperatureAction);
+    const showConditionActionEntity = this._shouldShowActionEntity(conditionAction);
+    const temperatureActionEntity = this._getActionEntity(temperatureAction);
+    const conditionActionEntity = this._getActionEntity(conditionAction);
 
     return html`
       <ha-form
@@ -503,39 +535,175 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
             <div class="editor-subsection">
               <h5 class="section-subtitle">Tap actions</h5>
               <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
-              <ha-selector
-                .hass=${this.hass}
-                .selector=${{ ui_action: {} }}
-                .value=${this._config.header_tap_action_temperature}
-                .label=${"Temperature tap action"}
-                .required=${false}
-                .disabled=${this._config.show_header === false}
-                @value-changed=${(event: CustomEvent) =>
-                  this._handleHeaderActionChange(event, "header_tap_action_temperature")}
-              ></ha-selector>
-              <ha-selector
-                .hass=${this.hass}
-                .selector=${{ ui_action: {} }}
-                .value=${this._config.header_tap_action_condition}
-                .label=${"Condition tap action"}
-                .required=${false}
-                .disabled=${this._config.show_header === false}
-                @value-changed=${(event: CustomEvent) =>
-                  this._handleHeaderActionChange(event, "header_tap_action_condition")}
-              ></ha-selector>
+              <div class="field">
+                <label class="field-label">Temperature tap action</label>
+                <ha-selector
+                  aria-label="Temperature tap action"
+                  .hass=${this.hass}
+                  .selector=${{ ui_action: {} }}
+                  .value=${this._config.header_tap_action_temperature}
+                  .label=${""}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event: CustomEvent) =>
+                    this._handleHeaderActionChange(event, "header_tap_action_temperature")}
+                ></ha-selector>
+              </div>
+              ${showTemperatureActionEntity
+                ? html`
+                    <div class="field">
+                      <ha-entity-picker
+                        .hass=${this.hass}
+                        .value=${temperatureActionEntity}
+                        .label=${"Temperature tap action entity"}
+                        ?disabled=${this._config.show_header === false}
+                        @value-changed=${(event: CustomEvent) =>
+                          this._handleHeaderActionEntityChange(event, "header_tap_action_temperature")}
+                      ></ha-entity-picker>
+                    </div>
+                  `
+                : nothing}
+              <div class="field">
+                <label class="field-label">Condition tap action</label>
+                <ha-selector
+                  aria-label="Condition tap action"
+                  .hass=${this.hass}
+                  .selector=${{ ui_action: {} }}
+                  .value=${this._config.header_tap_action_condition}
+                  .label=${""}
+                  .required=${false}
+                  .disabled=${this._config.show_header === false}
+                  @value-changed=${(event: CustomEvent) =>
+                    this._handleHeaderActionChange(event, "header_tap_action_condition")}
+                ></ha-selector>
+              </div>
+              ${showConditionActionEntity
+                ? html`
+                    <div class="field">
+                      <ha-entity-picker
+                        .hass=${this.hass}
+                        .value=${conditionActionEntity}
+                        .label=${"Condition tap action entity"}
+                        ?disabled=${this._config.show_header === false}
+                        @value-changed=${(event: CustomEvent) =>
+                          this._handleHeaderActionEntityChange(event, "header_tap_action_condition")}
+                      ></ha-entity-picker>
+                    </div>
+                  `
+                : nothing}
             </div>
             ${this._renderExpander(
               "header-chips",
               "Chips",
               html`
                 <p class="chips-hint">Choose Attribute or Template for up to three header chips.</p>
-                <ha-form
-                  .hass=${this.hass}
-                  .data=${formData}
-                  .schema=${chipSchema}
-                  .computeLabel=${this._computeLabel}
-                  @value-changed=${this._handleValueChanged}
-                ></ha-form>
+                ${HEADER_CHIP_INDEXES.map(index => {
+                  const labelIndex = index + 1;
+                  const typeField = chipTypeFieldName(index);
+                  const attributeField = chipAttributeFieldName(index);
+                  const templateField = chipTemplateFieldName(index);
+                  const iconField = chipIconFieldName(index);
+                  const actionField = chipActionFieldName(index);
+                  const actionEntityField = chipActionEntityFieldName(index);
+                  const chipType = (formData[typeField] as "attribute" | "template" | undefined) ?? "attribute";
+                  const actionConfig = formData[actionField];
+                  const showActionEntity = this._shouldShowActionEntity(actionConfig);
+                  const isEntityMissing = !this._config?.entity;
+
+                  return html`
+                    <div class="chips-section">
+                      <div class="field">
+                        <label class="field-label">Header chip ${labelIndex}: mode</label>
+                        <ha-selector
+                          aria-label="Header chip ${labelIndex}: mode"
+                          .hass=${this.hass}
+                          .selector=${{ select: { options: CHIP_TYPE_OPTIONS } }}
+                          .value=${formData[typeField]}
+                          .label=${""}
+                          .required=${false}
+                          @value-changed=${(event: CustomEvent) =>
+                            this._handleChipFieldChange(typeField, event)}
+                        ></ha-selector>
+                      </div>
+                      ${chipType === "template"
+                        ? html`
+                            <div class="field">
+                              <label class="field-label">Header chip ${labelIndex}: template</label>
+                              <ha-selector
+                                aria-label="Header chip ${labelIndex}: template"
+                                .hass=${this.hass}
+                                .selector=${{ text: {} }}
+                                .value=${formData[templateField]}
+                                .label=${""}
+                                .required=${false}
+                                @value-changed=${(event: CustomEvent) =>
+                                  this._handleChipFieldChange(templateField, event)}
+                              ></ha-selector>
+                            </div>
+                          `
+                        : html`
+                            <div class="field">
+                              <label class="field-label">Header chip ${labelIndex}: attribute</label>
+                              <ha-selector
+                                aria-label="Header chip ${labelIndex}: attribute"
+                                .hass=${this.hass}
+                                .selector=${{
+                                  select: {
+                                    options: attributeOptions,
+                                    custom_value: true,
+                                  },
+                                }}
+                                .value=${formData[attributeField]}
+                                .label=${""}
+                                .required=${false}
+                                .disabled=${isEntityMissing}
+                                @value-changed=${(event: CustomEvent) =>
+                                  this._handleChipFieldChange(attributeField, event)}
+                              ></ha-selector>
+                            </div>
+                          `}
+                      <div class="field">
+                        <label class="field-label">Header chip ${labelIndex}: icon</label>
+                        <ha-selector
+                          aria-label="Header chip ${labelIndex}: icon"
+                          .hass=${this.hass}
+                          .selector=${{ icon: {} }}
+                          .value=${formData[iconField]}
+                          .label=${""}
+                          .required=${false}
+                          @value-changed=${(event: CustomEvent) =>
+                            this._handleChipFieldChange(iconField, event)}
+                        ></ha-selector>
+                      </div>
+                      <div class="field">
+                        <label class="field-label">Header chip ${labelIndex}: tap action</label>
+                        <ha-selector
+                          aria-label="Header chip ${labelIndex}: tap action"
+                          .hass=${this.hass}
+                          .selector=${{ ui_action: {} }}
+                          .value=${formData[actionField]}
+                          .label=${""}
+                          .required=${false}
+                          @value-changed=${(event: CustomEvent) =>
+                            this._handleChipFieldChange(actionField, event)}
+                        ></ha-selector>
+                      </div>
+                      ${showActionEntity
+                        ? html`
+                            <div class="field">
+                              <ha-entity-picker
+                                .hass=${this.hass}
+                                .value=${formData[actionEntityField]}
+                                .label=${`Header chip ${labelIndex}: tap action entity`}
+                                @value-changed=${(event: CustomEvent) =>
+                                  this._handleChipFieldChange(actionEntityField, event)}
+                              ></ha-entity-picker>
+                            </div>
+                          `
+                        : nothing}
+                    </div>
+                  `;
+                })}
               `,
               { nested: true },
             )}
@@ -750,6 +918,22 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       ...event.detail.value,
     };
 
+    this._applyFormValue(mergedFormValue);
+  }
+
+  private _handleChipFieldChange(
+    field: HeaderChipFieldName,
+    event: CustomEvent<{ value?: unknown }>,
+  ) {
+    event.stopPropagation();
+    const mergedFormValue: EditorFormData = {
+      ...this._createFormData(),
+      [field]: event.detail?.value,
+    };
+    this._applyFormValue(mergedFormValue);
+  }
+
+  private _applyFormValue(mergedFormValue: EditorFormData) {
     const chipTypesUpdate: Record<number, "attribute" | "template"> = { ...this._chipTypes };
     HEADER_CHIP_INDEXES.forEach(index => {
       const typeField = chipTypeFieldName(index);
@@ -827,6 +1011,9 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
           }
           if (schema.name.endsWith("_icon")) {
             return `Header chip ${labelIndex}: icon`;
+          }
+          if (schema.name.endsWith("_tap_action_entity")) {
+            return `Header chip ${labelIndex}: tap action entity`;
           }
           if (schema.name.endsWith("_tap_action")) {
             return `Header chip ${labelIndex}: tap action`;
@@ -919,6 +1106,47 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     this._updateConfig({ [field]: undefined } as Partial<WeatherForecastExtendedConfig>);
   }
 
+  private _getActionType(actionConfig?: unknown): string | undefined {
+    const action = (actionConfig as { action?: unknown } | undefined)?.action;
+    return typeof action === "string" ? action : undefined;
+  }
+
+  private _getActionEntity(actionConfig?: unknown): string {
+    const entity = (actionConfig as { entity?: unknown } | undefined)?.entity;
+    return typeof entity === "string" ? entity.trim() : "";
+  }
+
+  private _hasActionEntity(actionConfig?: unknown): boolean {
+    return !!actionConfig && typeof actionConfig === "object" && "entity" in actionConfig;
+  }
+
+  private _shouldShowActionEntity(actionConfig?: unknown): boolean {
+    const action = this._getActionType(actionConfig);
+    return action !== undefined && ACTIONS_WITH_ENTITY.has(action);
+  }
+
+  private _applyActionEntity(actionConfig: unknown, entity?: string): unknown {
+    if (!actionConfig || typeof actionConfig !== "object") {
+      return actionConfig;
+    }
+
+    const action = this._getActionType(actionConfig);
+    const next = { ...(actionConfig as Record<string, unknown>) };
+    if (!action || !ACTIONS_WITH_ENTITY.has(action)) {
+      delete next.entity;
+      return next;
+    }
+
+    const trimmed = typeof entity === "string" ? entity.trim() : "";
+    if (trimmed) {
+      next.entity = trimmed;
+    } else {
+      delete next.entity;
+    }
+
+    return next;
+  }
+
   private _getIconMapValue(condition: WeatherCondition): string {
     const iconMap = this._config?.icon_map;
     if (!iconMap) {
@@ -968,8 +1196,33 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
   ) {
     event.stopPropagation();
     const value = event.detail?.value;
+    const currentEntity = this._getActionEntity(this._config?.[field]);
+    const valueEntity = this._getActionEntity(value);
+    const entitySource = this._hasActionEntity(value) ? valueEntity : currentEntity;
+    const normalized = value ? this._applyActionEntity(value, entitySource) : undefined;
     const update: Partial<WeatherForecastExtendedConfig> = {
-      [field]: value || undefined,
+      [field]: normalized || undefined,
+    };
+    this._updateConfig(update);
+  }
+
+  private _handleHeaderActionEntityChange(
+    event: CustomEvent<{ value?: unknown }>,
+    field: "header_tap_action_temperature" | "header_tap_action_condition",
+  ) {
+    event.stopPropagation();
+    if (!this._config) {
+      return;
+    }
+    const actionConfig = this._config[field];
+    if (!actionConfig || typeof actionConfig !== "object") {
+      return;
+    }
+    const raw = event.detail?.value;
+    const entity = typeof raw === "string" ? raw.trim() : "";
+    const normalized = this._applyActionEntity(actionConfig, entity);
+    const update: Partial<WeatherForecastExtendedConfig> = {
+      [field]: normalized,
     };
     this._updateConfig(update);
   }
@@ -1018,11 +1271,13 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const templateField = chipTemplateFieldName(index);
       const iconField = chipIconFieldName(index);
       const actionField = chipActionFieldName(index);
+      const actionEntityField = chipActionEntityFieldName(index);
       const configuredChip = headerChips[index];
       const type = this._chipTypes[index] ?? configuredChip?.type ?? "attribute";
 
       formData[typeField] = type;
       formData[actionField] = configuredChip?.tap_action;
+      formData[actionEntityField] = this._getActionEntity(configuredChip?.tap_action);
       formData[iconField] = configuredChip?.icon ?? "";
 
       if (type === "template") {
@@ -1184,10 +1439,19 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const attributeField = chipAttributeFieldName(index);
       const templateField = chipTemplateFieldName(index);
       const actionField = chipActionFieldName(index);
+      const actionEntityField = chipActionEntityFieldName(index);
       const iconField = chipIconFieldName(index);
 
       const type = (formValue[typeField] as "attribute" | "template" | undefined) ?? "attribute";
       const tapAction = formValue[actionField];
+      const actionEntityRaw = formValue[actionEntityField];
+      const actionEntity = typeof actionEntityRaw === "string" ? actionEntityRaw.trim() : "";
+      const previousEntity = this._getActionEntity(this._config?.header_chips?.[index]?.tap_action);
+      const tapActionEntity = this._getActionEntity(tapAction);
+      const tapActionHasEntity = this._hasActionEntity(tapAction);
+      const effectiveEntity =
+        tapActionHasEntity && actionEntity === previousEntity ? tapActionEntity : actionEntity;
+      const normalizedTapAction = tapAction ? this._applyActionEntity(tapAction, effectiveEntity) : undefined;
       const iconRaw = formValue[iconField];
       const iconValue = typeof iconRaw === "string" ? iconRaw.trim() : "";
 
@@ -1195,8 +1459,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         const templateRaw = formValue[templateField];
         const templateValue = typeof templateRaw === "string" ? templateRaw.trim() : "";
         const chip: HeaderChip = { type: "template", template: templateValue };
-        if (tapAction) {
-          (chip as any).tap_action = tapAction;
+        if (normalizedTapAction) {
+          (chip as any).tap_action = normalizedTapAction;
         }
         if (iconValue) {
           (chip as any).icon = iconValue;
@@ -1208,8 +1472,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       const attributeRaw = formValue[attributeField];
       const attributeValue = typeof attributeRaw === "string" ? attributeRaw.trim() : "";
       const chip: HeaderChip = { type: "attribute", attribute: attributeValue };
-      if (tapAction) {
-        (chip as any).tap_action = tapAction;
+      if (normalizedTapAction) {
+        (chip as any).tap_action = normalizedTapAction;
       }
       if (iconValue) {
         (chip as any).icon = iconValue;
@@ -1296,7 +1560,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
     layout: HaFormSchema[];
     header: HaFormSchema[];
     nowcast: HaFormSchema[];
-    chips: HaFormSchema[];
     hourly: HaFormSchema[];
     daily: HaFormSchema[];
   } {
@@ -1358,7 +1621,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       },
     ];
 
-    const attributeOptions = this._buildAttributeOptions();
     const hourlySchema: HaFormSchema[] = [
       {
         name: "hourly_extra_attribute",
@@ -1394,60 +1656,12 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         disabled: this._config?.daily_extra_attribute === "precipitation_probability",
       },
     ];
-    const chipsSchema: HaFormSchema[] = [];
-
-    HEADER_CHIP_INDEXES.forEach(index => {
-      const typeField = chipTypeFieldName(index);
-      chipsSchema.push({
-        name: typeField,
-        selector: {
-          select: {
-            options: CHIP_TYPE_OPTIONS,
-          },
-        },
-        optional: true,
-      });
-
-      const chipType = this._chipTypes[index] ?? "attribute";
-      if (chipType === "template") {
-        chipsSchema.push({
-          name: chipTemplateFieldName(index),
-          selector: { text: {} },
-          optional: true,
-        });
-      } else {
-        chipsSchema.push({
-          name: chipAttributeFieldName(index),
-          selector: {
-            select: {
-              options: attributeOptions,
-              custom_value: true,
-            },
-          },
-          optional: true,
-          disabled: !this._config?.entity,
-        });
-      }
-
-      chipsSchema.push({
-        name: chipIconFieldName(index),
-        selector: { icon: {} },
-        optional: true,
-      });
-
-      chipsSchema.push({
-        name: chipActionFieldName(index),
-        selector: { ui_action: {} },
-        optional: true,
-      });
-    });
 
     return {
       general: generalSchema,
       layout: layoutSchema,
       header: headerSchema,
       nowcast: nowcastSchema,
-      chips: chipsSchema,
       hourly: hourlySchema,
       daily: dailySchema,
     };

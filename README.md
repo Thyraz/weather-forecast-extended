@@ -75,8 +75,8 @@ use_night_header_backgrounds: true
 | `sun_longitude` | number \| string | Home Assistant longitude | Longitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
 | `icon_map` | object | none | Optional overrides for forecast condition icons. Keys are weather conditions, values are Home Assistant icon names (including custom icon sets). |
-| `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. |
-| `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. |
+| `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. For `more-info` or `toggle`, you can set `entity` to target a different entity. |
+| `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. For `more-info` or `toggle`, you can set `entity` to target a different entity. |
 | `hourly_extra_attribute` | string | none | Optional third text line under the hourly precipitation rows. |
 | `hourly_extra_attribute_unit` | string | none | Optional unit suffix displayed after the hourly extra attribute (e.g., `%` for `cloud_coverage`). |
 | `hourly_extra_attribute_color` | string | none | Optional CSS color used for the hourly extra attribute text (e.g., `#30b3ff`). |
@@ -103,6 +103,7 @@ header_chips:
     icon: mdi:water-percent
     tap_action:
       action: more-info
+      entity: camera.rain_radar
   - type: template
     template: "{{ 'Temp: ' ~ state_attr('weather.home', 'temperature') | round(0) }}°"
     tap_action:
@@ -115,6 +116,7 @@ header_chips:
 - `attribute` chips expose an attribute from the configured weather entity. The editor provides a dropdown populated with the entity's attributes.
 - `template` chips are rendered by Home Assistant's template engine and can reference any entity.
 - Each chip accepts optional `icon` and `tap_action` (tap only).
+- For `more-info` or `toggle` actions, add `entity` to point the action at another entity. The editor exposes this when those actions are selected.
 
 ### Header tap actions
 Attach tap-only Lovelace actions to the temperature and condition pills in the header. Configure them in the card editor under **Header options** or in YAML:
@@ -127,6 +129,7 @@ header_tap_action_temperature:
   navigation_path: /lovelace/weather
 header_tap_action_condition:
   action: more-info
+  entity: camera.rain_radar
 ```
 
 ### Custom icons
