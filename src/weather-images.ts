@@ -1,5 +1,7 @@
 import sunnyConditionImage from './img/sunny.jpg';
 import clearNightConditionImage from './img/clear-night.jpg';
+import cloudyConditionImage from './img/cloudy.jpg';
+import cloudyNightConditionImage from './img/cloudy-night.jpg';
 import pouringConditionImage from './img/pouring.jpg';
 import pouringNightConditionImage from './img/pouring-night.jpg';
 import partlyCloudyConditionImage from './img/partly-cloudy.jpg';
@@ -32,6 +34,7 @@ export const WeatherImages: Record<string, WeatherImageVariants> = {
   pouring: { day: pouringConditionImage, night: pouringNightConditionImage },
   sunny: { day: sunnyConditionImage, night: clearNightConditionImage },
   clearnight: { day: sunnyConditionImage, night: clearNightConditionImage },
+  cloudy: { day: cloudyConditionImage, night: cloudyNightConditionImage },
   partlycloudy: { day: partlyCloudyConditionImage, night: partlyCloudyNightConditionImage },
   fog: { day: fogConditionImage, night: fogNightConditionImage },
   hail: { day: hailConditionImage, night: hailNightConditionImage },
