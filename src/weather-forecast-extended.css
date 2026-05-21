@@ -79,7 +79,7 @@ ha-card {
 .weather .attribute-chip {
   font-size: var(--ha-font-size-m);
   line-height: calc(6px + var(--ha-font-size-m));
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: transparent;
   padding: 4px 12px;
   border-radius: 25px;
   color: inherit;
@@ -89,6 +89,19 @@ ha-card {
   align-items: center;
   align-self: flex-start;
   overflow: hidden;
+  position: relative;
+  z-index: 0;
+}
+
+.weather .attribute-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: black;
+  opacity: 0.35;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .weather .attribute-chip .chip-icon,
@@ -117,7 +130,7 @@ ha-card {
 .weather .condition {
   font-size: var(--ha-font-size-xl);
   line-height: calc(10px + var(--ha-font-size-xl));
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: transparent;
   padding: 4px 15px;
   border-radius: 100px;
   max-width: 100%;
@@ -126,11 +139,19 @@ ha-card {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  will-change: transform;
+  position: relative;
+  z-index: 0;
+}
+
+.weather .condition::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: black;
+  opacity: 0.3;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .weather .temp.has-action,
@@ -148,7 +169,7 @@ ha-card {
   font-size: var(--ha-font-size-5xl);
   line-height: calc(10px + var(--ha-font-size-5xl));
   font-weight: bolder;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: transparent;
   padding: 2px 17px;
   border-radius: 100px;
   max-width: 100%;
@@ -157,11 +178,19 @@ ha-card {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  will-change: transform;
+  position: relative;
+  z-index: 0;
+}
+
+.weather .temp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: black;
+  opacity: 0.3;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .weather .header-pill-text {
@@ -238,13 +267,26 @@ ha-card {
 }
 
 .weather .nowcast-panel {
-  background: rgba(0, 0, 0, 0.3);
+  background-color: transparent;
   border-radius: 16px;
   padding: 12px 12px 6px 12px;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  position: relative;
+  z-index: 0;
+}
+
+.weather .nowcast-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: black;
+  opacity: 0.3;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .weather wfe-nowcast {
@@ -273,7 +315,7 @@ ha-card {
 
 .weather .nowcast-bar {
   flex: 1 1 0;
-  background: rgba(255, 255, 255, 0.025);
+  background-color: transparent;
   border-radius: 999px;
   display: flex;
   align-items: flex-end;
@@ -281,6 +323,19 @@ ha-card {
   min-height: 6px;
   height: auto;
   align-self: stretch;
+  position: relative;
+  z-index: 0;
+}
+
+.weather .nowcast-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: white;
+  opacity: 0.025;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .weather .nowcast-bar-fill {
@@ -815,3 +870,4 @@ ha-card {
   stroke-width: 1;
   paint-order: stroke;
 }
+
