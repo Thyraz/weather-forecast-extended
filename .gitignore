@@ -1,2 +1,4 @@
 node_modules/
 .parcel-cache/
+.agents/
+skills-lock.json
