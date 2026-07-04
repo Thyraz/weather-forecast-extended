@@ -15,7 +15,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
 - Support to display daily / hourly solar forecast.
-- Optional minute-level nowcast precipitation chart via `get_minute_forecast` actions (OpenWeatherMap, DWD nowcast).
+- Optional minute-level nowcast precipitation chart via `get_minute_forecast` actions ([OpenWeatherMap](https://www.home-assistant.io/integrations/openweathermap/), [DWD nowcast](https://github.com/Thyraz/DWD-Nowcast) or [NL Weather](https://github.com/PaulVanSchayck/ha-nl-weather)).
 - Configurable header chips that can display entity attributes or value-templates in the header.
 - Optional tap actions and icons on the header pills / chips.
 - Support for 12 or 24 hour time formats and localized date labels using the Home Assistant user settings.
