@@ -454,7 +454,6 @@ ha-card {
   flex-direction: column;
   justify-content: flex-start;
   flex: 1 1 auto; /* allow growth with card height */
-  touch-action: pan-x;
   overscroll-behavior-x: contain;
 }
 
