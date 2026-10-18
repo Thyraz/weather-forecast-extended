@@ -15,6 +15,7 @@ import "./components/wfe-daily-list";
 import "./components/wfe-hourly-list";
 import "./components/wfe-nowcast";
 import { enableMomentumScroll } from "./utils/momentum-scroll";
+import { HeaderImageLoader } from "./utils/header-image";
 import type { HassEntity } from "home-assistant-js-websocket";
 import SunCalc from "suncalc";
 
@@ -48,6 +49,7 @@ type HassFormatEntityState = (stateObj: HassEntity) => string | undefined;
 type HassFormatEntityAttributeValue = (stateObj: HassEntity, attribute: string) => unknown;
 
 type ExtendedHomeAssistant = HomeAssistant & {
+  hassUrl?: (path: string) => string;
   formatEntityState?: HassFormatEntityState;
   formatEntityAttributeValue?: HassFormatEntityAttributeValue;
 };
@@ -99,6 +101,7 @@ export class WeatherForecastExtended extends LitElement {
   @state() private _state: WeatherEntity;
   @state() private _status: string;
   @state() private _headerTemperatureState?: HassEntity;
+  @state() private _headerImageUrl?: string;
   @state() private _forecastDailyEvent?: ForecastEvent;
   @state() private _forecastHourlyEvent?: ForecastEvent;
   @state() private _dailyGap?: number;
@@ -133,6 +136,9 @@ export class WeatherForecastExtended extends LitElement {
   private _nowcastRefreshInterval?: number;
   private _headerSwipeStartX?: number;
   private _headerSwipePointerId?: number;
+  private _headerImageLoader = new HeaderImageLoader(url => {
+    this._headerImageUrl = url;
+  });
 
   // Called by HA
   setConfig(config: WeatherForecastExtendedConfig) {
@@ -159,6 +165,9 @@ export class WeatherForecastExtended extends LitElement {
       nowcast_layout: config.nowcast_layout ?? "pager",
       nowcast_always_show: config.nowcast_always_show ?? false,
       show_header: config.show_header ?? true,
+      header_image_source: config.header_image_source === "entity" ? "entity" : "included",
+      header_image_entity: this._normalizeOptionalText(config.header_image_entity),
+      header_text_color: this._normalizeOptionalText(config.header_text_color),
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
@@ -217,6 +226,7 @@ export class WeatherForecastExtended extends LitElement {
       ? (hass.states[headerTemperatureEntity] as HassEntity | undefined)
       : undefined;
 
+    this._refreshHeaderImage();
     this._refreshTemplateSubscriptions();
     this._handleNowcastHassUpdate();
     this._setupNowcastRefreshTimer();
@@ -667,6 +677,7 @@ export class WeatherForecastExtended extends LitElement {
    // Lit callbacks
   connectedCallback() {
     super.connectedCallback();
+    this._refreshHeaderImage();
     this._refreshTemplateSubscriptions();
     if (this.hasUpdated && this._config && this._hass) {
       this._subscribeForecastEvents();
@@ -675,6 +686,7 @@ export class WeatherForecastExtended extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._headerImageLoader.clear();
     this._teardownTemplateSubscriptions({ clearValues: true });
     this._unsubscribeForecastEvents();
     this._clearNowcastRefreshTimer();
@@ -856,8 +868,12 @@ export class WeatherForecastExtended extends LitElement {
 
     const headerChips = this._computeHeaderChipDisplays();
     const useSnowNowcastFill = this._shouldUseSnowNowcastFill();
+    const headerImage = this._config.header_image_source === "entity"
+      ? this._headerImageUrl
+      : this._getWeatherBgImage(this._state.state);
     const headerStyles: Record<string, string> = {
-      "background-image": `url(${this._getWeatherBgImage(this._state.state)})`,
+      "background-image": headerImage ? `url(${JSON.stringify(headerImage)})` : "none",
+      "--wfe-header-text-color": this._config.header_text_color || "#ffffff",
     };
 
     if (showInlineNowcast && !headerOnly) {
@@ -1649,6 +1665,15 @@ export class WeatherForecastExtended extends LitElement {
     }
 
     return numericValue;
+  }
+
+  private _refreshHeaderImage(): void {
+    const entityId = this._config?.header_image_source === "entity" &&
+      this._config.show_header !== false && this.isConnected
+      ? this._config.header_image_entity
+      : undefined;
+    const entity = entityId ? this._hass?.states[entityId] : undefined;
+    this._headerImageLoader.update(entity, path => this._hass?.hassUrl?.(path) ?? path);
   }
 
   private _getWeatherBgImage(state: string): string {

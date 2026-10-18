@@ -11,6 +11,7 @@ Weather Forecast Extended is a Lovelace custom card for Home Assistant that comb
 
 ## Features
 - Header area that shows the current condition and temperature with day and night background artwork.
+- Optional image entity for custom header artwork, with configurable header text color.
 - Daily and hourly forecast sections that can be shown together or independently.
 - Click on a day in the daily list scrolls the hourly forecast to the same date.
 - Optional sunrise and sunset times embedded in the hourly forecast, using either the Home Assistant location or custom coordinates for sun calculations.
@@ -60,6 +61,9 @@ use_night_header_backgrounds: true
 | `type` | string | `custom:weather-forecast-extended-card` | Lovelace card type identifier. |
 | `entity` | string | required | Weather entity that supplies current conditions and forecast data. |
 | `header_temperature_entity` | string | current weather temperature | Optional sensor to use for the header temperature. Must report a numeric temperature. |
+| `header_image_source` | `included` \| `entity` | `included` | Header artwork source: the included weather images or a Home Assistant image entity. |
+| `header_image_entity` | string | none | Image entity (`image.*`) used when `header_image_source` is `entity`. |
+| `header_text_color` | string | `#ffffff` | CSS color for header text, chip icons, and nowcast time labels. Applies with either image source and when no image is available. |
 | `nowcast_entity` | string | none | Weather entity that supports `get_minute_forecast` and provides minute-level precipitation. |
 | `nowcast_layout` | `pager` \| `inline` | `pager` | `pager` adds a second header page with the nowcast chart and swipe/dots navigation. `inline` shows the chart below the header pills when rain is expected (always in header-only layouts). |
 | `nowcast_always_show` | boolean | `false` | When enabled, the nowcast chart stays visible even if no rain is predicted. Useful to keep the header layout consistent. |
@@ -73,7 +77,7 @@ use_night_header_backgrounds: true
 | `sun_use_home_coordinates` | boolean | `true` | Uses Home Assistant's home location for sun calculations when `show_sun_times` is enabled. Set to `false` to provide manual coordinates. |
 | `sun_latitude` | number \| string | Home Assistant latitude | Latitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
 | `sun_longitude` | number \| string | Home Assistant longitude | Longitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
-| `use_night_header_backgrounds` | boolean | `true` | Switches the header artwork to night variants when the sun is down. Set to `false` to always use the day theme. |
+| `use_night_header_backgrounds` | boolean | `true` | Switches the included header artwork to night variants when the sun is down. Set to `false` to always use the day theme. Applies only to `header_image_source: included`. |
 | `icon_map` | object | none | Optional overrides for forecast condition icons. Keys are weather conditions, values are Home Assistant icon names (including custom icon sets). |
 | `header_tap_action_temperature` | action | none | Lovelace action that fires when the header temperature pill is tapped. Only tap actions are supported. For `more-info` or `toggle`, you can set `entity` to target a different entity. |
 | `header_tap_action_condition` | action | none | Lovelace action that fires when the header condition pill is tapped. Only tap actions are supported. For `more-info` or `toggle`, you can set `entity` to target a different entity. |
@@ -90,6 +94,26 @@ use_night_header_backgrounds: true
 | `masonry_rows` | number | none | Masonry layout only: override the card height (1 row is handled as 50px by HA). Ignored in Sections view. |
 
 > Tip: The card editor prevents you from hiding every section at once, but in YAML you should also keep at least one of `show_header`, `daily_forecast`, or `hourly_forecast` enabled so the card has content to render.
+
+### Header images and text color
+
+Under **Header**, choose **Included** to keep the built-in weather artwork, or **Image entity** to select a Home Assistant `image.*` entity. The card follows changes to that entity automatically. Images fill the header and are centered; edges may be cropped to fit.
+
+```yaml
+type: custom:weather-forecast-extended-card
+entity: weather.home
+header_image_source: entity
+header_image_entity: image.weather_visualization
+header_text_color: "#ffffff"
+```
+
+With **Image entity**, the header initially has no image until the first image loads. When an updated image is loading, the previous image stays visible until the load completes. If the entity is missing, unknown, unavailable, or its image fails to load, the header displays no image; it does not switch to Included artwork. The header content and height remain unchanged.
+
+**Header Text Color** changes the temperature, condition, chips and their icons, and nowcast time labels. The default is white. Choose a color that suits your images and dashboard background, which is visible while no image is available.
+
+The night-background option is shown only for **Included**. When using an image entity, its integration or your automation controls the image content, including day/night changes. Switching sources preserves the selected image entity and night-background setting.
+
+For AI-generated weather images, see Home Assistant's [weather visualization example](https://www.home-assistant.io/integrations/ai_task/#weather-visualization-example). It shows an automation generating an image and updating a template image entity, which you can then select in this card.
 
 ### Header chips
 Header chips allow yout to display additional information, such as precipitation probability, feels-like temperature, or custom strings using value-templates. The editor lets you pick between **Attribute** and **Template** mode for each slot.

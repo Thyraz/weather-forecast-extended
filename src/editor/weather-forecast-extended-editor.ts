@@ -215,6 +215,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       gap: 12px;
     }
 
+    .sun-coordinates > .coordinate-field {
+      flex: 1 1 120px;
+    }
+
     .color-input-row {
       display: flex;
       flex-wrap: wrap;
@@ -272,7 +276,6 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
 
     .coordinate-field {
       display: flex;
-      flex: 1 1 120px;
       flex-direction: column;
       gap: 4px;
       font-size: 14px;
@@ -379,6 +382,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       nowcast_layout: config.nowcast_layout ?? "pager",
       nowcast_always_show: config.nowcast_always_show ?? false,
       show_header: config.show_header ?? true,
+      header_image_source: config.header_image_source === "entity" ? "entity" : "included",
+      use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
@@ -532,6 +537,31 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
               .computeLabel=${this._computeLabel}
               @value-changed=${this._handleValueChanged}
             ></ha-form>
+            <label class="coordinate-field">
+              <span>Header Text Color</span>
+              <div class="color-input-row">
+                <input
+                  type="color"
+                  name="header_text_color"
+                  .value=${this._getColorPickerValue(this._config.header_text_color || "#ffffff")}
+                  @input=${this._handleColorPickerChange}
+                />
+                <input
+                  type="text"
+                  name="header_text_color"
+                  placeholder="#ffffff"
+                  .value=${String(this._config.header_text_color ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+                <button
+                  class="clear-button"
+                  type="button"
+                  @click=${() => this._clearOptionalField("header_text_color")}
+                >
+                  Clear
+                </button>
+              </div>
+            </label>
             <div class="editor-subsection">
               <h5 class="section-subtitle">Tap actions</h5>
               <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
@@ -970,6 +1000,10 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return "Weather Entity";
       case "header_temperature_entity":
         return "Local Temperature Sensor Entity (Overrides the current temperature value of the forecast)";
+      case "header_image_source":
+        return "Header Image Source";
+      case "header_image_entity":
+        return "Header Image Entity";
       case "show_header":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
       case "hourly_forecast":
@@ -1589,10 +1623,30 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         optional: true,
       },
       {
-        name: "use_night_header_backgrounds",
-        selector: { boolean: {} },
+        name: "header_image_source",
+        selector: {
+          select: {
+            options: [
+              { value: "included", label: "Included" },
+              { value: "entity", label: "Image entity" },
+            ],
+          },
+        },
       },
     ];
+
+    if (this._config?.header_image_source === "entity") {
+      headerSchema.push({
+        name: "header_image_entity",
+        selector: { entity: { domain: "image" } },
+        optional: true,
+      });
+    } else {
+      headerSchema.push({
+        name: "use_night_header_backgrounds",
+        selector: { boolean: {} },
+      });
+    }
 
     const nowcastSchema: HaFormSchema[] = [
       {
