@@ -73,6 +73,7 @@ use_night_header_backgrounds: true
 | `daily_min_gap` | number | `30` | Minimum gap in pixels between daily forecast items. Must be `≥ 10`. |
 | `hourly_min_gap` | number | `16` | Minimum gap in pixels between hourly forecast items. Must be `≥ 10`. |
 | `orientation` | `vertical` \| `horizontal` | `vertical` | Stacks sections vertically (default) or places daily and hourly lists side by side. |
+| `hourly_first` | boolean | `false` | Shows the hourly forecast above the daily forecast in vertical layouts, or to its left in horizontal layouts. |
 | `show_sun_times` | boolean | `false` | Adds sunrise and sunset markers to the hourly forecast. Requires valid coordinates. |
 | `sun_use_home_coordinates` | boolean | `true` | Uses Home Assistant's home location for sun calculations when `show_sun_times` is enabled. Set to `false` to provide manual coordinates. |
 | `sun_latitude` | number \| string | Home Assistant latitude | Latitude used when `sun_use_home_coordinates` is `false`. Accepts decimal degrees as string or number. |
@@ -189,6 +190,7 @@ daily_extra_attribute_unit: " hPa"
 If you have a solar forecast configured in the Energy dashboard, you can select `solar_forecast` as the extra attribute for the hourly and/or daily forecast. The card uses the Energy API and sums multiple entries when more than one is selected. Values are shown as kWh.
 
 ## Interactions and layout
+- Under **Orientation**, enable **Show hourly forecast first** (YAML: `hourly_first: true`) to swap the daily and hourly sections. By default, the daily forecast comes first.
 - Drag or flick the daily and hourly lists.
 - Temperature bars in the daily list scale to the minimum and maximum across the visible forecast window, helping you spot warm or cold days quickly.
 - The hourly list highlights precipitation totals and probabilities above a fixed thresholds.

@@ -30,6 +30,7 @@ export interface WeatherForecastExtendedConfig extends LovelaceCardConfig {
   hourly_forecast?: boolean;
   daily_forecast?: boolean;
   orientation?: "vertical" | "horizontal";
+  hourly_first?: boolean;
   show_sun_times?: boolean;
   sun_use_home_coordinates?: boolean;
   sun_latitude?: number | string;

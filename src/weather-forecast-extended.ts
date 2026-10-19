@@ -171,6 +171,7 @@ export class WeatherForecastExtended extends LitElement {
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
+      hourly_first: config.hourly_first ?? false,
       show_sun_times: config.show_sun_times ?? false,
       sun_use_home_coordinates: config.sun_use_home_coordinates ?? true,
       use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
@@ -991,6 +992,51 @@ export class WeatherForecastExtended extends LitElement {
       </div>
     `;
 
+    const dailyForecastTemplate = dailyEnabled
+      ? html`
+        <div class="forecast-daily-container">
+          <div class="fade-left"></div>
+          <div class="fade-right"></div>
+          <div class="forecast daily" style=${dailyStyle}>
+            <wfe-daily-list
+              .hass=${this._hass}
+              .forecast=${dailyForecast}
+              .min=${this._dailyMinTemp}
+              .max=${this._dailyMaxTemp}
+              .extraAttribute=${this._config.daily_extra_attribute}
+              .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
+              .extraAttributeColor=${this._config.daily_extra_attribute_color}
+              .extraAttributeDimBelow=${this._config.daily_extra_attribute_dim_below}
+              .iconMap=${this._config.icon_map}
+              @wfe-daily-selected=${this._handleDailySelected}
+            ></wfe-daily-list>
+          </div>
+        </div>
+      `
+      : nothing;
+
+    const hourlyForecastTemplate = hourlyEnabled
+      ? html`
+        <div class="forecast-hourly-container">
+          <div class="fade-left"></div>
+          <div class="fade-right"></div>
+          <div class="forecast hourly" style=${hourlyStyle}>
+            <wfe-hourly-list
+              .hass=${this._hass}
+              .forecast=${hourlyForecast}
+              .showSunTimes=${showSunTimes}
+              .sunCoordinates=${sunCoordinates}
+              .extraAttribute=${this._config.hourly_extra_attribute}
+              .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
+              .extraAttributeColor=${this._config.hourly_extra_attribute_color}
+              .extraAttributeDimBelow=${this._config.hourly_extra_attribute_dim_below}
+              .iconMap=${this._config.icon_map}
+            ></wfe-hourly-list>
+          </div>
+        </div>
+      `
+      : nothing;
+
     return html`
       <ha-card style=${cardStyle}>
         ${showHeader
@@ -1034,55 +1080,11 @@ export class WeatherForecastExtended extends LitElement {
         ${showForecasts
           ? html`
             <div class=${classMap(containerClassMap)}>
-              ${dailyEnabled
-                ? html`
-                  <div class="forecast-daily-container">
-                    <div class="fade-left"></div>
-                    <div class="fade-right"></div>
-                    <div class="forecast daily" style=${dailyStyle}>
-                      <wfe-daily-list
-                        .hass=${this._hass}
-                        .forecast=${dailyForecast}
-                        .min=${this._dailyMinTemp}
-                        .max=${this._dailyMaxTemp}
-                        .extraAttribute=${this._config.daily_extra_attribute}
-                        .extraAttributeUnit=${this._config.daily_extra_attribute_unit}
-                        .extraAttributeColor=${this._config.daily_extra_attribute_color}
-                        .extraAttributeDimBelow=${this._config.daily_extra_attribute_dim_below}
-                        .iconMap=${this._config.icon_map}
-                        @wfe-daily-selected=${this._handleDailySelected}
-                      ></wfe-daily-list>
-                    </div>
-                  </div>
-                `
-                : nothing}
+              ${this._config.hourly_first ? hourlyForecastTemplate : dailyForecastTemplate}
               ${showForecastDivider
                 ? html`<div class="divider forecast-divider"></div>`
                 : nothing}
-              ${hourlyEnabled
-                ? html`
-                  <div class="forecast-hourly-container">
-                    <div class="fade-left"></div>
-                    <div class="fade-right"></div>
-                    <div
-                      class="forecast hourly"
-                      style=${hourlyStyle}
-                    >
-                      <wfe-hourly-list
-                        .hass=${this._hass}
-                        .forecast=${hourlyForecast}
-                        .showSunTimes=${showSunTimes}
-                        .sunCoordinates=${sunCoordinates}
-                        .extraAttribute=${this._config.hourly_extra_attribute}
-                        .extraAttributeUnit=${this._config.hourly_extra_attribute_unit}
-                        .extraAttributeColor=${this._config.hourly_extra_attribute_color}
-                        .extraAttributeDimBelow=${this._config.hourly_extra_attribute_dim_below}
-                        .iconMap=${this._config.icon_map}
-                      ></wfe-hourly-list>
-                    </div>
-                  </div>
-                `
-                : nothing}
+              ${this._config.hourly_first ? dailyForecastTemplate : hourlyForecastTemplate}
             </div>
           `
           : nothing}

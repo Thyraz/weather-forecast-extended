@@ -387,6 +387,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
       hourly_forecast: config.hourly_forecast ?? true,
       daily_forecast: config.daily_forecast ?? true,
       orientation: config.orientation ?? "vertical",
+      hourly_first: config.hourly_first ?? false,
       header_chips: normalizedChips,
       header_attributes: normalizedChips
         .filter(chip => chip.type === "attribute")
@@ -1012,6 +1013,8 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_daily") || "Show daily forecast";
       case "orientation":
         return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
+      case "hourly_first":
+        return "Show hourly forecast first";
       case "use_night_header_backgrounds":
         return "Use separate header backgrounds for nightly conditions";
       case "nowcast_entity":
@@ -1614,6 +1617,7 @@ export class WeatherForecastExtendedEditor extends LitElement implements Lovelac
         },
         optional: true,
       },
+      { name: "hourly_first", selector: { boolean: {} }, optional: true },
     ];
 
     const headerSchema: HaFormSchema[] = [
