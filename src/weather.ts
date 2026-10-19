@@ -483,6 +483,10 @@ export const getWeatherStateIcon = (
   nightTime?: boolean,
   iconMap?: WeatherIconMap
 ): TemplateResult | undefined => {
+  if (state === "sunny" && nightTime) {
+    state = "clear-night";
+  }
+
   const isPartlyCloudyNight = state === "partlycloudy" && nightTime;
   const mapKey = isPartlyCloudyNight ? "partlycloudy-night" : state;
   const mappedIcon = iconMap?.[mapKey as keyof WeatherIconMap];

@@ -796,7 +796,10 @@ export class WeatherForecastExtended extends LitElement {
     const hasTemperatureTapAction = hasAction(temperatureTapAction);
     const hasConditionTapAction = hasAction(conditionTapAction);
     const headerTemperature = this._computeHeaderTemperature();
-    const headerCondition = this._hass?.formatEntityState?.(this._state) || this._state.state;
+    const headerState = this._state.state === "sunny" && !this._isDaytimeNow()
+      ? { ...this._state, state: "clear-night" }
+      : this._state;
+    const headerCondition = this._hass?.formatEntityState?.(headerState) || headerState.state;
     const containerClassMap = {
       "forecast-container": true,
       "orientation-horizontal": orientation === "horizontal",
