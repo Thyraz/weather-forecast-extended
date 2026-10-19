@@ -163,6 +163,10 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
       gap: 12px;
     }
 
+    .sun-coordinates > .coordinate-field {
+      flex: 1 1 120px;
+    }
+
     .color-input-row {
       display: flex;
       flex-wrap: wrap;
@@ -220,7 +224,6 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
 
     .coordinate-field {
       display: flex;
-      flex: 1 1 120px;
       flex-direction: column;
       gap: 4px;
       font-size: 14px;
@@ -326,9 +329,12 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
             nowcast_layout: config.nowcast_layout ?? "pager",
             nowcast_always_show: config.nowcast_always_show ?? false,
             show_header: config.show_header ?? true,
+            header_image_source: config.header_image_source === "entity" ? "entity" : "included",
+            use_night_header_backgrounds: config.use_night_header_backgrounds ?? true,
             hourly_forecast: config.hourly_forecast ?? true,
             daily_forecast: config.daily_forecast ?? true,
             orientation: config.orientation ?? "vertical",
+            hourly_first: config.hourly_first ?? false,
             header_chips: normalizedChips,
             header_attributes: normalizedChips.filter((chip)=>chip.type === "attribute").map((chip)=>chip.attribute)
         };
@@ -452,6 +458,31 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
               .computeLabel=${this._computeLabel}
               @value-changed=${this._handleValueChanged}
             ></ha-form>
+            <label class="coordinate-field">
+              <span>Header Text Color</span>
+              <div class="color-input-row">
+                <input
+                  type="color"
+                  name="header_text_color"
+                  .value=${this._getColorPickerValue(this._config.header_text_color || "#ffffff")}
+                  @input=${this._handleColorPickerChange}
+                />
+                <input
+                  type="text"
+                  name="header_text_color"
+                  placeholder="#ffffff"
+                  .value=${String(this._config.header_text_color ?? "")}
+                  @input=${this._handleSunInputChange}
+                />
+                <button
+                  class="clear-button"
+                  type="button"
+                  @click=${()=>this._clearOptionalField("header_text_color")}
+                >
+                  Clear
+                </button>
+              </div>
+            </label>
             <div class="editor-subsection">
               <h5 class="section-subtitle">Tap actions</h5>
               <p class="chips-hint">Tap-only actions for the temperature and condition pills.</p>
@@ -1307,6 +1338,13 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     }
                 },
                 optional: true
+            },
+            {
+                name: "hourly_first",
+                selector: {
+                    boolean: {}
+                },
+                optional: true
             }
         ];
         const headerSchema = [
@@ -1321,12 +1359,38 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                 optional: true
             },
             {
-                name: "use_night_header_backgrounds",
+                name: "header_image_source",
                 selector: {
-                    boolean: {}
+                    select: {
+                        options: [
+                            {
+                                value: "included",
+                                label: "Included"
+                            },
+                            {
+                                value: "entity",
+                                label: "Image entity"
+                            }
+                        ]
+                    }
                 }
             }
         ];
+        if (this._config?.header_image_source === "entity") headerSchema.push({
+            name: "header_image_entity",
+            selector: {
+                entity: {
+                    domain: "image"
+                }
+            },
+            optional: true
+        });
+        else headerSchema.push({
+            name: "use_night_header_backgrounds",
+            selector: {
+                boolean: {}
+            }
+        });
         const nowcastSchema = [
             {
                 name: "nowcast_entity",
@@ -1698,6 +1762,10 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     return "Weather Entity";
                 case "header_temperature_entity":
                     return "Local Temperature Sensor Entity (Overrides the current temperature value of the forecast)";
+                case "header_image_source":
+                    return "Header Image Source";
+                case "header_image_entity":
+                    return "Header Image Entity";
                 case "show_header":
                     return this.hass.localize("ui.panel.lovelace.editor.card.generic.show_header") || "Show header";
                 case "hourly_forecast":
@@ -1706,6 +1774,8 @@ let $a37b5b928a2fc5d8$export$4f91f681c03a7b8b = class WeatherForecastExtendedEdi
                     return this.hass.localize("ui.panel.lovelace.editor.card.weather.show_forecast_daily") || "Show daily forecast";
                 case "orientation":
                     return this.hass.localize("ui.panel.lovelace.editor.card.generic.orientation") || "Orientation";
+                case "hourly_first":
+                    return "Show hourly forecast first";
                 case "use_night_header_backgrounds":
                     return "Use separate header backgrounds for nightly conditions";
                 case "nowcast_entity":
@@ -1802,4 +1872,4 @@ const $c0977d1f14d5c39b$export$7f18ae76d74a6de0 = [
 
 
 
-//# sourceMappingURL=weather-forecast-extended-editor.83f6b2e9.js.map
+//# sourceMappingURL=weather-forecast-extended-editor.70849d83.js.map
