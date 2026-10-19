@@ -192,6 +192,7 @@ If you have a solar forecast configured in the Energy dashboard, you can select 
 ## Interactions and layout
 - Under **Orientation**, enable **Show hourly forecast first** (YAML: `hourly_first: true`) to swap the daily and hourly sections. By default, the daily forecast comes first.
 - Drag or flick the daily and hourly lists.
+- Forecast edges fade into the actual card background, including transparent themes. Hourly day markers and time labels remain unfaded. Browsers without CSS mask support show plain edges.
 - Temperature bars in the daily list scale to the minimum and maximum across the visible forecast window, helping you spot warm or cold days quickly.
 - The hourly list highlights precipitation totals and probabilities above a fixed thresholds.
 - When a nowcast entity is configured, the header can show a second page or inline chart depending on the selected layout.

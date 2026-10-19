@@ -119,9 +119,15 @@ export class WFEHourlyList extends LitElement {
 
     const containerHeight = translateContainer.offsetHeight;
     const contentHeight = iconContainer.offsetHeight;
+    const forecastTop = forecastEl.getBoundingClientRect().top;
+    let labelHeight = 0;
+    this.querySelectorAll<HTMLElement>('.date, .ampm, .day-marker').forEach(label => {
+      labelHeight = Math.max(labelHeight, label.getBoundingClientRect().bottom - forecastTop);
+    });
 
     forecastEl.style.setProperty('--translate-container-height', `${containerHeight}px`);
     forecastEl.style.setProperty('--translate-content-height', `${contentHeight}px`);
+    forecastEl.style.setProperty('--forecast-label-height', `${Math.ceil(labelHeight)}px`);
   }
 
   private _hasValidValue(item?: any): boolean {

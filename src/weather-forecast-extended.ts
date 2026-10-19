@@ -995,8 +995,6 @@ export class WeatherForecastExtended extends LitElement {
     const dailyForecastTemplate = dailyEnabled
       ? html`
         <div class="forecast-daily-container">
-          <div class="fade-left"></div>
-          <div class="fade-right"></div>
           <div class="forecast daily" style=${dailyStyle}>
             <wfe-daily-list
               .hass=${this._hass}
@@ -1018,8 +1016,6 @@ export class WeatherForecastExtended extends LitElement {
     const hourlyForecastTemplate = hourlyEnabled
       ? html`
         <div class="forecast-hourly-container">
-          <div class="fade-left"></div>
-          <div class="fade-right"></div>
           <div class="forecast hourly" style=${hourlyStyle}>
             <wfe-hourly-list
               .hass=${this._hass}

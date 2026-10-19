@@ -448,7 +448,7 @@ ha-card {
 
 .forecast-daily-container,
 .forecast-hourly-container {
-  position: relative; /* Fading overlays should be relative positioned */
+  position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -457,36 +457,18 @@ ha-card {
   overscroll-behavior-x: contain;
 }
 
-.fade-left,
-.fade-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 16px;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.fade-left {
-  left: 0;
-  background: linear-gradient(to right,
-    var(--card-background-color) 0%,
-    var(--card-background-color) 2px,
-    transparent 100%
-  );
-}
-
-.fade-right {
-  right: 0;
-  background: linear-gradient(to left,
-    var(--card-background-color) 0%,
-    var(--card-background-color) 2px,
-    transparent 100%
-  );
-}
-
 .forecast {
   --forecast-inline-padding: 16px;
+  --forecast-edge-mask: linear-gradient(to right,
+    transparent 2px,
+    #000 var(--forecast-inline-padding),
+    #000 calc(100% - var(--forecast-inline-padding)),
+    transparent calc(100% - 2px)
+  );
+  -webkit-mask-image: var(--forecast-edge-mask);
+  mask-image: var(--forecast-edge-mask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   /* Allow this row to expand when parent is taller */
   flex: 1 1 auto;
   height: auto;
@@ -559,6 +541,13 @@ ha-card {
   --icon-size: 25px;
   --icon-container-width: 25px;
   --day-marker-width: 40px;
+  /* Keep day markers and time labels visible, including the AM/PM line. */
+  --forecast-label-mask: linear-gradient(to bottom,
+    #000 var(--forecast-label-height, calc(8px + 2.5em)),
+    transparent var(--forecast-label-height, calc(8px + 2.5em))
+  );
+  -webkit-mask-image: var(--forecast-label-mask), var(--forecast-edge-mask);
+  mask-image: var(--forecast-label-mask), var(--forecast-edge-mask);
 
   /* Variables used for calculations in CSS rules of "forecast-item .icon-container" */
   --translate-content-height: 50px; /* Default value, will be set in _setTranslationContentHeight() */
